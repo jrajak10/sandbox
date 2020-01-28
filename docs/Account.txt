@@ -6,3 +6,10 @@ First, we copied and pasted the example code posted on the OS Labs, showing the 
 
 At first glance, the code looks very complicated. Breaking this down into simpler issues has helped me understand the code better.
 
+
+
+
+When copying and pasting the code for the example, 'Show features which intersect a polygon', I added my API key for the map to work.
+However, although the map and circle worked, the fill to show the Greenspace was not working. I inspected the code and compared it to the one I copied to see if there was any difference/typos, but they were both identical.
+
+On OS Labs, there are 3 examples for the OS features API. I decided to copy and paste the code examples to see if they
