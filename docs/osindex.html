@@ -189,21 +189,17 @@
         // the query have been returned, and there is no need to request further pages.
         function fetchWhile(resultsRemain) {
             if( resultsRemain ) {
-                fetch("../../proxy.php", {
-                    method: "POST",
-                    headers: { "Content-type": "application/json; charset=utf-8" },
-                    body: JSON.stringify(wfsParams)
-                })
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    wfsParams.startIndex = wfsParams.startIndex + wfsParams.count;
+                fetch(getUrl(wfsParams))
+                    .then(response => response.json())
+                    .then((data) => {
+                        wfsParams.startIndex += wfsParams.count;
 
-                    geojson.features.push.apply(geojson.features, data.features);
+                        geojson.features.push.apply(geojson.features, data.features);
 
-                    resultsRemain = data.features.length < wfsParams.count ? false : true;
+                        resultsRemain = data.features.length < wfsParams.count ? false : true;
 
-                    fetchWhile(resultsRemain);
-                });
+                        fetchWhile(resultsRemain);
+                    });
             }
             else {
                 map.getSource('greenspace').setData(geojson);
@@ -213,6 +209,17 @@
 
         fetchWhile(resultsRemain);
     });
+
+    /**
+     * Return URL with encoded parameters.
+     */
+    function getUrl(params) {
+        var encodedParameters = Object.keys(params)
+            .map(paramName => paramName + '=' + encodeURI(params[paramName]))
+            .join('&');
+
+        return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
+    }
 
 </script>
 
