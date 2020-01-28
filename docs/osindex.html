@@ -57,11 +57,7 @@
         container: 'map',
         maxZoom: 17,
         style: serviceUrl + '/resources/styles',
-<<<<<<< HEAD
-        center: [-0.104759, 51.520698],
-=======
         center: [-0.104951, 51.520623 ],
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
         zoom: 14,
         transformRequest: function(url) {
             url += '?key=' + apiKey + '&srs=3857';
@@ -134,23 +130,12 @@
     // Add an event listener to handle when the user clicks the 'Find Greenspace' button.
     document.getElementById('request').addEventListener('click', function() {
         // Get the centre point of the map window.
-<<<<<<< HEAD
-        var center = [-0.104759, 51.520698];
-
-
-        
-
-        // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
-        // of the given a radius in kilometers; and steps for precision.
-        var circle = turf.circle(center, 0.1, { steps: 24, units: 'kilometers' });
-=======
         var center = [-0.104951, 51.520623 ];
 
 
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
         var circle = turf.circle(center, 0.5, { steps: 24, units: 'kilometers' });
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
 
         // Set the GeoJSON data for the 'circle' layer and re-render the map.
         map.getSource('circle').setData(circle);
@@ -204,21 +189,17 @@
         // the query have been returned, and there is no need to request further pages.
         function fetchWhile(resultsRemain) {
             if( resultsRemain ) {
-                fetch("../../proxy.php", {
-                    method: "POST",
-                    headers: { "Content-type": "application/json; charset=utf-8" },
-                    body: JSON.stringify(wfsParams)
-                })
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    wfsParams.startIndex = wfsParams.startIndex + wfsParams.count;
+                fetch(getUrl(wfsParams))
+                    .then(response => response.json())
+                    .then((data) => {
+                        wfsParams.startIndex += wfsParams.count;
 
-                    geojson.features.push.apply(geojson.features, data.features);
+                        geojson.features.push.apply(geojson.features, data.features);
 
-                    resultsRemain = data.features.length < wfsParams.count ? false : true;
+                        resultsRemain = data.features.length < wfsParams.count ? false : true;
 
-                    fetchWhile(resultsRemain);
-                });
+                        fetchWhile(resultsRemain);
+                    });
             }
             else {
                 map.getSource('greenspace').setData(geojson);
@@ -228,6 +209,17 @@
 
         fetchWhile(resultsRemain);
     });
+
+    /**
+     * Return URL with encoded parameters.
+     */
+    function getUrl(params) {
+        var encodedParameters = Object.keys(params)
+            .map(paramName => paramName + '=' + encodeURI(params[paramName]))
+            .join('&');
+
+        return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
+    }
 
 </script>
 
