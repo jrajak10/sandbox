@@ -42,7 +42,7 @@
     <div class='map-overlay-inner'>
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
-        <div>Total area: <span id='area'></span></div>
+        <div>Total area <b>(metres squared)</b>: <span id='area'></span></div>
     </div>
 </div>
 
@@ -227,7 +227,7 @@
                     area += geojson.features[i].properties.SHAPE_Area
                     
                 }
-                document.getElementById('area').innerHTML = area;
+                document.getElementById('area').innerHTML = area.toFixed(3);
             }
         }
 
