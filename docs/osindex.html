@@ -42,6 +42,7 @@
     <div class='map-overlay-inner'>
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
+        <div>Total area: <span id='area'></span></div>
     </div>
 </div>
 
@@ -57,11 +58,7 @@
         container: 'map',
         maxZoom: 17,
         style: serviceUrl + '/resources/styles',
-<<<<<<< HEAD
-        center: [-0.104759, 51.520698],
-=======
         center: [-0.104951, 51.520623 ],
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
         zoom: 14,
         transformRequest: function(url) {
             url += '?key=' + apiKey + '&srs=3857';
@@ -134,30 +131,19 @@
     // Add an event listener to handle when the user clicks the 'Find localBuildings' button.
     document.getElementById('request').addEventListener('click', function() {
         // Get the centre point of the map window.
-<<<<<<< HEAD
-        var center = [-0.104759, 51.520698];
-
-
-        
-
-        // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
-        // of the given a radius in kilometers; and steps for precision.
-        var circle = turf.circle(center, 0.1, { steps: 24, units: 'kilometers' });
-=======
         var center = [-0.104951, 51.520623 ];
 
 
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
         var circle = turf.circle(center, 0.5, { steps: 24, units: 'kilometers' });
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
 
         // Set the GeoJSON data for the 'circle' layer and re-render the map.
         map.getSource('circle').setData(circle);
 
         // Get the flipped geometry coordinates and return a new space-delimited string.
         var coords = circle.geometry.coordinates[0].join(' ');
-
+       
         // Create an OGC XML filter parameter value which will select the localBuildings
         // features intersecting the circle polygon coordinates.
         var xml = '<ogc:Filter>';
@@ -172,6 +158,8 @@
         xml += '</gml:Polygon>';
         xml += '</ogc:Intersects>';
         xml += '</ogc:Filter>';
+
+
 
         // Define parameters object.
         var wfsParams = {
@@ -193,6 +181,16 @@
 
         map.getSource('localBuildings').setData(geojson);
         document.getElementById('feature-count').innerHTML = '';
+        document.getElementById('area').innerHTML = 0;
+
+        
+        
+
+       
+        
+
+        
+
 
         // Use fetch() method to request GeoJSON data from the OS Features API.
         //
@@ -214,17 +212,30 @@
                         resultsRemain = data.features.length < wfsParams.count ? false : true;
 
                         fetchWhile(resultsRemain);
+                        
                     });
             }
             else {
                 map.getSource('localBuildings').setData(geojson);
                 document.getElementById('feature-count').innerHTML = geojson.features.length;
+
+
+                let area = 0;
+                let array = [];
+                let feature = geojson.features;
+                for(let i=0; i<feature.length; i++){
+                    area += geojson.features[i].properties.SHAPE_Area
+                    
+                }
+                document.getElementById('area').innerHTML = area;
             }
         }
 
         fetchWhile(resultsRemain);
+        
     });
 
+    
     /**
      * Return URL with encoded parameters.
      */
