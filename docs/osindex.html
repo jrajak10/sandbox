@@ -159,8 +159,6 @@
         xml += '</ogc:Intersects>';
         xml += '</ogc:Filter>';
 
-
-
         // Define parameters object.
         var wfsParams = {
             key: apiKey,
@@ -183,15 +181,6 @@
         document.getElementById('feature-count').innerHTML = '';
         document.getElementById('area').innerHTML = 0;
 
-        
-        
-
-       
-        
-
-        
-
-
         // Use fetch() method to request GeoJSON data from the OS Features API.
         //
         // If successful - set the GeoJSON data for the 'localBuildings' layer and re-render
@@ -212,27 +201,24 @@
                         resultsRemain = data.features.length < wfsParams.count ? false : true;
 
                         fetchWhile(resultsRemain);
-                        
                     });
             }
             else {
                 map.getSource('localBuildings').setData(geojson);
                 document.getElementById('feature-count').innerHTML = geojson.features.length;
-
-
+                
+                // To calculate the area, rounded to 3 decimal places
                 let area = 0;
-                let array = [];
                 let feature = geojson.features;
                 for(let i=0; i<feature.length; i++){
                     area += geojson.features[i].properties.SHAPE_Area
                     
-                }
+                    }
                 document.getElementById('area').innerHTML = area.toFixed(3);
+                }
             }
-        }
 
         fetchWhile(resultsRemain);
-        
     });
 
     
