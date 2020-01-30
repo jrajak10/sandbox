@@ -43,6 +43,14 @@
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
         <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
+        <div>
+            <select>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
     </div>
 </div>
 
@@ -58,11 +66,7 @@
         container: 'map',
         maxZoom: 17,
         style: serviceUrl + '/resources/styles',
-<<<<<<< HEAD
-        center: [-0.104759, 51.520698],
-=======
         center: [-0.104951, 51.520623 ],
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
         zoom: 14,
         transformRequest: function(url) {
             url += '?key=' + apiKey + '&srs=3857';
@@ -135,23 +139,12 @@
     // Add an event listener to handle when the user clicks the 'Find localBuildings' button.
     document.getElementById('request').addEventListener('click', function() {
         // Get the centre point of the map window.
-<<<<<<< HEAD
-        var center = [-0.104759, 51.520698];
-
-
-        
-
-        // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
-        // of the given a radius in kilometers; and steps for precision.
-        var circle = turf.circle(center, 0.1, { steps: 24, units: 'kilometers' });
-=======
         var center = [-0.104951, 51.520623 ];
 
 
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
         var circle = turf.circle(center, 0.5, { steps: 24, units: 'kilometers' });
->>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
 
         // Set the GeoJSON data for the 'circle' layer and re-render the map.
         map.getSource('circle').setData(circle);
