@@ -19,7 +19,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 150px;
+        width: 250px;
         padding: 10px;
     }
     .map-overlay .map-overlay-inner {
@@ -42,6 +42,7 @@
     <div class='map-overlay-inner'>
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
+        <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
     </div>
 </div>
 
@@ -157,7 +158,7 @@
 
         // Get the flipped geometry coordinates and return a new space-delimited string.
         var coords = circle.geometry.coordinates[0].join(' ');
-
+       
         // Create an OGC XML filter parameter value which will select the localBuildings
         // features intersecting the circle polygon coordinates.
         var xml = '<ogc:Filter>';
@@ -193,6 +194,7 @@
 
         map.getSource('localBuildings').setData(geojson);
         document.getElementById('feature-count').innerHTML = '';
+        document.getElementById('area').innerHTML = '';
 
         // Use fetch() method to request GeoJSON data from the OS Features API.
         //
@@ -219,8 +221,17 @@
             else {
                 map.getSource('localBuildings').setData(geojson);
                 document.getElementById('feature-count').innerHTML = geojson.features.length;
+                
+                // To calculate the area, rounded to 3 decimal places
+                let area = 0;
+                let feature = geojson.features;
+                for(let i=0; i<feature.length; i++){
+                    area += geojson.features[i].properties.SHAPE_Area
+                    
+                    }
+                document.getElementById('area').innerHTML = (area/1000).toFixed(2);
+                }
             }
-        }
 
         fetchWhile(resultsRemain);
     });
