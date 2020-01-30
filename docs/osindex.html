@@ -19,7 +19,7 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 150px;
+        width: 250px;
         padding: 10px;
     }
     .map-overlay .map-overlay-inner {
@@ -42,7 +42,7 @@
     <div class='map-overlay-inner'>
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
-        <div>Total area <b>(metres squared)</b>: <span id='area'></span></div>
+        <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
     </div>
 </div>
 
@@ -179,7 +179,7 @@
 
         map.getSource('localBuildings').setData(geojson);
         document.getElementById('feature-count').innerHTML = '';
-        document.getElementById('area').innerHTML = 0;
+        document.getElementById('area').innerHTML = '';
 
         // Use fetch() method to request GeoJSON data from the OS Features API.
         //
@@ -214,7 +214,7 @@
                     area += geojson.features[i].properties.SHAPE_Area
                     
                     }
-                document.getElementById('area').innerHTML = area.toFixed(3);
+                document.getElementById('area').innerHTML = (area/1000).toFixed(2);
                 }
             }
 
