@@ -182,7 +182,7 @@
     // Add an event listener to handle when the user clicks the 'Find localBuildings' button.
     document.getElementById('request').addEventListener('click', function() {
         // Get the centre point of the map window.
-        var center = [-0.104951, 51.520623 ];
+        var center = map.getCenter().toArray();
 
 
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
