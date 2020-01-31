@@ -43,6 +43,20 @@
         <button id='request'>Find localBuildings</button>
         <div>Total features: <span id='feature-count'></span></div>
         <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
+        <div>
+            <select id="stationSelect">
+                <option value="Farringdon">Farringdon</option>
+                <option value="Edinburgh Waverley">Edinburgh Waverley</option>
+                <option value="York">York</option>
+                <option value="Liverpool Lime Street">Liverpool Lime Street</option>
+                <option value="Waterloo">Waterloo</option>
+                <option value="Southampton">Southampton</option>
+                <option value="Cardiff">Cardiff</option>
+                <option value="Newcastle">Newcastle</option>
+                <option value="Oxford">Oxford</option>
+                <option value="Glasgow Central">Glasgow Central</option>
+            </select>
+        </div>
     </div>
 </div>
 
@@ -92,6 +106,43 @@
         },
         trackUserLocation: true
     }), 'bottom-right');
+
+    //Station json
+
+    let stationJson = {
+                        "stations": 
+                        [
+                        {'Station_Name': 'Farringdon', 'coordinates': [-0.1070064,  51.5202109]},
+                        {'Station_Name': 'Edinburgh Waverley', 'coordinates': [-3.1917618,  55.9519361]}, 
+                        {"Station_Name": "York", 'coordinates': [-1.0953797,  53.9579841]},
+                        {'Station_Name': 'Liverpool Lime Street', 'coordinates': [-2.9795018, 53.4076217]},
+                        {'Station_Name': 'Waterloo', 'coordinates': [-0.1144938,  51.5031686]},
+                        {'Station_Name': 'Southampton', 'coordinates': [-1.4160523,  50.9078191]},
+                        {'Station_Name': 'Cardiff', 'coordinates': [-3.1811426,  51.4751516]},
+                        {'Station_Name': 'Newcastle', 'coordinates': [-1.6192629,  54.968503]},
+                        {'Station_Name': 'Oxford', 'coordinates': [-1.2721341,  51.7534727]},
+                        {'Station_Name': 'Glasgow Central', 'coordinates': [-4.2602975,  55.8591148]}
+                        ]
+                        }
+
+
+
+ 
+    //Click on an option in the nav bar, and the map will fly to the location of that station.
+    document.getElementById("stationSelect").addEventListener('change', function() {
+        let stationList = stationJson.stations;
+        for(let i =0; i<stationList.length; i++){
+            if (document.getElementById("stationSelect").value == stationList[i].Station_Name){
+                map.flyTo({ 
+                    center: stationList[i].coordinates,
+                    zoom: 14,
+                    essential: true
+                })
+            }
+        }
+
+    }); 
+    
 
     // Create an empty GeoJSON FeatureCollection.
     var geojson = {
