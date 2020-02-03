@@ -45,21 +45,6 @@
         <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
         <div>
             <select id="stationSelect">
-                <option value="Farringdon">Farringdon</option>
-                <option value="Edinburgh Waverley">Edinburgh Waverley</option>
-                <option value="York">York</option>
-                <option value="Liverpool Lime Street">Liverpool Lime Street</option>
-                <option value="Waterloo">Waterloo</option>
-                <option value="Southampton">Southampton</option>
-                <option value="Cardiff">Cardiff</option>
-                <option value="Newcastle">Newcastle</option>
-                <option value="Oxford">Oxford</option>
-                <option value="Glasgow Central">Glasgow Central</option>
-                <option value="Beaulieu Road">Beaulieu Road</option>
-                <option value="Hope Derbyshire">Hope Derbyshire</option>
-                <option value="Ardlui">Ardlui</option>
-                <option value="Windermere">Windermere</option>
-                <option value="Downham Market">Downham Market</option>
             </select>
         </div>
     </div>
@@ -131,13 +116,28 @@
                         ]
                         }
 
+    let stationList = stationJson.stations;
+
+
+    document.body.onload = addElement;
+    function addElement(){
+        for(let i =0; i<stationList.length; i++){
+            let newOption = document.createElement("option");
+            let newContent = document.createTextNode(stationList[i].Station_Name);
+            newOption.appendChild(newContent);
+            let selectDiv = document.getElementById("stationSelect");
+            selectDiv.appendChild(newOption); 
+        }
+          
+    }
+
+
 
 
 
     //Click on an option in the nav bar, and the map will fly to the location of that station.
     document.getElementById("stationSelect").addEventListener('change', function() {
         let coords;
-        let stationList = stationJson.stations;
         for(let i =0; i<stationList.length; i++){
             if (document.getElementById("stationSelect").value == stationList[i].Station_Name){
                 coords =  stationList[i].coordinates;
