@@ -1,76 +1,90 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>OS Features API | Intersects Example | Mapbox GL JS</title>
-    <meta charset='utf-8' />
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+  <title>OS Features API | Intersects Example | Mapbox GL JS</title>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css' rel='stylesheet' />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
 
-<style>
+  <style>
     .map-overlay {
-        font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 250px;
-        padding: 10px;
+      font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 250px;
+      padding: 10px;
     }
+
     .map-overlay .map-overlay-inner {
-        background-color: #fff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-        border-radius: 4px;
-        padding: 10px;
+      background-color: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+      border-radius: 4px;
+      padding: 10px;
     }
+
     .map-overlay-inner div {
-        display: block;
-        margin-top: 10px;
+      display: block;
+      margin-top: 10px;
     }
+
     .map-overlay-inner span {
-        font-weight: 600;
+      font-weight: 600;
     }
-</style>
+  </style>
 
-<div id='map'></div>
-<div class='map-overlay top'>
+  <div id='map'></div>
+  <div class='map-overlay top'>
     <div class='map-overlay-inner'>
-        <button id='request'>Find localBuildings</button>
-        <div>Total features: <span id='feature-count'></span></div>
-        <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
-        <div>
-            <select id="stationSelect">
-                <!-- Option tags from addElement function go here  -->
-            </select>
-        </div>
+      <button id='request'>Find localBuildings</button>
+      <div>Total features: <span id='feature-count'></span></div>
+      <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
+      <div>Total ratio: <span id='ratio'></span></div>
+      <div>
+        <select id="stationSelect">
+          <!-- Option tags from addElement function go here  -->
+        </select>
+      </div>
     </div>
-</div>
+  </div>
 
-<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
-<script>
-
+  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+  <script>
     var apiKey = 'HRQqp4yN8hLHepJEg2fG4kFS69w1oVap';
 
     var serviceUrl = 'https://osdatahubapi.os.uk/OSVectorTileAPI/vts/v1';
 
     // Initialize the map object.
     var map = new mapboxgl.Map({
-        container: 'map',
-        maxZoom: 17,
-        style: serviceUrl + '/resources/styles',
-        center: [-0.104951, 51.520623 ],
-        zoom: 14,
-        transformRequest: function(url) {
-            url += '?key=' + apiKey + '&srs=3857';
-            return {
-                url: url
-            }
+      container: 'map',
+      maxZoom: 17,
+      style: serviceUrl + '/resources/styles',
+      center: [-0.104951, 51.520623],
+      zoom: 14,
+      transformRequest: function(url) {
+        url += '?key=' + apiKey + '&srs=3857';
+        return {
+          url: url
         }
+      }
     });
 
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -78,58 +92,102 @@
 
     // Add navigation control (excluding compass button) to the map.
     map.addControl(new mapboxgl.NavigationControl({
-        showCompass: false
+      showCompass: false
     }));
 
     // Add attribution control to the map.
     map.addControl(new mapboxgl.AttributionControl({
-        customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
+      customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
     }));
 
     // Add geolocation control to the map.
     map.addControl(new mapboxgl.GeolocateControl({
-        positionOptions: {
-            enableHighAccuracy: true
-        },
-        trackUserLocation: true
+      positionOptions: {
+        enableHighAccuracy: true
+      },
+      trackUserLocation: true
     }), 'bottom-right');
 
     //Station json
 
     let stationJson = {
-                        "stations":
-                        [
-                        {'Station_Name': 'Farringdon', 'coordinates': [-0.1070064,  51.5202109]},
-                        {'Station_Name': 'Edinburgh Waverley', 'coordinates': [-3.1917618,  55.9519361]},
-                        {"Station_Name": "York", 'coordinates': [-1.0953797,  53.9579841]},
-                        {'Station_Name': 'Liverpool Lime Street', 'coordinates': [-2.9795018, 53.4076217]},
-                        {'Station_Name': 'Waterloo', 'coordinates': [-0.1144938,  51.5031686]},
-                        {'Station_Name': 'Southampton', 'coordinates': [-1.4160523,  50.9078191]},
-                        {'Station_Name': 'Cardiff', 'coordinates': [-3.1811426,  51.4751516]},
-                        {'Station_Name': 'Newcastle', 'coordinates': [-1.6192629,  54.968503]},
-                        {'Station_Name': 'Oxford', 'coordinates': [-1.2721341,  51.7534727]},
-                        {'Station_Name': 'Glasgow Central', 'coordinates': [-4.2602975,  55.8591148]},
-                        {'Station_Name': 'Beaulieu Road', 'coordinates': [-1.5050999, 50.8551102]},
-                        {'Station_Name': 'Ardlui', 'coordinates': [-4.7216399, 56.30196]},
-                        {'Station_Name': 'Hope Derbyshire', 'coordinates': [-1.729849, 53.34613]},
-                        {'Station_Name': 'Windermere', 'coordinates': [-2.904022, 54.3800842]},
-                        {'Station_Name': 'Downham Market', 'coordinates': [0.3635113, 52.6041292]}
-                        ]
-                        }
+      "stations": [{
+          'Station_Name': 'Farringdon',
+          'coordinates': [-0.1070064, 51.5202109]
+        },
+        {
+          'Station_Name': 'Edinburgh Waverley',
+          'coordinates': [-3.1917618, 55.9519361]
+        },
+        {
+          "Station_Name": "York",
+          'coordinates': [-1.0953797, 53.9579841]
+        },
+        {
+          'Station_Name': 'Liverpool Lime Street',
+          'coordinates': [-2.9795018, 53.4076217]
+        },
+        {
+          'Station_Name': 'Waterloo',
+          'coordinates': [-0.1144938, 51.5031686]
+        },
+        {
+          'Station_Name': 'Southampton',
+          'coordinates': [-1.4160523, 50.9078191]
+        },
+        {
+          'Station_Name': 'Cardiff',
+          'coordinates': [-3.1811426, 51.4751516]
+        },
+        {
+          'Station_Name': 'Newcastle',
+          'coordinates': [-1.6192629, 54.968503]
+        },
+        {
+          'Station_Name': 'Oxford',
+          'coordinates': [-1.2721341, 51.7534727]
+        },
+        {
+          'Station_Name': 'Glasgow Central',
+          'coordinates': [-4.2602975, 55.8591148]
+        },
+        {
+          'Station_Name': 'Beaulieu Road',
+          'coordinates': [-1.5050999, 50.8551102]
+        },
+        {
+          'Station_Name': 'Ardlui',
+          'coordinates': [-4.7216399, 56.30196]
+        },
+        {
+          'Station_Name': 'Hope Derbyshire',
+          'coordinates': [-1.729849, 53.34613]
+        },
+        {
+          'Station_Name': 'Windermere',
+          'coordinates': [-2.904022, 54.3800842]
+        },
+        {
+          'Station_Name': 'Downham Market',
+          'coordinates': [0.3635113, 52.6041292]
+        }
+      ]
+    }
 
     let stationList = stationJson.stations;
 
 
     document.body.onload = addElement;
-    function addElement(){
-        for(let i =0; i<stationList.length; i++){
-            let newOption = document.createElement("option");
-            let newContent = document.createTextNode(stationList[i].Station_Name);
-            newOption.appendChild(newContent);
-            let selectDiv = document.getElementById("stationSelect");
-            selectDiv.appendChild(newOption); 
-        }
-          
+
+    function addElement() {
+      for (let i = 0; i < stationList.length; i++) {
+        let newOption = document.createElement("option");
+        let newContent = document.createTextNode(stationList[i].Station_Name);
+        newOption.appendChild(newContent);
+        let selectDiv = document.getElementById("stationSelect");
+        selectDiv.appendChild(newOption);
+      }
+
     }
 
 
@@ -138,163 +196,171 @@
 
     //Click on an option in the nav bar, and the map will fly to the location of that station.
     document.getElementById("stationSelect").addEventListener('change', function() {
-        let coords;
-        for(let i =0; i<stationList.length; i++){
-            if (document.getElementById("stationSelect").value == stationList[i].Station_Name){
-                coords =  stationList[i].coordinates;
-                map.flyTo({
-                    center: coords,
-                    zoom: 14,
-                    essential: true
-                })
-            }
+      let coords;
+      for (let i = 0; i < stationList.length; i++) {
+        if (document.getElementById("stationSelect").value == stationList[i].Station_Name) {
+          coords = stationList[i].coordinates;
+          map.flyTo({
+            center: coords,
+            zoom: 14,
+            essential: true
+          })
         }
+      }
 
-        drawAll(coords)
+      drawAll(coords)
 
     });
 
 
     // Create an empty GeoJSON FeatureCollection.
     var geojson = {
-        "type": "FeatureCollection",
-        "features": []
+      "type": "FeatureCollection",
+      "features": []
     };
 
     // Add event which waits for the map to be loaded.
     map.on('load', function() {
-        // Add an empty GeoJSON style layer for the 1km circle polygon (buffered
-        // centroid) features.
-        map.addLayer({
-            "id": "circle",
-            "type": "fill",
-            "source": {
-                "type": "geojson",
-                "data": geojson
-            },
-            "layout": {},
-            "paint": {
-                "fill-color": "#f80",
-                "fill-opacity": 0.5
-            }
-        });
+      // Add an empty GeoJSON style layer for the 1km circle polygon (buffered
+      // centroid) features.
+      map.addLayer({
+        "id": "circle",
+        "type": "fill",
+        "source": {
+          "type": "geojson",
+          "data": geojson
+        },
+        "layout": {},
+        "paint": {
+          "fill-color": "#f80",
+          "fill-opacity": 0.5
+        }
+      });
 
-        // Add an empty GeoJSON style layer for the localBuildings features.
-        map.addLayer({
-            "id": "localBuildings",
-            "type": "fill",
-            "source": {
-                "type": "geojson",
-                "data": geojson
-            },
-            "layout": {},
-            "paint": {
-                "fill-color": "#0c0"
-            }
-        });
+      // Add an empty GeoJSON style layer for the localBuildings features.
+      map.addLayer({
+        "id": "localBuildings",
+        "type": "fill",
+        "source": {
+          "type": "geojson",
+          "data": geojson
+        },
+        "layout": {},
+        "paint": {
+          "fill-color": "#0c0"
+        }
+      });
     });
 
-   function drawAll(center) {
+    function drawAll(center) {
 
-        // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
-        // of the given a radius in kilometers; and steps for precision.
-        var circle = turf.circle(center, 0.5, { steps: 24, units: 'kilometers' });
+      const circle_radius = 0.5
+      // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
+      // of the given a radius in kilometers; and steps for precision.
+      var circle = turf.circle(center, circle_radius, {
+        steps: 24,
+        units: 'kilometers'
+      });
 
-        // Set the GeoJSON data for the 'circle' layer and re-render the map.
-        map.getSource('circle').setData(circle);
+      // Set the GeoJSON data for the 'circle' layer and re-render the map.
+      map.getSource('circle').setData(circle);
 
-        // Get the flipped geometry coordinates and return a new space-delimited string.
-        var coords = circle.geometry.coordinates[0].join(' ');
+      // Get the flipped geometry coordinates and return a new space-delimited string.
+      var coords = circle.geometry.coordinates[0].join(' ');
 
-        // Create an OGC XML filter parameter value which will select the localBuildings
-        // features intersecting the circle polygon coordinates.
-        var xml = '<ogc:Filter>';
-        xml += '<ogc:Intersects>';
-        xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-        xml += '<gml:Polygon srsName="urn:ogc:def:crs:EPSG::4326">';
-        xml += '<gml:outerBoundaryIs>';
-        xml += '<gml:LinearRing>';
-        xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-        xml += '</gml:LinearRing>';
-        xml += '</gml:outerBoundaryIs>';
-        xml += '</gml:Polygon>';
-        xml += '</ogc:Intersects>';
-        xml += '</ogc:Filter>';
+      // Create an OGC XML filter parameter value which will select the localBuildings
+      // features intersecting the circle polygon coordinates.
+      var xml = '<ogc:Filter>';
+      xml += '<ogc:Intersects>';
+      xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+      xml += '<gml:Polygon srsName="urn:ogc:def:crs:EPSG::4326">';
+      xml += '<gml:outerBoundaryIs>';
+      xml += '<gml:LinearRing>';
+      xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+      xml += '</gml:LinearRing>';
+      xml += '</gml:outerBoundaryIs>';
+      xml += '</gml:Polygon>';
+      xml += '</ogc:Intersects>';
+      xml += '</ogc:Filter>';
 
-        // Define parameters object.
-        var wfsParams = {
-            key: apiKey,
-            service: 'WFS',
-            request: 'GetFeature',
-            version: '2.0.0',
-            typeNames: 'Zoomstack_LocalBuildings',
-            outputFormat: 'GEOJSON',
-            srsName: 'urn:ogc:def:crs:EPSG::4326',
-            filter: xml,
-            count: 100,
-            startIndex: 0
-        };
+      // Define parameters object.
+      var wfsParams = {
+        key: apiKey,
+        service: 'WFS',
+        request: 'GetFeature',
+        version: '2.0.0',
+        typeNames: 'Zoomstack_LocalBuildings',
+        outputFormat: 'GEOJSON',
+        srsName: 'urn:ogc:def:crs:EPSG::4326',
+        filter: xml,
+        count: 100,
+        startIndex: 0
+      };
 
-        var resultsRemain = true;
+      var resultsRemain = true;
 
-        geojson.features.length = 0;
+      geojson.features.length = 0;
 
-        map.getSource('localBuildings').setData(geojson);
-        document.getElementById('feature-count').innerHTML = '';
-        document.getElementById('area').innerHTML = '';
+      map.getSource('localBuildings').setData(geojson);
+      document.getElementById('feature-count').innerHTML = '';
+      document.getElementById('area').innerHTML = '';
 
-        // Use fetch() method to request GeoJSON data from the OS Features API.
-        //
-        // If successful - set the GeoJSON data for the 'localBuildings' layer and re-render
-        // the map.
-        //
-        // Calls will be made until the number of features returned is less than the
-        // requested count, at which point it can be assumed that all features for
-        // the query have been returned, and there is no need to request further pages.
-        function fetchWhile(resultsRemain) {
-            if( resultsRemain ) {
-                fetch(getUrl(wfsParams))
-                    .then(response => response.json())
-                    .then((data) => {
-                        wfsParams.startIndex += wfsParams.count;
+      // Use fetch() method to request GeoJSON data from the OS Features API.
+      //
+      // If successful - set the GeoJSON data for the 'localBuildings' layer and re-render
+      // the map.
+      //
+      // Calls will be made until the number of features returned is less than the
+      // requested count, at which point it can be assumed that all features for
+      // the query have been returned, and there is no need to request further pages.
+      function fetchWhile(resultsRemain) {
+        if (resultsRemain) {
+          fetch(getUrl(wfsParams))
+            .then(response => response.json())
+            .then((data) => {
+              wfsParams.startIndex += wfsParams.count;
 
-                        geojson.features.push.apply(geojson.features, data.features);
+              geojson.features.push.apply(geojson.features, data.features);
 
-                        resultsRemain = data.features.length < wfsParams.count ? false : true;
+              resultsRemain = data.features.length < wfsParams.count ? false : true;
 
-                        fetchWhile(resultsRemain);
-                    });
-            }
-            else {
-                map.getSource('localBuildings').setData(geojson);
-                document.getElementById('feature-count').innerHTML = geojson.features.length;
+              fetchWhile(resultsRemain);
+            });
+        } else {
+          map.getSource('localBuildings').setData(geojson);
+          document.getElementById('feature-count').innerHTML = geojson.features.length;
 
-                // To calculate the area, rounded to 3 decimal places
-                let area = 0;
-                let feature = geojson.features;
-                for(let i=0; i<feature.length; i++){
-                    area += geojson.features[i].properties.SHAPE_Area
+          // To calculate the area, rounded to 3 decimal places
+          let area = 0;
+          let ratio = 0;
+          const circle_area = Math.PI * circle_radius * circle_radius;
+          let feature = geojson.features;
+          for (let i = 0; i < feature.length; i++) {
+            // Area in kilometers square
+            area += (geojson.features[i].properties.SHAPE_Area) / 1000000
+          }
 
-                    }
-                document.getElementById('area').innerHTML = (area/1000).toFixed(2);
-                }
-            }
+          ratio = area / circle_area
+          document.getElementById('area').innerHTML = area.toFixed(2);
+          document.getElementById('ratio').innerHTML = ratio.toFixed(3);
+        }
+      }
 
-        fetchWhile(resultsRemain);
+      fetchWhile(resultsRemain);
     }
 
     /**
      * Return URL with encoded parameters.
      */
     function getUrl(params) {
-        var encodedParameters = Object.keys(params)
-            .map(paramName => paramName + '=' + encodeURI(params[paramName]))
-            .join('&');
+      var encodedParameters = Object.keys(params)
+        .map(paramName => paramName + '=' + encodeURI(params[paramName]))
+        .join('&');
 
-        return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
+      return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
     }
-
-</script>
+  </script>
 
 </body>
+
 </html>
