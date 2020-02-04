@@ -23,48 +23,105 @@
 </head>
 
 <body>
-
-  <style>
-    .map-overlay {
-      font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 250px;
-      padding: 10px;
-    }
-
-    .map-overlay .map-overlay-inner {
-      background-color: #fff;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-      border-radius: 4px;
-      padding: 10px;
-    }
-
-    .map-overlay-inner div {
-      display: block;
-      margin-top: 10px;
-    }
-
-    .map-overlay-inner span {
-      font-weight: 600;
-    }
-  </style>
-
-  <div id='map'></div>
-  <div class='map-overlay top'>
+ 
+ <div id='map'></div>
+  <div class='map-overlay top'> 
     <div class='map-overlay-inner'>
-      <button id='request'>Find localBuildings</button>
       <div>Total features: <span id='feature-count'></span></div>
       <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
       <div>Total ratio: <span id='ratio'></span></div>
-      <div>
+      <div class="colorKey">
+          <div class="keyTitle"><b>Ratio of building area to total area</b></div>
+          <div class="flex-container">
+              <div class="square" id="red"></div>
+                <div>>= 0.45</div>
+          </div>
+          <div class="flex-container">
+              <div class="square" id="orange"></div>
+                <div>0.3-0.44</div>
+          </div>
+          <div class="flex-container">
+              <div class="square" id="yellow"></div>
+                <div>0.15-0.29</div>
+          </div>
+          <div class="flex-container">
+              <div class="square" id="green"></div>
+                <div> 0.15 </div>
+          </div>
+      </div>
+      
+      
+    <div>
         <select id="stationSelect">
           <!-- Option tags from addElement function go here  -->
         </select>
       </div>
     </div>
   </div>
+
+  <style>
+        .map-overlay {
+          font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 250px;
+          padding: 10px;
+        }
+    
+        .map-overlay .map-overlay-inner {
+          background-color: #fff;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+          border-radius: 4px;
+          padding: 10px;
+        }
+    
+        .map-overlay-inner div {
+          display: block flex;
+          margin-top: 10px;
+        }
+    
+        .map-overlay-inner span {
+          font-weight: 600;
+        }
+    
+        .flex-container{
+            display: flex;
+            flex-direction: row;
+            font-weight: bold;
+        }
+
+        .keyTitle{
+            padding-top: 30px;
+            margin-bottom: -15px;
+        }
+    
+        .square {
+            height: 25px;
+            width: 37.5px;
+            margin-right: 10px;
+        }
+    
+        #red {
+            background-color: #F00; 
+        }
+    
+        #orange{
+            background-color: #FFA500; 
+        }
+    
+        #yellow{
+            background-color: #FFFF00; 
+        }
+    
+        #green{
+            background-color: #0c0; 
+        }
+    
+      </style>
+
+
+  
 
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
   <script>
@@ -191,9 +248,6 @@
     }
 
 
-
-
-
     //Click on an option in the nav bar, and the map will fly to the location of that station.
     document.getElementById("stationSelect").addEventListener('change', function() {
       let coords;
@@ -246,9 +300,7 @@
           "data": geojson
         },
         "layout": {},
-        "paint": {
-          "fill-color": "#0c0"
-        }
+       
       });
     });
 
@@ -327,24 +379,46 @@
               fetchWhile(resultsRemain);
             });
         } else {
-          map.getSource('localBuildings').setData(geojson);
-          document.getElementById('feature-count').innerHTML = geojson.features.length;
+            map.getSource('localBuildings').setData(geojson);
+            document.getElementById('feature-count').innerHTML = geojson.features.length;
 
           // To calculate the area, rounded to 3 decimal places
-          let area = 0;
-          let ratio = 0;
-          const circle_area = Math.PI * circle_radius * circle_radius;
-          let feature = geojson.features;
-          for (let i = 0; i < feature.length; i++) {
+            let area = 0;
+            let ratio = 0;
+            const circle_area = Math.PI * circle_radius * circle_radius;
+            let feature = geojson.features;
+            for (let i = 0; i < feature.length; i++) {
             // Area in kilometers square
             area += (geojson.features[i].properties.SHAPE_Area) / 1000000
-          }
+            }
+            ratio = area / circle_area
+            //format the area
+            if (area < 0.01){
+                document.getElementById('area').innerHTML = "< 0.01"
+            }
+            else document.getElementById('area').innerHTML = area.toFixed(2);
+            
+            // format the ratio
+            if (ratio <0.01){
+                document.getElementById('ratio').innerHTML = "< 0.01"
 
-          ratio = area / circle_area
-          document.getElementById('area').innerHTML = area.toFixed(2);
-          document.getElementById('ratio').innerHTML = ratio.toFixed(3);
-
-          console.log(ratio > 0.35);
+            }
+            else document.getElementById('ratio').innerHTML = ratio.toFixed(2);
+            
+            // change color based on ratios
+            if(ratio >= 0.45){
+                map.setPaintProperty("localBuildings", "fill-color", "#F00")
+            }
+            else if (ratio < 0.45 && ratio > 0.3) {
+                map.setPaintProperty("localBuildings", "fill-color", "#FFA500")
+            }
+            else if (ratio < 0.29 && ratio > 0.15) {
+                map.setPaintProperty("localBuildings", "fill-color", "#FFFF00")
+            }
+            
+            else{
+                map.setPaintProperty("localBuildings", "fill-color", "#0c0")
+            }
         }
       }
 
