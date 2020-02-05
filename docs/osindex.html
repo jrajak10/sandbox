@@ -24,38 +24,38 @@
 
 <body>
  
- <div id='map'></div>
-  <div class='map-overlay top'> 
-    <div class='map-overlay-inner'>
-      <div>Total features: <span id='feature-count'></span></div>
-      <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
-      <div>Total ratio: <span id='ratio'></span></div>
-      <div class="colorKey">
-          <div class="keyTitle"><b>Ratio of building area to total area</b></div>
-          <div class="flex-container">
-              <div class="square" id="red"></div>
-                <div>>= 0.45</div>
-          </div>
-          <div class="flex-container">
-              <div class="square" id="orange"></div>
-                <div>0.3-0.44</div>
-          </div>
-          <div class="flex-container">
-              <div class="square" id="yellow"></div>
-                <div>0.15-0.29</div>
-          </div>
-          <div class="flex-container">
-              <div class="square" id="green"></div>
-                <div> 0.15 </div>
-          </div>
-      </div>
-    <div>
-        <select id="stationSelect">
-          <!-- Option tags from addElement function go here  -->
-        </select>
-      </div>
+    <div id='map'></div>
+    <div class='map-overlay top'> 
+        <div class='map-overlay-inner'>
+            <div>Total features: <span id='feature-count'></span></div>
+            <div>Total building area (<b>km<sup>2</sup></b>): <span id='area'></span></div>
+            <div>Total ratio: <span id='ratio'></span></div>
+            <div class="colorKey">
+                <div class="keyTitle"><b>Ratio of building area to total area</b></div>
+                <div class="flex-container">
+                    <div class="square" id="red"></div>
+                        <div>&#8805; 0.45</div>
+                </div>
+                <div class="flex-container">
+                    <div class="square" id="orange"></div>
+                        <div>0.3-0.44</div>
+                </div>
+                <div class="flex-container">
+                    <div class="square" id="yellow"></div>
+                        <div>0.15-0.29</div>
+                </div>
+                <div class="flex-container">
+                    <div class="square" id="green"></div>
+                        <div> &#60; 0.15 </div>
+                </div>
+            </div>
+            <div>
+                <select id="stationSelect">
+                <!-- Option tags from addElement function go here  -->
+                </select>
+            </div>
+        </div>
     </div>
-  </div>
 
   <style>
         .map-overlay {
