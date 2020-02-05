@@ -163,74 +163,7 @@
         trackUserLocation: true
         }), 'bottom-right');
 
-        //Station json
-
-        let stationJson = {
-        "stations": [{
-            'Station_Name': 'Farringdon',
-            'coordinates': [-0.1070064, 51.5202109]
-            },
-            {
-            'Station_Name': 'Edinburgh Waverley',
-            'coordinates': [-3.1917618, 55.9519361]
-            },
-            {
-            "Station_Name": "York",
-            'coordinates': [-1.0953797, 53.9579841]
-            },
-            {
-            'Station_Name': 'Liverpool Lime Street',
-            'coordinates': [-2.9795018, 53.4076217]
-            },
-            {
-            'Station_Name': 'Waterloo',
-            'coordinates': [-0.1144938, 51.5031686]
-            },
-            {
-            'Station_Name': 'Southampton',
-            'coordinates': [-1.4160523, 50.9078191]
-            },
-            {
-            'Station_Name': 'Cardiff',
-            'coordinates': [-3.1811426, 51.4751516]
-            },
-            {
-            'Station_Name': 'Newcastle',
-            'coordinates': [-1.6192629, 54.968503]
-            },
-            {
-            'Station_Name': 'Oxford',
-            'coordinates': [-1.2721341, 51.7534727]
-            },
-            {
-            'Station_Name': 'Glasgow Central',
-            'coordinates': [-4.2602975, 55.8591148]
-            },
-            {
-            'Station_Name': 'Beaulieu Road',
-            'coordinates': [-1.5050999, 50.8551102]
-            },
-            {
-            'Station_Name': 'Ardlui',
-            'coordinates': [-4.7216399, 56.30196]
-            },
-            {
-            'Station_Name': 'Hope Derbyshire',
-            'coordinates': [-1.729849, 53.34613]
-            },
-            {
-            'Station_Name': 'Windermere',
-            'coordinates': [-2.904022, 54.3800842]
-            },
-            {
-            'Station_Name': 'Downham Market',
-            'coordinates': [0.3635113, 52.6041292]
-            }
-        ]
-        }
-
         
-
 
         let xhReq = new XMLHttpRequest();
         xhReq.open("GET", "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=3000&startindex=200", false);
