@@ -229,7 +229,21 @@
         ]
         }
 
-        let stationList = stationJson.stations;
+        
+
+
+        let xhReq = new XMLHttpRequest();
+        xhReq.open("GET", "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=3000&startindex=200", false);
+        xhReq.send(null);
+        let jsonObject = JSON.parse(xhReq.responseText);
+
+
+        let stationList = jsonObject.features.sort(function(a,b){
+                            return 0.5 - Math.random();
+                            }).slice(0,20);
+
+        console.log(stationList)
+   
 
 
         document.body.onload = addElement;
@@ -237,7 +251,7 @@
         function addElement() {
         for (let i = 0; i < stationList.length; i++) {
             let newOption = document.createElement("option");
-            let newContent = document.createTextNode(stationList[i].Station_Name);
+            let newContent = document.createTextNode(stationList[i].properties.Name);
             newOption.appendChild(newContent);
             let selectDiv = document.getElementById("stationSelect");
             selectDiv.appendChild(newOption);
@@ -250,8 +264,8 @@
         document.getElementById("stationSelect").addEventListener('change', function() {
         let coords;
         for (let i = 0; i < stationList.length; i++) {
-            if (document.getElementById("stationSelect").value == stationList[i].Station_Name) {
-            coords = stationList[i].coordinates;
+            if (document.getElementById("stationSelect").value == stationList[i].properties.Name) {
+            coords = stationList[i].geometry.coordinates;
             map.flyTo({
                 center: coords,
                 zoom: 14,
