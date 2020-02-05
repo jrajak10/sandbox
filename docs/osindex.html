@@ -380,7 +380,7 @@
                 map.getSource('localBuildings').setData(geojson);
                 document.getElementById('feature-count').innerHTML = geojson.features.length;
 
-            // To calculate the area, rounded to 3 decimal places
+                // To calculate the area, rounded to 3 decimal places
                 let area = 0;
                 let ratio = 0;
                 const circle_area = Math.PI * circle_radius * circle_radius;
@@ -399,7 +399,6 @@
                 // format the ratio
                 if (ratio <0.01){
                     document.getElementById('ratio').innerHTML = "< 0.01"
-
                 }
                 else document.getElementById('ratio').innerHTML = ratio.toFixed(2);
                 
