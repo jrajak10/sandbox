@@ -163,23 +163,23 @@
         trackUserLocation: true
         }), 'bottom-right');
 
+        let url = "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=10&startIndex=" + Math.floor(Math.random() * 3431).toString();
+       
         
-
         let xhReq = new XMLHttpRequest();
-        xhReq.open("GET", "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=3000&startindex=200", false);
+        xhReq.open("GET", url, false);
         xhReq.send(null);
         let jsonObject = JSON.parse(xhReq.responseText);
 
-
         let stationList = jsonObject.features.sort(function(a,b){
                             return 0.5 - Math.random();
-                            }).slice(0,20);
+                            }).slice(0,10);
 
-        console.log(stationList)
-   
+     
 
 
         document.body.onload = addElement;
+        
 
         function addElement() {
         for (let i = 0; i < stationList.length; i++) {
@@ -192,6 +192,7 @@
 
         }
 
+        
 
         //Click on an option in the nav bar, and the map will fly to the location of that station.
         document.getElementById("stationSelect").addEventListener('change', function() {
@@ -210,6 +211,11 @@
         drawAll(coords)
 
         });
+
+        
+
+        
+        
 
 
         // Create an empty GeoJSON FeatureCollection.
@@ -251,6 +257,9 @@
 
         function drawAll(center) {
 
+
+        
+
         const circle_radius = 0.5
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
@@ -261,6 +270,8 @@
 
         // Set the GeoJSON data for the 'circle' layer and re-render the map.
         map.getSource('circle').setData(circle);
+
+        
 
         // Get the flipped geometry coordinates and return a new space-delimited string.
         var coords = circle.geometry.coordinates[0].join(' ');
