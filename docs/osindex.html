@@ -129,29 +129,20 @@
         function fetchStation(stationNumber) {
 
             let url = "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=1&startIndex=" + stationNumber.toString();
-
-
             let xhReq = new XMLHttpRequest();
             xhReq.open("GET", url, false);
             xhReq.send(null);
             let jsonObject = JSON.parse(xhReq.responseText);
             let station = jsonObject.features[0]
-
             return station;
-
         }
 
-
         const stationList = [];
-        for(let i=0; i<11; i++){
+        for(let stationEntry=1; stationEntry<11; stationEntry++){
             stationList.push(fetchStation(Math.floor(Math.random() * 3441)))
         }
 
-
-
         document.body.onload = addElement;
-
-
         function addElement() {
             for (let i = 0; i < stationList.length; i++) {
                 let newOption = document.createElement("option");
@@ -219,12 +210,6 @@
 
         });
 
-
-
-
-
-
-
         // Create an empty GeoJSON FeatureCollection.
         var geojson = {
             "type": "FeatureCollection",
@@ -277,7 +262,6 @@
 
             // Set the GeoJSON data for the 'circle' layer and re-render the map.
             map.getSource('circle').setData(circle);
-
 
 
             // Get the flipped geometry coordinates and return a new space-delimited string.
