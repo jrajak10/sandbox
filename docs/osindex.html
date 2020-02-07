@@ -126,8 +126,7 @@
 
         var serviceUrl = 'https://osdatahubapi.os.uk/OSVectorTileAPI/vts/v1';
 
-        function fetchStation(stationNumber) {
-
+        async function fetchStation(stationNumber) {
             let stationParams = {
                 key: apiKey,
                 service: 'WFS',
@@ -141,13 +140,20 @@
             };
 
             let url = getUrl(stationParams);
-            let xhReq = new XMLHttpRequest();
-            xhReq.open("GET", url, false);
-            xhReq.send(null);
-            let jsonObject = JSON.parse(xhReq.responseText);
-            let station = jsonObject.features[0]
+            
+
+
+            let response = await fetch(url);
+            console.log("XXXXXXXXXXXX")
+
+
+            let json = await response.json();
+            let station = json.features[0];
+            
             return station;
         }
+
+
 
 
         function randomStations(){
@@ -159,21 +165,59 @@
             }
             }
             return randomNums;
-
         }
 
 
-        let numbers = randomStations();
-        
-        
-        const stationList = [];
-        for(let i=0; i<numbers.length; i++){
-            stationList.push(fetchStation(numbers[i]));
+        async function generatesStations() {
+            let numbers = randomStations();
+            let stationList = [];
+            for(let i=0; i<numbers.length; i++){
+                const station = await fetchStation(numbers[i]);
+                stationList.push(station);
         }
-        
+       
+            return stationList;
 
+        } 
+
+
+        
+        
         document.body.onload = addElement;
-        function addElement() {
+        
+        async function addElement() {
+            const stationList = await generatesStations();
+            populatesDropDown(stationList);
+            addDropdownListener(stationList);
+            flyto(stationList[0].geometry.coordinates);
+        }
+
+        function flyto(coords) {
+            map.flyTo({
+                            center: coords,
+                            zoom: 14,
+                            essential: true
+                        })
+            drawAll(coords)
+        }
+
+        function addDropdownListener(stationList) {
+            //Click on an option in the nav bar, and the map will fly to the location of that station.
+            document.getElementById("stationSelect").addEventListener('change',  function () {
+                let coords;
+                for (let i = 0; i < stationList.length; i++) {
+                    
+                    if (document.getElementById("stationSelect").value == stationList[i].properties.Name) {
+                        coords = stationList[i].geometry.coordinates;
+                        flyto(coords);
+                        break;
+                    }
+                }
+
+            });
+        }
+
+        function populatesDropDown(stationList) {
             for (let i = 0; i < stationList.length; i++) {
                 let newOption = document.createElement("option");
                 let newContent = document.createTextNode(stationList[i].properties.Name);
@@ -181,11 +225,8 @@
                 let selectDiv = document.getElementById("stationSelect");
                 selectDiv.appendChild(newOption);
             }
-
         }
-
         
-
         // Initialize the map object.
         var map = new mapboxgl.Map({
             container: 'map',
@@ -221,24 +262,6 @@
             },
             trackUserLocation: true
         }), 'bottom-right');
-
-        //Click on an option in the nav bar, and the map will fly to the location of that station.
-        document.getElementById("stationSelect").addEventListener('change', function () {
-            let coords;
-            for (let i = 0; i < stationList.length; i++) {
-                if (document.getElementById("stationSelect").value == stationList[i].properties.Name) {
-                    coords = stationList[i].geometry.coordinates;
-                    map.flyTo({
-                        center: coords,
-                        zoom: 14,
-                        essential: true
-                    })
-                }
-            }
-
-            drawAll(coords)
-
-        });
 
         // Create an empty GeoJSON FeatureCollection.
         var geojson = {
@@ -285,10 +308,11 @@
             const circle_radius = 0.5
             // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
             // of the given a radius in kilometers; and steps for precision.
-            var circle = turf.circle(center, circle_radius, {
+            let circle = turf.circle(center, circle_radius, {
                 steps: 24,
                 units: 'kilometers'
             });
+            
 
             // Set the GeoJSON data for the 'circle' layer and re-render the map.
             map.getSource('circle').setData(circle);
@@ -333,7 +357,6 @@
             map.getSource('localBuildings').setData(geojson);
             document.getElementById('feature-count').innerHTML = '';
             document.getElementById('area').innerHTML = '';
-
             // Use fetch() method to request GeoJSON data from the OS Features API.
             //
             // If successful - set the GeoJSON data for the 'localBuildings' layer and re-render
