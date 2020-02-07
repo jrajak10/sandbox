@@ -128,7 +128,19 @@
 
         function fetchStation(stationNumber) {
 
-            let url = "https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?service=wfs&request=GetFeature&typename=osfeatures:Zoomstack_RailwayStations&key=pxKGVMtaA9X2382DdJA4h3hAi6mkXt60&version=2.0.0&outputformat=geoJSON&srsName=urn:ogc:def:crs:EPSG::4326&count=1&startIndex=" + stationNumber.toString();
+            let stationParams = {
+                key: apiKey,
+                service: 'WFS',
+                request: 'GetFeature',
+                version: '2.0.0',
+                typeNames: 'Zoomstack_RailwayStations',
+                outputFormat: 'GEOJSON',
+                srsName: 'urn:ogc:def:crs:EPSG::4326',
+                count: 1,
+                startIndex: stationNumber.toString()
+            };
+
+            let url = getUrl(stationParams);
             let xhReq = new XMLHttpRequest();
             xhReq.open("GET", url, false);
             xhReq.send(null);
@@ -137,10 +149,28 @@
             return station;
         }
 
-        const stationList = [];
-        for(let stationEntry=1; stationEntry<21; stationEntry++){
-            stationList.push(fetchStation(Math.floor(Math.random() * 3441)))
+
+        function randomStations(){
+            let randomNums = [];
+            while(randomNums.length < 20){
+                let num = Math.floor(Math.random() * 3451);
+                if (randomNums.indexOf(num) === -1){
+                    randomNums.push(num)
+            }
+            }
+            return randomNums;
+
         }
+
+
+        let numbers = randomStations();
+        
+        
+        const stationList = [];
+        for(let i=0; i<numbers.length; i++){
+            stationList.push(fetchStation(numbers[i]));
+        }
+        
 
         document.body.onload = addElement;
         function addElement() {
@@ -153,6 +183,8 @@
             }
 
         }
+
+        
 
         // Initialize the map object.
         var map = new mapboxgl.Map({
@@ -189,8 +221,6 @@
             },
             trackUserLocation: true
         }), 'bottom-right');
-
-
 
         //Click on an option in the nav bar, and the map will fly to the location of that station.
         document.getElementById("stationSelect").addEventListener('change', function () {
