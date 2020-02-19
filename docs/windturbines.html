@@ -89,7 +89,7 @@
     map.on('load', function() {
         // Add an empty GeoJSON style layer for the Airport features.
         map.addLayer({
-            "id": "windTurbines",
+            "id": "woodland",
             "type": "fill",
             "source": {
                 "type": "geojson",
@@ -100,7 +100,7 @@
             },
             "layout": {},
             "paint": {
-                "fill-color": "#F00",
+                "fill-color": "#0c0",
                 "fill-opacity": 0.8
             }
         });
@@ -175,6 +175,15 @@
         xml += '</ogc:And>';
         xml += '</ogc:Filter>';
 
+        let woodXml = '<ogc:Filter>';
+        woodXml += '<ogc:BBOX>';
+        woodXml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+        woodXml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+        woodXml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+        woodXml += '</gml:Box>';
+        woodXml += '</ogc:BBOX>';
+        woodXml += '</ogc:Filter>';
+
         // Define (WFS) parameters object.
         var wfsParams = {
             key: apiKey,
@@ -187,6 +196,17 @@
             filter: xml
         };
 
+        var woodlandParams = {
+            key: apiKey,
+            service: 'WFS',
+            request: 'GetFeature',
+            version: '2.0.0',
+            typeNames: 'Zoomstack_Woodland',
+            outputFormat: 'GEOJSON',
+            srsName: 'urn:ogc:def:crs:EPSG::4326',
+            filter: woodXml
+        };
+
         // Use fetch() method to request GeoJSON data from the OS Features API.
         // If successful - set the GeoJSON data for the 'airports' layer and re-render
         // the map.
@@ -197,12 +217,26 @@
                 // rings are counterclockwise and inner rings [holes] are clockwise; plus
                 // ensure the geometry has no self-intersections.
                 var result = turf.unkinkPolygon(turf.rewind(data));
-                map.getSource('windTurbines').setData(result);
+                // map.getSource('windTurbines').setData(result);
                 console.log(data.features)
                 data.features.forEach(function(feature){
                     let marker = new mapboxgl.Marker().setLngLat(feature.geometry.coordinates[0][0]).addTo(map)
                 })
             });
+
+        
+            fetch(getUrl(woodlandParams))
+            .then(response => response.json())
+            .then((data) => {
+                // {Turf.js} Rewind polygons to follow the right-hand rule, i.e. exterior
+                // rings are counterclockwise and inner rings [holes] are clockwise; plus
+                // ensure the geometry has no self-intersections.
+                    var result = turf.unkinkPolygon(turf.rewind(data));
+                map.getSource('woodland').setData(result);
+            });
+
+
+    
     }
 
     /**
