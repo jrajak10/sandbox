@@ -65,11 +65,11 @@
     // Initialize the map object.
     var map = new mapboxgl.Map({
         container: 'map',
-        minZoom: 7,
+        minZoom: 3,
         maxZoom: 20,
         style: style,
-        center: [-0.11348, 53.7492],
-        zoom: 11
+        center: [-2.5223117, 54.1848281],
+        zoom: 7
     });
 
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -119,10 +119,10 @@
             var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
                 bounds2 = map.getBounds();
 
-            if( JSON.stringify(bounds) !== JSON.stringify(bounds1.extend(bounds2)) ) {
-                bounds = bounds2;
-                getFeatures(bounds);
-            }
+            // if( JSON.stringify(bounds) !== JSON.stringify(bounds1.extend(bounds2)) ) {
+            //     bounds = bounds2;
+            //     getFeatures(bounds);
+            // }
         });
 
         // When a click event occurs on a feature in the 'airports' layer, open a popup at
@@ -132,9 +132,6 @@
                 .setLngLat(e.lngLat)
                 .setHTML(e.features[0].properties.DescriptiveTerm)
                 .addTo(map);
-
-
-                
         });
 
         // Change the cursor to a pointer when the mouse is over the 'airports' layer.
@@ -161,48 +158,64 @@
         // Create an OGC XML filter parameter value which will select the Airport
         // features (site function) intersecting the BBOX coordinates.
         var xml = '<ogc:Filter>';
-        xml += '<ogc:And>';
-        xml += '<ogc:BBOX>';
-        xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-        xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
-        xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-        xml += '</gml:Box>';
-        xml += '</ogc:BBOX>';
+        // xml += '<ogc:And>';
+        // xml += '<ogc:BBOX>';
+        // xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+        // xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+        // xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+        // xml += '</gml:Box>';
+        // xml += '</ogc:BBOX>';
         xml += '<ogc:PropertyIsEqualTo>';
         xml += '<ogc:PropertyName>DescriptiveTerm</ogc:PropertyName>';
         xml += '<ogc:Literal>Wind Turbine</ogc:Literal>';
         xml += '</ogc:PropertyIsEqualTo>';
-        xml += '</ogc:And>';
+        // xml += '</ogc:And>';
         xml += '</ogc:Filter>';
 
         // Define (WFS) parameters object.
-        var wfsParams = {
-            key: apiKey,
-            service: 'WFS',
-            request: 'GetFeature',
-            version: '2.0.0',
-            typeNames: 'Topography_TopographicArea',
-            outputFormat: 'GEOJSON',
-            srsName: 'urn:ogc:def:crs:EPSG::4326',
-            filter: xml
-        };
 
+        let wfsArray = [];
+        
+        for(let i=0; i<5800; i+=100){
+            let wfsParams = {
+                key: apiKey,
+                service: 'WFS',
+                request: 'GetFeature',
+                version: '2.0.0',
+                typeNames: 'Topography_TopographicArea',
+                outputFormat: 'GEOJSON',
+                srsName: 'urn:ogc:def:crs:EPSG::4326',
+                filter: xml, 
+                startIndex: i,
+                count: 100
+            };
+
+        wfsArray.push(wfsParams)
+            
+        }
+
+        console.log(wfsArray)
         // Use fetch() method to request GeoJSON data from the OS Features API.
         // If successful - set the GeoJSON data for the 'airports' layer and re-render
         // the map.
-        fetch(getUrl(wfsParams))
-            .then(response => response.json())
-            .then((data) => {
-                // {Turf.js} Rewind polygons to follow the right-hand rule, i.e. exterior
-                // rings are counterclockwise and inner rings [holes] are clockwise; plus
-                // ensure the geometry has no self-intersections.
-                var result = turf.unkinkPolygon(turf.rewind(data));
-                map.getSource('windTurbines').setData(result);
-                console.log(data.features)
-                data.features.forEach(function(feature){
-                    let marker = new mapboxgl.Marker().setLngLat(feature.geometry.coordinates[0][0]).addTo(map)
-                })
-            });
+
+        for(let i=0; i<wfsArray.length; i++){
+            fetch(getUrl(wfsArray[i]))
+                .then(response => response.json())
+                .then((data) => {
+                    // {Turf.js} Rewind polygons to follow the right-hand rule, i.e. exterior
+                    // rings are counterclockwise and inner rings [holes] are clockwise; plus
+                    // ensure the geometry has no self-intersections.
+                    var result = turf.unkinkPolygon(turf.rewind(data));
+                    map.getSource('windTurbines').setData(result);
+                    console.log(data.features.length)
+                    data.features.forEach(function(feature){
+                        let marker = new mapboxgl.Marker()
+                                        .setLngLat(feature.geometry.coordinates[0][0])
+                                        .addTo(map)
+                    })
+                });
+        }
     }
 
     /**
