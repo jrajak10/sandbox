@@ -217,9 +217,6 @@ function getFeatures(bounds) {
       // ensure the geometry has no self-intersections.
       var result = turf.unkinkPolygon(turf.rewind(data));
       map.getSource('woodland').setData(result);
-      console.log(data.features[0].geometry.coordinates[0]);
-      let feature1 = data.features[3].geometry.coordinates;
-
       
       // data.features.forEach(function(feature){ 
       //   new mapboxgl.Marker({color: "#F00"}).setLngLat(turf.center(turf.polygon(feature.geometry.coordinates)).geometry.coordinates).addTo(map)
@@ -237,14 +234,6 @@ function getFeatures(bounds) {
         .addTo(map)
       }
       
-
-
-      // for (let i = 0; i< featureCollection.length; i++){
-      //   let center  = turf.center(featureCollection[i].geometry.coordinates);
-
-      // }
-
-
     });
 
 
