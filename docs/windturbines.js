@@ -80,7 +80,7 @@ map.on('load', function() {
     },
     "layout": {},
     "paint": {
-      "fill-color": "#F00",
+      "fill-color": "#0c0",
       "fill-opacity": 0.8
     }
   });
@@ -105,14 +105,7 @@ map.on('load', function() {
     }
   });
 
-  // When a click event occurs on a feature in the 'airports' layer, open a popup at
-  // the location of the click, with description HTML from its properties.
-  map.on('click', 'woodland', function(e) {
-    new mapboxgl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML("Area: " + e.features[0].properties.SHAPE_Area.toFixed(2))
-      .addTo(map);
-  });
+
 
   // Change the cursor to a pointer when the mouse is over the 'airports' layer.
   map.on('mouseenter', 'woodland', function() {
@@ -124,12 +117,6 @@ map.on('load', function() {
     map.getCanvas().style.cursor = '';
   });
 
-  map.on('click', 'windTurbine', function(e) {
-    new mapboxgl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(e.features[0].properties.DescriptiveTerm)
-      .addTo(map);
-  });
 
   // Change the cursor to a pointer when the mouse is over the 'airports' layer.
   map.on('mouseenter', 'windTurbine', function() {
@@ -210,9 +197,13 @@ function getFeatures(bounds) {
       // rings are counterclockwise and inner rings [holes] are clockwise; plus
       // ensure the geometry has no self-intersections.
       var result = turf.unkinkPolygon(turf.rewind(data));
-      console.log(data.features)
+      // console.log(data.features)
       data.features.forEach(function(feature) {
-        let marker = new mapboxgl.Marker().setLngLat(feature.geometry.coordinates[0][0]).addTo(map)
+        new mapboxgl.Marker()
+        .setLngLat(feature.geometry.coordinates[0][0])
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+                      .setHTML("<p>" + feature.properties.DescriptiveTerm + "</p>"))
+        .addTo(map)
       })
     });
 
@@ -224,6 +215,23 @@ function getFeatures(bounds) {
       // ensure the geometry has no self-intersections.
       var result = turf.unkinkPolygon(turf.rewind(data));
       map.getSource('woodland').setData(result);
+      
+      // data.features.forEach(function(feature){ 
+      //   new mapboxgl.Marker({color: "#F00"}).setLngLat(turf.center(turf.polygon(feature.geometry.coordinates)).geometry.coordinates).addTo(map)
+      // })
+      let woodFeatures = data.features
+      for (let i=0; i<woodFeatures.length; i++){
+        let woodFeature = woodFeatures[i].geometry.coordinates
+        let popupId = woodFeatures[i].properties.OBJECTID
+        let popup = new mapboxgl.Popup({ offset: 25 }).setText(
+          "ID: " + popupId
+          );
+        new mapboxgl.Marker({color: "#F00"})
+        .setLngLat(turf.centroid(turf.polygon(woodFeature)).geometry.coordinates)
+        .setPopup(popup)
+        .addTo(map)
+      }
+      
     });
 
 
