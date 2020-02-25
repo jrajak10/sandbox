@@ -1,4 +1,4 @@
-var apiKey = '5FXQAScgfjcwQVpvIUHJncvfOjS7hKGf';
+var apiKey = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
 
 var serviceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
 
@@ -48,7 +48,7 @@ var map = new mapboxgl.Map({
   minZoom: 7,
   maxZoom: 20,
   style: style,
-  center: [-0.11348, 53.7492],
+  center: [-4.408240, 55.684409],
   zoom: 11
 });
 
@@ -67,30 +67,11 @@ map.addControl(new mapboxgl.AttributionControl({
 
 // Add event which waits for the map to be loaded.
 map.on('load', function() {
-  // Add an empty GeoJSON style layer for the Airport features.
-  map.addLayer({
-    "id": "woodland",
-    "type": "fill",
-    "source": {
-      "type": "geojson",
-      "data": {
-        "type": "FeatureCollection",
-        "features": []
-      }
-    },
-    "layout": {},
-    "paint": {
-      "fill-color": "#0c0",
-      "fill-opacity": 0.8
-    }
-  });
-
-
-
+  
   // Get the visible map bounds (BBOX).
   var bounds = map.getBounds();
 
-  getFeatures(bounds);
+  addFeaturesToMap(bounds, map);
 
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
@@ -99,56 +80,29 @@ map.on('load', function() {
     var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
       bounds2 = map.getBounds();
 
-    if (JSON.stringify(bounds) !== JSON.stringify(bounds1.extend(bounds2))) {
+    // if (JSON.stringify(bounds) !== JSON.stringify(bounds1.extend(bounds2))) {
       bounds = bounds2;
-      getFeatures(bounds);
-    }
+      addFeaturesToMap(bounds, map);
+    // }
   });
-
-  
-
-  // Change the cursor to a pointer when the mouse is over the 'airports' layer.
-  map.on('mouseenter', 'woodland', function() {
-    map.getCanvas().style.cursor = 'pointer';
-  });
-
-  // Change the cursor back to a pointer when it leaves the 'airports' layer.
-  map.on('mouseleave', 'woodland', function() {
-    map.getCanvas().style.cursor = '';
-  });
-
-  map.on('click', 'windTurbine', function(e) {
-    new mapboxgl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(e.features[0].properties.DescriptiveTerm)
-      .addTo(map);
-  });
-
-  // Change the cursor to a pointer when the mouse is over the 'airports' layer.
-  map.on('mouseenter', 'windTurbine', function() {
-    map.getCanvas().style.cursor = 'pointer';
-  });
-
-  // Change the cursor back to a pointer when it leaves the 'airports' layer.
-  map.on('mouseleave', 'windTurbine', function() {
-    map.getCanvas().style.cursor = '';
-  });
-
-
-
-
 });
 
-/**
- * Get features from the WFS.
- */
-function getFeatures(bounds) {
+
+
+
+ /**
+  * Add Wind Turbine and Zoomstack_Woodland features from the WFS to the map
+  * 
+  // * @param {*} bounds 
+  * 
+  * @returns 
+  */
+function addFeaturesToMap(bounds, map) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
 
   var coords = sw + ' ' + ne;
-
   // Create an OGC XML filter parameter value which will select the Airport
   // features (site function) intersecting the BBOX coordinates.
   var xml = '<ogc:Filter>';
@@ -166,84 +120,61 @@ function getFeatures(bounds) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  let regex = /IsEqualTo/g
 
-  let woodXml = xml.replace(regex, 'IsGreaterThanOrEqualTo').replace("DescriptiveTerm", "SHAPE_Area").replace("Wind Turbine", "200000")
-  
-  // Define (WFS) parameters object.
-  var wfsParams = {
-    key: apiKey,
-    service: 'WFS',
-    request: 'GetFeature',
-    version: '2.0.0',
-    typeNames: 'Topography_TopographicArea',
-    outputFormat: 'GEOJSON',
-    srsName: 'urn:ogc:def:crs:EPSG::4326',
-    filter: xml
-  };
+  async function addTurbinesToMap() {
+    let startIndex = 0;
+    let turbineLength =0;
+    debugger
+    do {
 
-
-  let woodlandParams = {
-    key: apiKey,
-    service: 'WFS',
-    request: 'GetFeature',
-    version: '2.0.0',
-    typeNames: 'Zoomstack_Woodland',
-    outputFormat: 'GEOJSON',
-    srsName: 'urn:ogc:def:crs:EPSG::4326',
-    filter: woodXml 
-  };
-  // Use fetch() method to request GeoJSON data from the OS Features API.
-  // If successful - set the GeoJSON data for the 'airports' layer and re-render
-  // the map.
-  fetch(getUrl(wfsParams))
-    .then(response => response.json())
-    .then((data) => {
-      // {Turf.js} Rewind polygons to follow the right-hand rule, i.e. exterior
-      // rings are counterclockwise and inner rings [holes] are clockwise; plus
-      // ensure the geometry has no self-intersections.
-      var result = turf.unkinkPolygon(turf.rewind(data));
-      console.log(data.features)
-      data.features.forEach(function(feature) {
+      // TODO: add them to the map
+      let turbineParams = {
+        key: apiKey,
+        service: 'WFS',
+        request: 'GetFeature',
+        version: '2.0.0',
+        typeNames: 'Topography_TopographicArea',
+        outputFormat: 'GEOJSON',
+        srsName: 'urn:ogc:def:crs:EPSG::4326',
+        filter: xml,
+        startIndex: startIndex.toString(), 
+        count: 100
+      };
+    
+      let turbineUrl = getUrl(turbineParams);
+      let response = await fetch(turbineUrl);
+      debugger
+      let json = await response.json();
+      turbineLength = json.features.length;
+      json.features.forEach(function(feature) {
+        // TODO: avoid duplications 
         new mapboxgl.Marker()
             .setLngLat(feature.geometry.coordinates[0][0])
             .setPopup(new mapboxgl.Popup({ offset: 25 })
-            .setHTML('<p>' + feature.properties.DescriptiveTerm + '<p>'))
+            .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
             .addTo(map)
       })
-    });
-
-    fetch(getUrl(woodlandParams))
-    .then(response => response.json())
-    .then((data) => {
-      // {Turf.js} Rewind polygons to follow the right-hand rule, i.e. exterior
-      // rings are counterclockwise and inner rings [holes] are clockwise; plus
-      // ensure the geometry has no self-intersections.
-      var result = turf.unkinkPolygon(turf.rewind(data));
-      map.getSource('woodland').setData(result);
+      startIndex += turbineLength;
       
-      // data.features.forEach(function(feature){ 
-      //   new mapboxgl.Marker({color: "#F00"}).setLngLat(turf.center(turf.polygon(feature.geometry.coordinates)).geometry.coordinates).addTo(map)
-      // })
-      let woodFeatures = data.features
-      for (let i=0; i<woodFeatures.length; i++){
-        let woodFeature = woodFeatures[i].geometry.coordinates
-        let woodlandPopupId = woodFeatures[i].properties.OBJECTID
-        let woodlandPopup = new mapboxgl.Popup({ offset: 25 }).setText(
-          "ID: " + woodlandPopupId
-          );
-        new mapboxgl.Marker({color: "#F00"})
-        .setLngLat(turf.centroid(turf.polygon(woodFeature)).geometry.coordinates)
-        .setPopup(woodlandPopup)
-        .addTo(map)
-      }
+    }
+    
+    while (turbineLength >= 100)
       
-    });
+    
+     
+      // TODO: call the API
+      // TODO: add them to the map (IF NOT ALREADY ADDED)
+  }
 
+  addTurbinesToMap();
 
+  // TODO: addWoodlandsToMap
+
+  
     
 }
 
+// TODO: (?) move it inside the fuction
 /**
  * Return URL with encoded parameters.
  * @param {object} params - The parameters object to be encoded.
