@@ -49,7 +49,7 @@ var map = new mapboxgl.Map({
   maxZoom: 20,
   style: style,
   center: [-4.408240, 55.684409],
-  zoom: 11
+  zoom: 8
 });
 
 map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -124,7 +124,7 @@ function addFeaturesToMap(bounds, map) {
   async function addTurbinesToMap() {
     let startIndex = 0;
     let turbineLength =0;
-    debugger
+    // debugger
     do {
 
       // TODO: add them to the map
@@ -143,16 +143,20 @@ function addFeaturesToMap(bounds, map) {
     
       let turbineUrl = getUrl(turbineParams);
       let response = await fetch(turbineUrl);
-      debugger
+      // debugger
       let json = await response.json();
       turbineLength = json.features.length;
-      json.features.forEach(function(feature) {
-        // TODO: avoid duplications 
+      //avoid duplicate entries for features
+      json.features.filter((feature, index) => json.features.indexOf(feature) === index)
+                    .forEach(function(feature) {
+      
+        
         new mapboxgl.Marker()
             .setLngLat(feature.geometry.coordinates[0][0])
             .setPopup(new mapboxgl.Popup({ offset: 25 })
             .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
             .addTo(map)
+        // debugger
       })
       startIndex += turbineLength;
       
