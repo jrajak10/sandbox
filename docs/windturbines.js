@@ -171,7 +171,7 @@ function addFeaturesToMap(bounds, map) {
 
   
 
-  async function uniqueTurbines(){
+  async function adduniqueTurbines(){
     let turbines = await addTurbinesToMap()
     let newTurbineArray =[];
     for(let i=0; i< turbines.length; i++){
@@ -190,7 +190,7 @@ function addFeaturesToMap(bounds, map) {
 )
   }
 
-  uniqueTurbines()
+  adduniqueTurbines()
 
   // TODO: addWoodlandsToMap
 
