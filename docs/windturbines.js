@@ -186,8 +186,8 @@ function addFeaturesToMap(bounds, map) {
       .setLngLat(feature.geometry.coordinates[0][0])
       .setPopup(new mapboxgl.Popup({ offset: 25 })
       .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-      .addTo(map)}
-)
+      .addTo(map)
+    });
   }
 
   adduniqueTurbines()
