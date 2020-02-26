@@ -150,8 +150,6 @@ function addFeaturesToMap(bounds, map) {
       turbineLength = featureArray.length;
 
       
-      
-
       //push unique array entries into a new, 'stored turbine' array
       storedTurbineArray.push(featureArray)
       startIndex += turbineLength;     
@@ -166,7 +164,7 @@ function addFeaturesToMap(bounds, map) {
   }
 
 
-  async function adduniqueTurbines(){
+  async function addUniqueTurbines(){
     let turbines = await addTurbinesToMap()
     let newTurbineArray =[];
     for(let i=0; i< turbines.length; i++){
@@ -185,7 +183,7 @@ function addFeaturesToMap(bounds, map) {
     });
   }
 
-  adduniqueTurbines()
+  addUniqueTurbines()
 
   // TODO: addWoodlandsToMap
 
