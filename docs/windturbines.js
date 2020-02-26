@@ -152,8 +152,7 @@ function addFeaturesToMap(bounds, map) {
       
       
 
-      //avoid duplicate entries for features
-      
+      //push unique array entries into a new, 'stored turbine' array
       storedTurbineArray.push(featureArray)
       startIndex += turbineLength;     
     }
@@ -166,10 +165,6 @@ function addFeaturesToMap(bounds, map) {
       // TODO: add them to the map (IF NOT ALREADY ADDED)
   }
 
-
-  addTurbinesToMap();
-
-  
 
   async function adduniqueTurbines(){
     let turbines = await addTurbinesToMap()
