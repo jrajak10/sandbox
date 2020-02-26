@@ -97,7 +97,7 @@ map.on('load', function() {
   * 
   * @returns 
   */
-function addFeaturesToMap(bounds, map) {
+async function addFeaturesToMap(bounds, map) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
@@ -120,8 +120,27 @@ function addFeaturesToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
+  let newTurbines = await getTurbines();
+  console.log(newTurbines)
+  let newTurbineArray =[];
+    for(let i=0; i< newTurbines.length; i++){
+    if(newTurbineArray.indexOf(newTurbines[i])=== -1){
+      newTurbineArray.push(newTurbines[i]);
+    }
+  }
+  let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
+  console.log(mergedTurbineArray)
+  mergedTurbineArray.forEach(function(feature) {
+  new mapboxgl.Marker()
+      .setLngLat(feature.geometry.coordinates[0][0])
+      .setPopup(new mapboxgl.Popup({ offset: 25 })
+      .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+      .addTo(map)
+    });
 
-  async function addTurbinesToMap() {
+
+
+  async function getTurbines() {
     let startIndex = 0;
     let turbineLength =0;
     let storedTurbineArray = [];
@@ -164,26 +183,12 @@ function addFeaturesToMap(bounds, map) {
   }
 
 
-  async function addUniqueTurbines(){
-    let turbines = await addTurbinesToMap()
-    let newTurbineArray =[];
-    for(let i=0; i< turbines.length; i++){
-    if(newTurbineArray.indexOf(turbines[i])=== -1){
-      newTurbineArray.push(turbines[i]);
-    }
-  }
-  let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
-  
-  mergedTurbineArray.forEach(function(feature) {
-  new mapboxgl.Marker()
-      .setLngLat(feature.geometry.coordinates[0][0])
-      .setPopup(new mapboxgl.Popup({ offset: 25 })
-      .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-      .addTo(map)
-    });
-  }
+  // async function addUniqueTurbines(){
+    
+    
+  // }
 
-  addUniqueTurbines()
+  // addUniqueTurbines()
 
   // TODO: addWoodlandsToMap
 
