@@ -49,7 +49,7 @@ var map = new mapboxgl.Map({
   maxZoom: 20,
   style: style,
   center: [-4.408240, 55.684409],
-  zoom: 8
+  zoom: 11
 });
 
 map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -124,6 +124,7 @@ function addFeaturesToMap(bounds, map) {
   async function addTurbinesToMap() {
     let startIndex = 0;
     let turbineLength =0;
+    let newArray = [];
     // debugger
     do {
 
@@ -145,32 +146,51 @@ function addFeaturesToMap(bounds, map) {
       let response = await fetch(turbineUrl);
       // debugger
       let json = await response.json();
-      turbineLength = json.features.length;
+      let featureArray = json.features;
+      turbineLength = featureArray.length;
+
+      
+      
+
       //avoid duplicate entries for features
-      json.features.filter((feature, index) => json.features.indexOf(feature) === index)
-                    .forEach(function(feature) {
       
-        
-        new mapboxgl.Marker()
-            .setLngLat(feature.geometry.coordinates[0][0])
-            .setPopup(new mapboxgl.Popup({ offset: 25 })
-            .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-            .addTo(map)
-        // debugger
-      })
-      startIndex += turbineLength;
-      
+      newArray.push(featureArray)
+      startIndex += turbineLength;     
     }
     
     while (turbineLength >= 100)
-      
+    return newArray; 
     
-     
+    
       // TODO: call the API
       // TODO: add them to the map (IF NOT ALREADY ADDED)
   }
 
+
   addTurbinesToMap();
+
+  
+
+  async function uniqueTurbines(){
+    let turbines = await addTurbinesToMap()
+    let storedTurbineArray =[];
+    for(let i=0; i< turbines.length; i++){
+    if(storedTurbineArray.indexOf(turbines[i])=== -1){
+      storedTurbineArray.push(turbines[i]);
+    }
+  }
+  let mergedArray = storedTurbineArray.reduce((acc, val) => acc.concat(val), []);
+  
+  mergedArray.forEach(function(feature) {
+  new mapboxgl.Marker()
+      .setLngLat(feature.geometry.coordinates[0][0])
+      .setPopup(new mapboxgl.Popup({ offset: 25 })
+      .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+      .addTo(map)}
+)
+  }
+
+  uniqueTurbines()
 
   // TODO: addWoodlandsToMap
 
