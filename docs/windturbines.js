@@ -124,7 +124,7 @@ function addFeaturesToMap(bounds, map) {
   async function addTurbinesToMap() {
     let startIndex = 0;
     let turbineLength =0;
-    let newArray = [];
+    let storedTurbineArray = [];
     // debugger
     do {
 
@@ -154,12 +154,12 @@ function addFeaturesToMap(bounds, map) {
 
       //avoid duplicate entries for features
       
-      newArray.push(featureArray)
+      storedTurbineArray.push(featureArray)
       startIndex += turbineLength;     
     }
     
     while (turbineLength >= 100)
-    return newArray; 
+    return storedTurbineArray; 
     
     
       // TODO: call the API
@@ -173,15 +173,15 @@ function addFeaturesToMap(bounds, map) {
 
   async function uniqueTurbines(){
     let turbines = await addTurbinesToMap()
-    let storedTurbineArray =[];
+    let newTurbineArray =[];
     for(let i=0; i< turbines.length; i++){
-    if(storedTurbineArray.indexOf(turbines[i])=== -1){
-      storedTurbineArray.push(turbines[i]);
+    if(newTurbineArray.indexOf(turbines[i])=== -1){
+      newTurbineArray.push(turbines[i]);
     }
   }
-  let mergedArray = storedTurbineArray.reduce((acc, val) => acc.concat(val), []);
+  let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
   
-  mergedArray.forEach(function(feature) {
+  mergedTurbineArray.forEach(function(feature) {
   new mapboxgl.Marker()
       .setLngLat(feature.geometry.coordinates[0][0])
       .setPopup(new mapboxgl.Popup({ offset: 25 })
