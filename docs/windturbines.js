@@ -121,21 +121,20 @@ async function addFeaturesToMap(bounds, map) {
   xml += '</ogc:Filter>';
 
   let newTurbines = await getTurbines();
-  console.log(newTurbines)
   let newTurbineArray =[];
     for(let i=0; i< newTurbines.length; i++){
     if(newTurbineArray.indexOf(newTurbines[i])=== -1){
       newTurbineArray.push(newTurbines[i]);
     }
   }
+
   let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
-  console.log(mergedTurbineArray)
   mergedTurbineArray.forEach(function(feature) {
-  new mapboxgl.Marker()
-      .setLngLat(feature.geometry.coordinates[0][0])
-      .setPopup(new mapboxgl.Popup({ offset: 25 })
-      .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-      .addTo(map)
+    new mapboxgl.Marker()
+        .setLngLat(feature.geometry.coordinates[0][0])
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+        .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+        .addTo(map)
     });
 
 
