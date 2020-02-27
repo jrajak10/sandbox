@@ -79,11 +79,8 @@ map.on('load', function() {
   map.on('moveend', function() {
     var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
       bounds2 = map.getBounds();
-
-    // if (JSON.stringify(bounds) !== JSON.stringify(bounds1.extend(bounds2))) {
       bounds = bounds2;
       addFeaturesToMap(bounds, map);
-    // }
   });
 });
 
@@ -173,7 +170,6 @@ async function addFeaturesToMap(bounds, map) {
   }
 }
 
-// TODO: (?) move it inside the fuction
 /**
  * Return URL with encoded parameters.
  * @param {object} params - The parameters object to be encoded.
