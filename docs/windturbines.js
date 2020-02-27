@@ -103,7 +103,7 @@ async function addFeaturesToMap(bounds, map) {
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
 
   var coords = sw + ' ' + ne;
-  // Create an OGC XML filter parameter value which will select the Airport
+  // Create an OGC XML filter parameter value which will select the Wind Turbines
   // features (site function) intersecting the BBOX coordinates.
   var xml = '<ogc:Filter>';
   xml += '<ogc:And>';
@@ -127,7 +127,7 @@ async function addFeaturesToMap(bounds, map) {
       newTurbineArray.push(newTurbines[i]);
     }
   }
-
+  //Merge the sub arrays into one feature array, then iterate and create markers
   let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
   mergedTurbineArray.forEach(function(feature) {
     new mapboxgl.Marker()
@@ -143,10 +143,7 @@ async function addFeaturesToMap(bounds, map) {
     let startIndex = 0;
     let turbineLength =0;
     let storedTurbineArray = [];
-    // debugger
     do {
-
-      // TODO: add them to the map
       let turbineParams = {
         key: apiKey,
         service: 'WFS',
@@ -162,12 +159,10 @@ async function addFeaturesToMap(bounds, map) {
     
       let turbineUrl = getUrl(turbineParams);
       let response = await fetch(turbineUrl);
-      // debugger
       let json = await response.json();
       let featureArray = json.features;
       turbineLength = featureArray.length;
 
-      
       //push unique array entries into a new, 'stored turbine' array
       storedTurbineArray.push(featureArray)
       startIndex += turbineLength;     
@@ -175,24 +170,7 @@ async function addFeaturesToMap(bounds, map) {
     
     while (turbineLength >= 100)
     return storedTurbineArray; 
-    
-    
-      // TODO: call the API
-      // TODO: add them to the map (IF NOT ALREADY ADDED)
   }
-
-
-  // async function addUniqueTurbines(){
-    
-    
-  // }
-
-  // addUniqueTurbines()
-
-  // TODO: addWoodlandsToMap
-
-  
-    
 }
 
 // TODO: (?) move it inside the fuction
