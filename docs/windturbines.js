@@ -66,22 +66,48 @@ map.addControl(new mapboxgl.AttributionControl({
 }));
 
 // Add event which waits for the map to be loaded.
-map.on('load', function() {
+map.on('load', async function() {
   
   // Get the visible map bounds (BBOX).
-  var bounds = map.getBounds();
+  let bounds = map.getBounds();
+  let uniqueTurbineArray = await addFeaturesToMap(bounds, map);
+ 
 
-  addFeaturesToMap(bounds, map);
-
+  uniqueTurbineArray.forEach(function(feature) {
+    new mapboxgl.Marker({color: "red"})
+        .setLngLat(feature.geometry.coordinates[0][0])
+        .setPopup(new mapboxgl.Popup({ offset: 25 })
+        .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+        .addTo(map)
+    });
+  
+  
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
   // certain bounds.
-  map.on('moveend', function() {
+  map.on('moveend', async function() {
     var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
-      bounds2 = map.getBounds();
-      bounds = bounds2;
-      addFeaturesToMap(bounds, map);
-  });
+    bounds2 = map.getBounds();
+    bounds = bounds2;
+    let bounds2Array = await addFeaturesToMap(bounds2, map);
+    let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
+    let newTurbinesArray = bounds2Array.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
+
+    newTurbinesArray.forEach(function(feature) {
+      new mapboxgl.Marker({color: "#0c0"})
+          .setLngLat(feature.geometry.coordinates[0][0])
+          .setPopup(new mapboxgl.Popup({ offset: 25 })
+          .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+          .addTo(map)
+      });
+    
+    uniqueTurbineArray = uniqueTurbineArray.concat(newTurbinesArray);
+
+});
+
+
+
+  
 });
 
 
@@ -117,22 +143,13 @@ async function addFeaturesToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  let newTurbines = await getTurbines();
-  let newTurbineArray =[];
-    for(let i=0; i< newTurbines.length; i++){
-    if(newTurbineArray.indexOf(newTurbines[i])=== -1){
-      newTurbineArray.push(newTurbines[i]);
-    }
-  }
+  const newTurbines = await getTurbines();
+  
   //Merge the sub arrays into one feature array, then iterate and create markers
-  let mergedTurbineArray = newTurbineArray.reduce((acc, val) => acc.concat(val), []);
-  mergedTurbineArray.forEach(function(feature) {
-    new mapboxgl.Marker()
-        .setLngLat(feature.geometry.coordinates[0][0])
-        .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-        .addTo(map)
-    });
+  let mergedTurbineArray = newTurbines.reduce((acc, val) => acc.concat(val), [])
+
+ 
+  return mergedTurbineArray
 
 
 
