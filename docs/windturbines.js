@@ -89,7 +89,7 @@ map.on('load', async function() {
     new mapboxgl.Marker({color: "#000"})
         .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML('<p>' + feature.properties.SHAPE_Area + '<p>'))
+        .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
         .addTo(map)
     });
  
@@ -124,7 +124,7 @@ map.on('load', async function() {
       new mapboxgl.Marker({color: "#00F"})
           .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
           .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML('<p>' + feature.properties.SHAPE_Area + '<p>'))
+          .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
           .addTo(map)
       });
   });
