@@ -70,6 +70,8 @@ map.on('load', async function() {
   
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
+
+  //array for bounds1 features - this will be the array with all unique turbines when the map moves
   let uniqueTurbineArray = await addFeaturesToMap(bounds, map);
  
 
