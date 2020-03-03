@@ -144,6 +144,7 @@ async function getTurbineFeatures(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
+  // Create an array of turbine features when more than 100 are on the map
   let startIndex = 0;
   let turbineLength = 0;
   let totalTurbineFeatures = [];
