@@ -65,24 +65,25 @@ map.addControl(new mapboxgl.AttributionControl({
   customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
 }));
 
+function turbineMarkers(feature) {
+  new mapboxgl.Marker({color: "red"})
+      .setLngLat(feature.geometry.coordinates[0][0])
+      .setPopup(new mapboxgl.Popup({ offset: 25 })
+      .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+      .addTo(map)
+  } 
+
+
 // Add event which waits for the map to be loaded.
 map.on('load', async function() {
-  
+
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
 
   //array for bounds1 turbine features - this will be the arrays with all unique turbines when the map moves
   let uniqueTurbineArray = await getTurbineFeatures(bounds, map);
   //create markers for turbines when map loads
-  uniqueTurbineArray.forEach(function(feature) {
-    new mapboxgl.Marker({color: "red"})
-        .setLngLat(feature.geometry.coordinates[0][0])
-        .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-        .addTo(map)
-    });
-  
-
+  uniqueTurbineArray.forEach(turbineMarkers);
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
@@ -99,13 +100,7 @@ map.on('load', async function() {
     
     //Create markers for the new features after the map moves, then update the unique turbine array 
     //so the features won't load again.
-    newTurbinesArray.forEach(function(feature) {
-      new mapboxgl.Marker({color: "#0c0"})
-          .setLngLat(feature.geometry.coordinates[0][0])
-          .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-          .addTo(map)
-      });
+    newTurbinesArray.forEach(turbineMarkers);
     uniqueTurbineArray = uniqueTurbineArray.concat(newTurbinesArray);
 
   });
