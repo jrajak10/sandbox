@@ -65,67 +65,61 @@ map.addControl(new mapboxgl.AttributionControl({
   customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
 }));
 
-// Add event which waits for the map to be loaded.
-map.on('load', async function() {
+function addTurbineMarkersToMap(feature) {
+  new mapboxgl.Marker({color: "red"})
+              .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
+              .setPopup(new mapboxgl.Popup({ offset: 25 })
+              .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+              .addTo(map)
+  }
   
-  // Get the visible map bounds (BBOX).
-  let bounds = map.getBounds();
-
-  //array for bounds1 turbine and woodland features - this will be the arrays with all unique turbines and woodland when the map moves
-  let uniqueTurbineArray = await addTurbinesToMap(bounds, map);
-  let uniqueWoodlandArray = await addWoodlandToMap(bounds, map);
-
-  
-  uniqueTurbineArray.forEach(function(feature) {
-    new mapboxgl.Marker({color: "red"})
+  function addWoodlandMarkersToMap(feature) {
+    new mapboxgl.Marker({color: "#0c0"})
         .setLngLat(feature.geometry.coordinates[0][0])
-        .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-        .addTo(map)
-    });
-  
-
-  uniqueWoodlandArray.forEach(function(feature) {
-    new mapboxgl.Marker({color: "#000"})
-        .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 })
         .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
         .addTo(map)
-    });
- 
+    }
 
-  
+
+// Add event which waits for the map to be loaded.
+map.on('load', async function() {
+
+  // Get the visible map bounds (BBOX).
+  let bounds = map.getBounds();
+
+  //array for bounds1 features - this will be the arrays with all unique features when the map moves
+  let uniqueTurbineArray = await getTurbineFeatures(bounds, map);
+  let uniqueWoodlandArray = await getWoodlandFeatures(bounds, map);
+
+  //create markers for turbines when map loads
+  uniqueTurbineArray.forEach(addTurbineMarkersToMap);
+  uniqueWoodlandArray.forEach(addWoodlandMarkersToMap);
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
   // certain bounds.
   map.on('moveend', async function() {
-    var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
     bounds2 = map.getBounds();
     bounds = bounds2;
-    let bounds2TurbineArray = await addTurbinesToMap(bounds2, map);
+
+    //Create a new array for features when map is moved. Filter out features which are already in the map, 
+    //based on the OBJECTID, giving the new features only in a new turbines array.
+    let bounds2TurbineArray = await getTurbineFeatures(bounds2, map);
     let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
     let newTurbinesArray = bounds2TurbineArray.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
-    newTurbinesArray.forEach(function(feature) {
-      new mapboxgl.Marker({color: "#0c0"})
-          .setLngLat(feature.geometry.coordinates[0][0])
-          .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
-          .addTo(map)
-      });
+    
+
+    let bounds2WoodlandArray = await getWoodlandFeatures(bounds2, map);
+    let uniqueWoodlandIDs = uniqueWoodlandArray.map(x => x.properties.OBJECTID);
+    let newWoodlandArray = bounds2WoodlandArray.filter(feature => !uniqueWoodlandIDs.includes(feature.properties.OBJECTID));
+
+    //Create markers for the new features after the map moves, then update the unique features array 
+    //so the features won't load again.
+    newTurbinesArray.forEach(addTurbineMarkersToMap);
     uniqueTurbineArray = uniqueTurbineArray.concat(newTurbinesArray);
 
-
-    let bounds2WoodlandArray = await addWoodlandToMap(bounds2, map);
-    let uniqueWoodlandIDs = uniqueWoodlandArray.map(x => x.properties.OBJECTID);
-    let newWoodlandArray = bounds2WoodlandArray.filter(feature => !uniqueWoodlandIDs.includes(feature.properties.OBJECTID)); 
-    newWoodlandArray.forEach(function(feature) {
-      new mapboxgl.Marker({color: "orange"})
-          .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
-          .setPopup(new mapboxgl.Popup({ offset: 25 })
-          .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
-          .addTo(map)
-      });
+    newWoodlandArray.forEach(addWoodlandMarkersToMap);
     uniqueWoodlandArray = uniqueWoodlandArray.concat(newWoodlandArray);
   });
 });
@@ -140,7 +134,7 @@ map.on('load', async function() {
   * 
   * @returns 
   */
-async function addTurbinesToMap(bounds, map) {
+async function getTurbineFeatures(bounds, map) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
@@ -163,51 +157,46 @@ async function addTurbinesToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
+  // Create an array of turbine features when more than 100 are on the map
+  let startIndex = 0;
+  let turbineLength = 0;
+  let totalTurbineFeatures = [];
+  do {
+    let turbineParams = {
+      key: apiKey,
+      service: 'WFS',
+      request: 'GetFeature',
+      version: '2.0.0',
+      typeNames: 'Topography_TopographicArea',
+      outputFormat: 'GEOJSON',
+      srsName: 'urn:ogc:def:crs:EPSG::4326',
+      filter: xml,
+      startIndex: startIndex.toString(), 
+      count: 100
+    };
   
-  let mergedTurbineArray = await getTurbines();
-  return mergedTurbineArray.reduce((acc, val) => acc.concat(val), [])
+    let turbineUrl = getUrl(turbineParams);
+    let response = await fetch(turbineUrl);
+    let json = await response.json();
+    let featureArray = json.features;
+    turbineLength = featureArray.length;
 
-  async function getTurbines() {
-    let startIndex = 0;
-    let turbineLength =0;
-    let storedTurbineArray = [];
-    do {
-      let turbineParams = {
-        key: apiKey,
-        service: 'WFS',
-        request: 'GetFeature',
-        version: '2.0.0',
-        typeNames: 'Topography_TopographicArea',
-        outputFormat: 'GEOJSON',
-        srsName: 'urn:ogc:def:crs:EPSG::4326',
-        filter: xml,
-        startIndex: startIndex.toString(), 
-        count: 100
-      };
-    
-      let turbineUrl = getUrl(turbineParams);
-      let response = await fetch(turbineUrl);
-      let json = await response.json();
-      let featureArray = json.features;
-      turbineLength = featureArray.length;
-
-      //push unique array entries into a new, 'stored turbine' array
-      storedTurbineArray.push(featureArray)
-      startIndex += turbineLength;     
-    }
-    
-    while (turbineLength >= 100)
-    return storedTurbineArray;
+    //push max 100 unique array entries at a time into a total turbine features array
+    totalTurbineFeatures.push(featureArray)
+    startIndex += turbineLength;     
   }
+  
+  while (turbineLength >= 100)
+  return [].concat(...totalTurbineFeatures);
 }
 
-async function addWoodlandToMap(bounds, map) {
+async function getWoodlandFeatures(bounds, map) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
 
   var coords = sw + ' ' + ne;
-  // Create an OGC XML filter parameter value which will select the large Woodland features
+  // Create an OGC XML filter parameter value which will select the Woodland Features
   // features (site function) intersecting the BBOX coordinates.
   var xml = '<ogc:Filter>';
   xml += '<ogc:And>';
@@ -224,42 +213,40 @@ async function addWoodlandToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  let mergedWoodlandArray = await getWoodland();
-  return mergedWoodlandArray.reduce((acc, val) => acc.concat(val), []);
+  // Create an array of woodland features when more than 100 are on the map
+  let startIndex = 0;
+  let woodlandLength = 0;
+  let totalWoodlandFeatures = [];
+  do {
+    let woodlandParams = {
+      key: apiKey,
+      service: 'WFS',
+      request: 'GetFeature',
+      version: '2.0.0',
+      typeNames: 'Zoomstack_Woodland',
+      outputFormat: 'GEOJSON',
+      srsName: 'urn:ogc:def:crs:EPSG::4326',
+      filter: xml,
+      startIndex: startIndex.toString(), 
+      count: 100
+    };
+  
+    let woodlandUrl = getUrl(woodlandParams);
+    let response = await fetch(woodlandUrl);
+    let json = await response.json();
+    let woodFeatureArray = json.features;
+    woodlandLength = woodFeatureArray.length;
 
-  async function getWoodland() {
-    let startIndex = 0;
-    let woodlandLength =0;
-    let storedWoodlandArray = [];
-    do {
-      let woodlandParams = {
-        key: apiKey,
-        service: 'WFS',
-        request: 'GetFeature',
-        version: '2.0.0',
-        typeNames: 'Zoomstack_Woodland',
-        outputFormat: 'GEOJSON',
-        srsName: 'urn:ogc:def:crs:EPSG::4326',
-        filter: xml,
-        startIndex: startIndex.toString(), 
-        count: 100
-      };
-    
-      let woodlandUrl = getUrl(woodlandParams);
-      let response = await fetch(woodlandUrl);
-      let json = await response.json();
-      let woodFeatureArray = json.features;
-      woodlandLength = woodFeatureArray.length;
-
-      //push unique array entries into a new, 'stored woodland' array
-      storedWoodlandArray.push(woodFeatureArray)
-      startIndex += woodlandLength;     
-    }
-    
-    while (woodlandLength >= 100)
-    return storedWoodlandArray;
+    //push max 100 unique array entries at a time into a total woodland features array
+    totalWoodlandFeatures.push(woodFeatureArray)
+    startIndex += woodlandLength;     
   }
+  
+  while (woodlandLength >= 100)
+  return [].concat(...totalWoodlandFeatures);
 }
+
+
 
 
 
