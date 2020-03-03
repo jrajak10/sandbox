@@ -106,7 +106,6 @@ map.on('load', async function() {
     let bounds2TurbineArray = await addTurbinesToMap(bounds2, map);
     let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
     let newTurbinesArray = bounds2TurbineArray.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
-    
     newTurbinesArray.forEach(function(feature) {
       new mapboxgl.Marker({color: "#0c0"})
           .setLngLat(feature.geometry.coordinates[0][0])
@@ -119,14 +118,15 @@ map.on('load', async function() {
 
     let bounds2WoodlandArray = await addWoodlandToMap(bounds2, map);
     let uniqueWoodlandIDs = uniqueWoodlandArray.map(x => x.properties.OBJECTID);
-    let newWoodlandArray = bounds2WoodlandArray.filter(feature => !uniqueWoodlandIDs.includes(feature.properties.OBJECTID)) 
+    let newWoodlandArray = bounds2WoodlandArray.filter(feature => !uniqueWoodlandIDs.includes(feature.properties.OBJECTID)); 
     newWoodlandArray.forEach(function(feature) {
-      new mapboxgl.Marker({color: "#00F"})
+      new mapboxgl.Marker({color: "orange"})
           .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
           .setPopup(new mapboxgl.Popup({ offset: 25 })
           .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
           .addTo(map)
       });
+    uniqueWoodlandArray = uniqueWoodlandArray.concat(newWoodlandArray);
   });
 });
 
@@ -163,13 +163,9 @@ async function addTurbinesToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  const newTurbines = await getTurbines();
   
-  //Merge the sub arrays into one feature array, then iterate and create markers
-  let mergedTurbineArray = newTurbines.reduce((acc, val) => acc.concat(val), [])
-
- 
-  return mergedTurbineArray
+  let mergedTurbineArray = await getTurbines();
+  return mergedTurbineArray.reduce((acc, val) => acc.concat(val), [])
 
   async function getTurbines() {
     let startIndex = 0;
@@ -211,7 +207,7 @@ async function addWoodlandToMap(bounds, map) {
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
 
   var coords = sw + ' ' + ne;
-  // Create an OGC XML filter parameter value which will select the Wind Turbines
+  // Create an OGC XML filter parameter value which will select the large Woodland features
   // features (site function) intersecting the BBOX coordinates.
   var xml = '<ogc:Filter>';
   xml += '<ogc:And>';
@@ -228,13 +224,8 @@ async function addWoodlandToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  const newWoodland = await getWoodland();
-  
-  //Merge the sub arrays into one feature array, then iterate and create markers
-  let mergedWoodlandArray = newWoodland.reduce((acc, val) => acc.concat(val), [])
-
- 
-  return mergedWoodlandArray;
+  let mergedWoodlandArray = await getWoodland();
+  return mergedWoodlandArray.reduce((acc, val) => acc.concat(val), []);
 
   async function getWoodland() {
     let startIndex = 0;
@@ -260,7 +251,7 @@ async function addWoodlandToMap(bounds, map) {
       let woodFeatureArray = json.features;
       woodlandLength = woodFeatureArray.length;
 
-      //push unique array entries into a new, 'stored turbine' array
+      //push unique array entries into a new, 'stored woodland' array
       storedWoodlandArray.push(woodFeatureArray)
       startIndex += woodlandLength;     
     }
