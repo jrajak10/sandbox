@@ -169,7 +169,7 @@ async function getTurbineFeatures(bounds, map) {
   }
   
   while (turbineLength >= 100)
-  return totalTurbineFeatures.reduce((acc, val) => acc.concat(val), []);
+  return [].concat(...totalTurbineFeatures);
 }
 
 
