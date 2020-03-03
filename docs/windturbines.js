@@ -71,10 +71,9 @@ map.on('load', async function() {
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
 
-  //array for bounds1 features - this will be the array with all unique turbines when the map moves
-  let uniqueTurbineArray = await addFeaturesToMap(bounds, map);
- 
-
+  //array for bounds1 turbine features - this will be the arrays with all unique turbines when the map moves
+  let uniqueTurbineArray = await getTurbineFeatures(bounds, map);
+  //create markers for turbines when map loads
   uniqueTurbineArray.forEach(function(feature) {
     new mapboxgl.Marker({color: "red"})
         .setLngLat(feature.geometry.coordinates[0][0])
@@ -83,18 +82,23 @@ map.on('load', async function() {
         .addTo(map)
     });
   
+
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
   // certain bounds.
   map.on('moveend', async function() {
-    var bounds1 = new mapboxgl.LngLatBounds(bounds.getSouthWest(), bounds.getNorthEast()),
     bounds2 = map.getBounds();
     bounds = bounds2;
-    let bounds2Array = await addFeaturesToMap(bounds2, map);
-    let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
-    let newTurbinesArray = bounds2Array.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
 
+    //Create a new array for features when map is moved. Filter out features which are already in the map, 
+    //based on the OBJECTID, giving the new features only in a new turbines array.
+    let bounds2TurbineArray = await getTurbineFeatures(bounds2, map);
+    let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
+    let newTurbinesArray = bounds2TurbineArray.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
+    
+    //Create markers for the new features after the map moves, then update the unique turbine array 
+    //so the features won't load again.
     newTurbinesArray.forEach(function(feature) {
       new mapboxgl.Marker({color: "#0c0"})
           .setLngLat(feature.geometry.coordinates[0][0])
@@ -102,14 +106,9 @@ map.on('load', async function() {
           .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
           .addTo(map)
       });
-    
     uniqueTurbineArray = uniqueTurbineArray.concat(newTurbinesArray);
 
-});
-
-
-
-  
+  });
 });
 
 
@@ -122,7 +121,7 @@ map.on('load', async function() {
   * 
   * @returns 
   */
-async function addFeaturesToMap(bounds, map) {
+async function getTurbineFeatures(bounds, map) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
@@ -145,49 +144,39 @@ async function addFeaturesToMap(bounds, map) {
   xml += '</ogc:And>';
   xml += '</ogc:Filter>';
 
-  const newTurbines = await getTurbines();
+  let startIndex = 0;
+  let turbineLength = 0;
+  let totalTurbineFeatures = [];
+  do {
+    let turbineParams = {
+      key: apiKey,
+      service: 'WFS',
+      request: 'GetFeature',
+      version: '2.0.0',
+      typeNames: 'Topography_TopographicArea',
+      outputFormat: 'GEOJSON',
+      srsName: 'urn:ogc:def:crs:EPSG::4326',
+      filter: xml,
+      startIndex: startIndex.toString(), 
+      count: 100
+    };
   
-  //Merge the sub arrays into one feature array, then iterate and create markers
-  let mergedTurbineArray = newTurbines.reduce((acc, val) => acc.concat(val), [])
+    let turbineUrl = getUrl(turbineParams);
+    let response = await fetch(turbineUrl);
+    let json = await response.json();
+    let featureArray = json.features;
+    turbineLength = featureArray.length;
 
- 
-  return mergedTurbineArray
-
-
-
-  async function getTurbines() {
-    let startIndex = 0;
-    let turbineLength =0;
-    let storedTurbineArray = [];
-    do {
-      let turbineParams = {
-        key: apiKey,
-        service: 'WFS',
-        request: 'GetFeature',
-        version: '2.0.0',
-        typeNames: 'Topography_TopographicArea',
-        outputFormat: 'GEOJSON',
-        srsName: 'urn:ogc:def:crs:EPSG::4326',
-        filter: xml,
-        startIndex: startIndex.toString(), 
-        count: 100
-      };
-    
-      let turbineUrl = getUrl(turbineParams);
-      let response = await fetch(turbineUrl);
-      let json = await response.json();
-      let featureArray = json.features;
-      turbineLength = featureArray.length;
-
-      //push unique array entries into a new, 'stored turbine' array
-      storedTurbineArray.push(featureArray)
-      startIndex += turbineLength;     
-    }
-    
-    while (turbineLength >= 100)
-    return storedTurbineArray; 
+    //push max 100 unique array entries at a time into a total turbine features array
+    totalTurbineFeatures.push(featureArray)
+    startIndex += turbineLength;     
   }
+  
+  while (turbineLength >= 100)
+  return totalTurbineFeatures.reduce((acc, val) => acc.concat(val), []);
 }
+
+
 
 /**
  * Return URL with encoded parameters.
