@@ -81,6 +81,14 @@ function addTurbineMarkersToMap(feature) {
         .addTo(map)
     }
 
+  function createNewFeatureMarkers(totalFeaturesArray, featureArrayOnmove, addMarkerstoMap){
+    let totalFeaturesIDs = totalFeaturesArray.map(x => x.properties.OBJECTID);
+    let newFeaturesArray = featureArrayOnmove.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
+
+    newFeaturesArray.forEach(addMarkerstoMap);
+    return newFeaturesArray;
+  }
+
 
 // Add event which waits for the map to be loaded.
 map.on('load', async function() {
@@ -89,8 +97,8 @@ map.on('load', async function() {
   let bounds = map.getBounds();
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
-  let uniqueTurbineArray = await getTurbineFeatures(bounds, map);
-  let uniqueWoodlandArray = await getWoodlandFeatures(bounds, map);
+  let uniqueTurbineArray = await getFeatures(bounds, map, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
+  let uniqueWoodlandArray = await getFeatures(bounds, map, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
 
   //create markers for turbines and woodland features when map loads
   uniqueTurbineArray.forEach(addTurbineMarkersToMap);
@@ -103,28 +111,14 @@ map.on('load', async function() {
     bounds2 = map.getBounds();
     bounds = bounds2;
 
-    //Create a new array for features when map is moved. Filter out features which are already in the map, 
-    //based on the OBJECTID, giving the new features only in a new turbines/woodland array.
-    let bounds2TurbineArray = await getTurbineFeatures(bounds2, map);
-    let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
-    let newTurbinesArray = bounds2TurbineArray.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
+    let bounds2TurbineArray = await getFeatures(bounds2, map, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
+    uniqueTurbineArray = uniqueTurbineArray.concat(createNewFeatureMarkers(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
     
-
-    let bounds2WoodlandArray = await getWoodlandFeatures(bounds2, map);
-    let uniqueWoodlandIDs = uniqueWoodlandArray.map(x => x.properties.OBJECTID);
-    let newWoodlandArray = bounds2WoodlandArray.filter(feature => !uniqueWoodlandIDs.includes(feature.properties.OBJECTID));
-
-    //Create markers for the new features after the map moves, then update the unique features array 
-    //so the features won't load again.
-    newTurbinesArray.forEach(addTurbineMarkersToMap);
-    uniqueTurbineArray = uniqueTurbineArray.concat(newTurbinesArray);
-
-    newWoodlandArray.forEach(addWoodlandMarkersToMap);
-    uniqueWoodlandArray = uniqueWoodlandArray.concat(newWoodlandArray);
+    let bounds2WoodlandArray = await getFeatures(bounds2, map, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+    uniqueWoodlandArray = uniqueWoodlandArray.concat(createNewFeatureMarkers(uniqueWoodlandArray,bounds2WoodlandArray, addWoodlandMarkersToMap));
+    
   });
 });
-
-
 
 
  /**
@@ -134,121 +128,61 @@ map.on('load', async function() {
   * 
   * @returns 
   */
-async function getTurbineFeatures(bounds, map) {
+async function getFeatures(bounds, map, comparison, propName, literal, typeName) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
 
   var coords = sw + ' ' + ne;
-  // Create an OGC XML filter parameter value which will select the Wind Turbines
+  // Create an OGC XML filter parameter value which will select the
   // features (site function) intersecting the BBOX coordinates.
-  var turbinexml = '<ogc:Filter>';
-  turbinexml += '<ogc:And>';
-  turbinexml += '<ogc:BBOX>';
-  turbinexml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-  turbinexml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
-  turbinexml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-  turbinexml += '</gml:Box>';
-  turbinexml += '</ogc:BBOX>';
-  turbinexml += '<ogc:PropertyIsEqualTo>';
-  turbinexml += '<ogc:PropertyName>DescriptiveTerm</ogc:PropertyName>';
-  turbinexml += '<ogc:Literal>Wind Turbine</ogc:Literal>';
-  turbinexml += '</ogc:PropertyIsEqualTo>';
-  turbinexml += '</ogc:And>';
-  turbinexml += '</ogc:Filter>';
+  var xml = '<ogc:Filter>';
+  xml += '<ogc:And>';
+  xml += '<ogc:BBOX>';
+  xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+  xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+  xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+  xml += '</gml:Box>';
+  xml += '</ogc:BBOX>';
+  xml += '<ogc:PropertyIs'+ comparison +'To>';
+  xml += '<ogc:PropertyName>'+ propName +'</ogc:PropertyName>';
+  xml += '<ogc:Literal>'+ literal +'</ogc:Literal>';
+  xml += '</ogc:PropertyIs'+ comparison +'To>';
+  xml += '</ogc:And>';
+  xml += '</ogc:Filter>';
 
-  // Create an array of turbine features when more than 100 are on the map
+  // Create an array of features when more than 100 are on the map
   let startIndex = 0;
-  let turbineLength = 0;
-  let totalTurbineFeatures = [];
+  let featureLength = 0;
+  let totalFeatures = [];
   do {
-    let turbineParams = {
+    let params = {
       key: apiKey,
       service: 'WFS',
       request: 'GetFeature',
       version: '2.0.0',
-      typeNames: 'Topography_TopographicArea',
+      typeNames: typeName,
       outputFormat: 'GEOJSON',
       srsName: 'urn:ogc:def:crs:EPSG::4326',
-      filter: turbinexml,
+      filter: xml,
       startIndex: startIndex.toString(), 
       count: 100
     };
   
-    let turbineUrl = getUrl(turbineParams);
-    let response = await fetch(turbineUrl);
+    let featureUrl = getUrl(params);
+    let response = await fetch(featureUrl);
     let json = await response.json();
     let featureArray = json.features;
-    turbineLength = featureArray.length;
+    featureLength = featureArray.length;
 
-    //push max 100 unique array entries at a time into a total turbine features array
-    totalTurbineFeatures.push(featureArray)
-    startIndex += turbineLength;     
+    //push max 100 unique array entries at a time into a total features array
+    totalFeatures.push(featureArray)
+    startIndex += featureLength;     
   }
   
-  while (turbineLength >= 100)
-  return [].concat(...totalTurbineFeatures);
+  while (featureLength >= 100)
+  return [].concat(...totalFeatures);
 }
-
-async function getWoodlandFeatures(bounds, map) {
-  // Convert the bounds to a formatted string.
-  var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
-    ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
-
-  var coords = sw + ' ' + ne;
-  // Create an OGC XML filter parameter value which will select the Woodland Features
-  // features (site function) intersecting the BBOX coordinates.
-  var woodlandxml = '<ogc:Filter>';
-  woodlandxml += '<ogc:And>';
-  woodlandxml += '<ogc:BBOX>';
-  woodlandxml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-  woodlandxml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
-  woodlandxml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-  woodlandxml += '</gml:Box>';
-  woodlandxml += '</ogc:BBOX>';
-  woodlandxml += '<ogc:PropertyIsGreaterThanOrEqualTo>';
-  woodlandxml += '<ogc:PropertyName>SHAPE_Area</ogc:PropertyName>';
-  woodlandxml += '<ogc:Literal>2500000</ogc:Literal>';
-  woodlandxml += '</ogc:PropertyIsGreaterThanOrEqualTo>';
-  woodlandxml += '</ogc:And>';
-  woodlandxml += '</ogc:Filter>';
-
-  // Create an array of woodland features when more than 100 are on the map
-  let startIndex = 0;
-  let woodlandLength = 0;
-  let totalWoodlandFeatures = [];
-  do {
-    let woodlandParams = {
-      key: apiKey,
-      service: 'WFS',
-      request: 'GetFeature',
-      version: '2.0.0',
-      typeNames: 'Zoomstack_Woodland',
-      outputFormat: 'GEOJSON',
-      srsName: 'urn:ogc:def:crs:EPSG::4326',
-      filter: woodlandxml,
-      startIndex: startIndex.toString(), 
-      count: 100
-    };
-  
-    let woodlandUrl = getUrl(woodlandParams);
-    let response = await fetch(woodlandUrl);
-    let json = await response.json();
-    let woodFeatureArray = json.features;
-    woodlandLength = woodFeatureArray.length;
-
-    //push max 100 unique array entries at a time into a total woodland features array
-    totalWoodlandFeatures.push(woodFeatureArray)
-    startIndex += woodlandLength;     
-  }
-  
-  while (woodlandLength >= 100)
-  return [].concat(...totalWoodlandFeatures);
-}
-
-
-
-
 
 
 /**
