@@ -67,7 +67,7 @@ map.addControl(new mapboxgl.AttributionControl({
 
 function addTurbineMarkersToMap(feature) {
   new mapboxgl.Marker({color: "red"})
-              .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
+              .setLngLat(feature.geometry.coordinates[0][0])
               .setPopup(new mapboxgl.Popup({ offset: 25 })
               .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
               .addTo(map)
@@ -75,13 +75,13 @@ function addTurbineMarkersToMap(feature) {
   
   function addWoodlandMarkersToMap(feature) {
     new mapboxgl.Marker({color: "#0c0"})
-        .setLngLat(feature.geometry.coordinates[0][0])
+        .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
         .setPopup(new mapboxgl.Popup({ offset: 25 })
         .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
         .addTo(map)
     }
 
-  function createNewFeatureMarkers(loadedFeatureArray, movedFeatureArray, addMarkerstoMap){
+  function addNewFeatureMarkersToMap(loadedFeatureArray, movedFeatureArray, addMarkerstoMap){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
     let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
 
@@ -114,8 +114,8 @@ map.on('load', async function() {
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
     
-    uniqueTurbineArray = uniqueTurbineArray.concat(createNewFeatureMarkers(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
-    uniqueWoodlandArray = uniqueWoodlandArray.concat(createNewFeatureMarkers(uniqueWoodlandArray,bounds2WoodlandArray, addWoodlandMarkersToMap));
+    uniqueTurbineArray = uniqueTurbineArray.concat(addNewFeatureMarkersToMap(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
+    uniqueWoodlandArray = uniqueWoodlandArray.concat(addNewFeatureMarkersToMap(uniqueWoodlandArray,bounds2WoodlandArray, addWoodlandMarkersToMap));
     
   });
 });
