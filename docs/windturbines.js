@@ -92,7 +92,7 @@ map.on('load', async function() {
   let uniqueTurbineArray = await getTurbineFeatures(bounds, map);
   let uniqueWoodlandArray = await getWoodlandFeatures(bounds, map);
 
-  //create markers for turbines when map loads
+  //create markers for turbines and woodland features when map loads
   uniqueTurbineArray.forEach(addTurbineMarkersToMap);
   uniqueWoodlandArray.forEach(addWoodlandMarkersToMap);
   
@@ -104,7 +104,7 @@ map.on('load', async function() {
     bounds = bounds2;
 
     //Create a new array for features when map is moved. Filter out features which are already in the map, 
-    //based on the OBJECTID, giving the new features only in a new turbines array.
+    //based on the OBJECTID, giving the new features only in a new turbines/woodland array.
     let bounds2TurbineArray = await getTurbineFeatures(bounds2, map);
     let uniqueTurbineIDs = uniqueTurbineArray.map(x => x.properties.OBJECTID);
     let newTurbinesArray = bounds2TurbineArray.filter(feature => !uniqueTurbineIDs.includes(feature.properties.OBJECTID));
@@ -142,20 +142,20 @@ async function getTurbineFeatures(bounds, map) {
   var coords = sw + ' ' + ne;
   // Create an OGC XML filter parameter value which will select the Wind Turbines
   // features (site function) intersecting the BBOX coordinates.
-  var xml = '<ogc:Filter>';
-  xml += '<ogc:And>';
-  xml += '<ogc:BBOX>';
-  xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-  xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
-  xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-  xml += '</gml:Box>';
-  xml += '</ogc:BBOX>';
-  xml += '<ogc:PropertyIsEqualTo>';
-  xml += '<ogc:PropertyName>DescriptiveTerm</ogc:PropertyName>';
-  xml += '<ogc:Literal>Wind Turbine</ogc:Literal>';
-  xml += '</ogc:PropertyIsEqualTo>';
-  xml += '</ogc:And>';
-  xml += '</ogc:Filter>';
+  var turbinexml = '<ogc:Filter>';
+  turbinexml += '<ogc:And>';
+  turbinexml += '<ogc:BBOX>';
+  turbinexml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+  turbinexml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+  turbinexml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+  turbinexml += '</gml:Box>';
+  turbinexml += '</ogc:BBOX>';
+  turbinexml += '<ogc:PropertyIsEqualTo>';
+  turbinexml += '<ogc:PropertyName>DescriptiveTerm</ogc:PropertyName>';
+  turbinexml += '<ogc:Literal>Wind Turbine</ogc:Literal>';
+  turbinexml += '</ogc:PropertyIsEqualTo>';
+  turbinexml += '</ogc:And>';
+  turbinexml += '</ogc:Filter>';
 
   // Create an array of turbine features when more than 100 are on the map
   let startIndex = 0;
@@ -170,7 +170,7 @@ async function getTurbineFeatures(bounds, map) {
       typeNames: 'Topography_TopographicArea',
       outputFormat: 'GEOJSON',
       srsName: 'urn:ogc:def:crs:EPSG::4326',
-      filter: xml,
+      filter: turbinexml,
       startIndex: startIndex.toString(), 
       count: 100
     };
@@ -198,20 +198,20 @@ async function getWoodlandFeatures(bounds, map) {
   var coords = sw + ' ' + ne;
   // Create an OGC XML filter parameter value which will select the Woodland Features
   // features (site function) intersecting the BBOX coordinates.
-  var xml = '<ogc:Filter>';
-  xml += '<ogc:And>';
-  xml += '<ogc:BBOX>';
-  xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-  xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
-  xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
-  xml += '</gml:Box>';
-  xml += '</ogc:BBOX>';
-  xml += '<ogc:PropertyIsGreaterThanOrEqualTo>';
-  xml += '<ogc:PropertyName>SHAPE_Area</ogc:PropertyName>';
-  xml += '<ogc:Literal>2500000</ogc:Literal>';
-  xml += '</ogc:PropertyIsGreaterThanOrEqualTo>';
-  xml += '</ogc:And>';
-  xml += '</ogc:Filter>';
+  var woodlandxml = '<ogc:Filter>';
+  woodlandxml += '<ogc:And>';
+  woodlandxml += '<ogc:BBOX>';
+  woodlandxml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+  woodlandxml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+  woodlandxml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+  woodlandxml += '</gml:Box>';
+  woodlandxml += '</ogc:BBOX>';
+  woodlandxml += '<ogc:PropertyIsGreaterThanOrEqualTo>';
+  woodlandxml += '<ogc:PropertyName>SHAPE_Area</ogc:PropertyName>';
+  woodlandxml += '<ogc:Literal>2500000</ogc:Literal>';
+  woodlandxml += '</ogc:PropertyIsGreaterThanOrEqualTo>';
+  woodlandxml += '</ogc:And>';
+  woodlandxml += '</ogc:Filter>';
 
   // Create an array of woodland features when more than 100 are on the map
   let startIndex = 0;
@@ -226,7 +226,7 @@ async function getWoodlandFeatures(bounds, map) {
       typeNames: 'Zoomstack_Woodland',
       outputFormat: 'GEOJSON',
       srsName: 'urn:ogc:def:crs:EPSG::4326',
-      filter: xml,
+      filter: woodlandxml,
       startIndex: startIndex.toString(), 
       count: 100
     };
