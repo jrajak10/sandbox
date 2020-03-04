@@ -81,9 +81,9 @@ function addTurbineMarkersToMap(feature) {
         .addTo(map)
     }
 
-  function createNewFeatureMarkers(totalFeaturesArray, featureArrayOnmove, addMarkerstoMap){
-    let totalFeaturesIDs = totalFeaturesArray.map(x => x.properties.OBJECTID);
-    let newFeaturesArray = featureArrayOnmove.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
+  function createNewFeatureMarkers(loadedFeatureArray, movedFeatureArray, addMarkerstoMap){
+    let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
+    let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
 
     newFeaturesArray.forEach(addMarkerstoMap);
     return newFeaturesArray;
@@ -97,8 +97,8 @@ map.on('load', async function() {
   let bounds = map.getBounds();
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
-  let uniqueTurbineArray = await getFeatures(bounds, map, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-  let uniqueWoodlandArray = await getFeatures(bounds, map, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+  let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
+  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
 
   //create markers for turbines and woodland features when map loads
   uniqueTurbineArray.forEach(addTurbineMarkersToMap);
@@ -111,10 +111,10 @@ map.on('load', async function() {
     bounds2 = map.getBounds();
     bounds = bounds2;
 
-    let bounds2TurbineArray = await getFeatures(bounds2, map, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-    uniqueTurbineArray = uniqueTurbineArray.concat(createNewFeatureMarkers(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
+    let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
+    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
     
-    let bounds2WoodlandArray = await getFeatures(bounds2, map, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+    uniqueTurbineArray = uniqueTurbineArray.concat(createNewFeatureMarkers(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
     uniqueWoodlandArray = uniqueWoodlandArray.concat(createNewFeatureMarkers(uniqueWoodlandArray,bounds2WoodlandArray, addWoodlandMarkersToMap));
     
   });
@@ -128,7 +128,7 @@ map.on('load', async function() {
   * 
   * @returns 
   */
-async function getFeatures(bounds, map, comparison, propName, literal, typeName) {
+async function getFeatures(bounds, comparison, propName, literal, typeName) {
   // Convert the bounds to a formatted string.
   var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
     ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
