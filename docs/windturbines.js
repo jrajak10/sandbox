@@ -66,26 +66,21 @@ map.addControl(new mapboxgl.AttributionControl({
 }));
 
 function addTurbineMarkersToMap(feature) {
-  new mapboxgl.Marker({color: "red"})
+  let element = document.createElement('div')
+  element.className = 'turbineMarker'
+
+
+  new mapboxgl.Marker(element)
               .setLngLat(feature.geometry.coordinates[0][0])
               .setPopup(new mapboxgl.Popup({ offset: 25 })
               .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
               .addTo(map)
   }
-  
-  function addWoodlandMarkersToMap(feature) {
-    new mapboxgl.Marker({color: "#0c0"})
-        .setLngLat(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates)
-        .setPopup(new mapboxgl.Popup({ offset: 25 })
-        .setHTML('<p>' + feature.properties.SHAPE_Area.toFixed(2) + '<p>'))
-        .addTo(map)
-    }
-
-  function addNewFeatureMarkersToMap(loadedFeatureArray, movedFeatureArray, addMarkerstoMap){
+ 
+  function getNewFeatures(loadedFeatureArray, movedFeatureArray){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
     let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
 
-    newFeaturesArray.forEach(addMarkerstoMap);
     return newFeaturesArray;
   }
 
@@ -100,9 +95,25 @@ map.on('load', async function() {
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
 
-  //create markers for turbines and woodland features when map loads
+  //create markers for turbines and shading woodland features when map loads
   uniqueTurbineArray.forEach(addTurbineMarkersToMap);
-  uniqueWoodlandArray.forEach(addWoodlandMarkersToMap);
+
+  map.addLayer({
+    "id": "woodland",
+    "type": "fill",
+    "source": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": uniqueWoodlandArray
+      }
+    },
+    "layout": {},
+    "paint": {
+      "fill-color": "#0c0",
+      "fill-opacity": 0.8
+    }
+  });
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
@@ -114,9 +125,20 @@ map.on('load', async function() {
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
     
-    uniqueTurbineArray = uniqueTurbineArray.concat(addNewFeatureMarkersToMap(uniqueTurbineArray, bounds2TurbineArray, addTurbineMarkersToMap));
-    uniqueWoodlandArray = uniqueWoodlandArray.concat(addNewFeatureMarkersToMap(uniqueWoodlandArray,bounds2WoodlandArray, addWoodlandMarkersToMap));
+    let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
+    newTurbineFeatures.forEach(addTurbineMarkersToMap);
+    uniqueTurbineArray = uniqueTurbineArray.concat(newTurbineFeatures);
+
+
+    uniqueWoodlandArray = uniqueWoodlandArray.concat(getNewFeatures(uniqueWoodlandArray,bounds2WoodlandArray));
+    let totalWoodlandFeatures = {
+      "type": "FeatureCollection",
+      "features": uniqueWoodlandArray
+      }
+
+    map.getSource('woodland').setData(totalWoodlandFeatures);
     
+
   });
 });
 
