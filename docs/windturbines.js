@@ -70,12 +70,13 @@ function addTurbineMarkersToMap(feature) {
   let element = document.createElement('div')
   element.className = 'turbineMarker'
 
-  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates.map(x => x.toFixed(2));
+  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
+  let formattedCentroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates.map(x => x.toFixed(2));
 
   new mapboxgl.Marker(element)
               .setLngLat(centroid)
               .setPopup(new mapboxgl.Popup({ offset: 25 })
-              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + '<p><br><p> Centroid: ' + centroid ))
+              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + '<p><br><p> Centroid: ' + formattedCentroid ))
               .addTo(map)
   }
  
