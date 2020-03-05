@@ -65,15 +65,17 @@ map.addControl(new mapboxgl.AttributionControl({
   customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
 }));
 
+
 function addTurbineMarkersToMap(feature) {
   let element = document.createElement('div')
   element.className = 'turbineMarker'
 
+  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates.map(x => x.toFixed(2));
 
   new mapboxgl.Marker(element)
-              .setLngLat(feature.geometry.coordinates[0][0])
+              .setLngLat(centroid)
               .setPopup(new mapboxgl.Popup({ offset: 25 })
-              .setHTML('<p>' + feature.properties.OBJECTID + '<p>'))
+              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + '<p><br><p> Centroid: ' + centroid ))
               .addTo(map)
   }
  
@@ -94,6 +96,9 @@ map.on('load', async function() {
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+
+
+
 
   //create markers for turbines and shading woodland features when map loads
   uniqueTurbineArray.forEach(addTurbineMarkersToMap);
@@ -136,9 +141,7 @@ map.on('load', async function() {
       "features": uniqueWoodlandArray
       }
 
-    map.getSource('woodland').setData(totalWoodlandFeatures);
-    
-
+    map.getSource('woodland').setData(totalWoodlandFeatures); 
   });
 });
 
