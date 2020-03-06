@@ -73,12 +73,97 @@ function addTurbineMarkersToMap(feature) {
   let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
   let formattedCentroid = centroid.map(x => x.toFixed(2));
 
+  
+  let newCircle = async function createCircle(){
+    let radius = 5;
+    let options = {steps: 64, units: 'miles'};
+    let circle = turf.circle(centroid, radius, options);
+
+    let turbinegeojson = {
+      "type": "FeatureCollection",
+      "features": centroid
+  };
+
+    map.addLayer({
+      "id": "circle",
+      "type": "fill",
+      "source": {
+          "type": "geojson",
+          "data": turbinegeojson
+      },
+      "layout": {},
+      "paint": {
+          "fill-color": "#f80",
+          "fill-opacity": 0.5
+      }
+  });
+    let circlecoords = circle.geometry.coordinates[0].join(' ')
+
+    let circlexml = '<ogc:Filter>';
+    circlexml += '<ogc:And>';
+    circlexml += '<ogc:Intersects>';
+    circlexml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+    circlexml += '<gml:Polygon srsName="urn:ogc:def:crs:EPSG::4326">';
+    circlexml += '<gml:outerBoundaryIs>';
+    circlexml += '<gml:LinearRing>';
+    circlexml += '<gml:coordinates>' + circlecoords + '</gml:coordinates>';
+    circlexml += '</gml:LinearRing>';
+    circlexml += '</gml:outerBoundaryIs>';
+    circlexml += '</gml:Polygon>';
+    circlexml += '</ogc:Intersects>';
+    circlexml += '<ogc:PropertyIsGreaterThanOrEqualTo>';
+    circlexml += '<ogc:PropertyName>SHAPE_Area</ogc:PropertyName>';
+    circlexml += '<ogc:Literal>2500000</ogc:Literal>';
+    circlexml += '</ogc:PropertyIsGreaterThanOrEqualTo>';
+    circlexml += '</ogc:And>';
+    circlexml += '</ogc:Filter>';  
+
+
+
+    map.getSource('circle').setData(circle);
+
+    let circleParams = {
+      key: apiKey,
+      service: 'WFS',
+      request: 'GetFeature',
+      version: '2.0.0',
+      typeNames: 'Zoomstack_Woodland',
+      outputFormat: 'GEOJSON',
+      srsName: 'urn:ogc:def:crs:EPSG::4326',
+      filter: circlexml,
+      count: 100,
+      startIndex: 0
+  };
+
+
+    let circleUrl = getUrl(circleParams);
+    let circleResponse = await fetch(circleUrl);
+    let circleJson = await circleResponse.json();
+    let circleWoodlandCount = circleJson.features.length;
+    // featureLength = featureArrayInCircle.length;
+
+    // return circleWoodlandCount;
+    console.log(circleWoodlandCount)
+  
+
+  }
+
+  
+
   new mapboxgl.Marker(element)
               .setLngLat(centroid)
               .setPopup(new mapboxgl.Popup({ offset: 25 })
-              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + '<p><br><p> Centroid: ' + formattedCentroid ))
+              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + 
+                        '<p><br><p> Centroid: ' + formattedCentroid +  
+                        '<p><br><p> Number of features: ' + newCircle() ))
               .addTo(map)
+
+  // element.addEventListener('click', newCircle);
+
+
   }
+
+
  
   function getNewFeatures(loadedFeatureArray, movedFeatureArray){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
@@ -89,7 +174,7 @@ function addTurbineMarkersToMap(feature) {
 
 
 // Add event which waits for the map to be loaded.
-map.on('load', async function() {
+map.on('load', async function countWoodland() {
 
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
