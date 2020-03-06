@@ -71,7 +71,7 @@ function addTurbineMarkersToMap(feature) {
   element.className = 'turbineMarker'
 
   let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
-  let formattedCentroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates.map(x => x.toFixed(2));
+  let formattedCentroid = centroid.map(x => x.toFixed(2));
 
   new mapboxgl.Marker(element)
               .setLngLat(centroid)
