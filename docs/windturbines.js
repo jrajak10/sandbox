@@ -66,6 +66,7 @@ map.addControl(new mapboxgl.AttributionControl({
 }));
 
 
+<<<<<<< HEAD
 async function addTurbineMarkersToMap(feature) {
   let element = document.createElement('div');
   element.className = 'turbineMarker';
@@ -160,8 +161,24 @@ async function addTurbineMarkersToMap(feature) {
                             '<p><br><p> Risk Level: ' + riskLevel ))
                   .addTo(map)  
 }
+=======
+function addTurbineMarkersToMap(feature) {
+  let element = document.createElement('div')
+  element.className = 'turbineMarker'
+>>>>>>> faa3a121cec01b9a4522629c2efc9e70e46ab3e3
 
+  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
+  let formattedCentroid = centroid.map(x => x.toFixed(2));
 
+<<<<<<< HEAD
+=======
+  new mapboxgl.Marker(element)
+              .setLngLat(centroid)
+              .setPopup(new mapboxgl.Popup({ offset: 25 })
+              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + '<p><br><p> Centroid: ' + formattedCentroid ))
+              .addTo(map)
+  }
+>>>>>>> faa3a121cec01b9a4522629c2efc9e70e46ab3e3
  
   function getNewFeatures(loadedFeatureArray, movedFeatureArray){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
