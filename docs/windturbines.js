@@ -161,9 +161,6 @@ async function addTurbineMarkersToMap(feature) {
                   .addTo(map)  
 }
 
-  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
-  let formattedCentroid = centroid.map(x => x.toFixed(2));
-
  
   function getNewFeatures(loadedFeatureArray, movedFeatureArray){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
