@@ -66,37 +66,42 @@ map.addControl(new mapboxgl.AttributionControl({
 }));
 
 
-function addTurbineMarkersToMap(feature) {
-  let element = document.createElement('div')
-  element.className = 'turbineMarker'
+async function addTurbineMarkersToMap(feature) {
+  let element = document.createElement('div');
+  element.className = 'turbineMarker';
 
   let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
-  let formattedCentroid = centroid.map(x => x.toFixed(2));
+  let radius = 5;
+  let options = {steps: 64, units: 'miles'};
+  let circle = turf.circle(centroid, radius, options);
 
   
-  let newCircle = async function createCircle(){
-    let radius = 5;
-    let options = {steps: 64, units: 'miles'};
-    let circle = turf.circle(centroid, radius, options);
-
+  element.addEventListener('click', function(){
+  
     let turbinegeojson = {
       "type": "FeatureCollection",
       "features": centroid
-  };
+    };
 
-    map.addLayer({
-      "id": "circle",
-      "type": "fill",
-      "source": {
-          "type": "geojson",
-          "data": turbinegeojson
-      },
-      "layout": {},
-      "paint": {
-          "fill-color": "#f80",
-          "fill-opacity": 0.5
-      }
+      map.addLayer({
+        "id": "circle",
+        "type": "fill",
+        "source": {
+            "type": "geojson",
+            "data": turbinegeojson
+        },
+        "layout": {},
+        "paint": {
+            "fill-color": "#f80",
+            "fill-opacity": 0.5
+        }
+    });
+
+    map.getSource('circle').setData(circle);
   });
+
+
+    
     let circlecoords = circle.geometry.coordinates[0].join(' ')
 
     let circlexml = '<ogc:Filter>';
@@ -118,63 +123,55 @@ function addTurbineMarkersToMap(feature) {
     circlexml += '</ogc:And>';
     circlexml += '</ogc:Filter>';  
 
+    let featuresInCircleParams = {
+          key: apiKey,
+          service: 'WFS',
+          request: 'GetFeature',
+          version: '2.0.0',
+          typeNames: 'Zoomstack_Woodland',
+          outputFormat: 'GEOJSON',
+          srsName: 'urn:ogc:def:crs:EPSG::4326',
+          filter: circlexml,
+          count: 100,
+          startIndex: 0
+      };
 
 
-    map.getSource('circle').setData(circle);
+    let featuresInCircleUrl = getUrl(featuresInCircleParams);
+    let featuresInCircleResponse = await fetch(featuresInCircleUrl);
+    let featuresInCircleJson = await featuresInCircleResponse.json();
+    let circleWoodlandCount = featuresInCircleJson.features.length;
+    let riskLevel = "";
 
-    let circleParams = {
-      key: apiKey,
-      service: 'WFS',
-      request: 'GetFeature',
-      version: '2.0.0',
-      typeNames: 'Zoomstack_Woodland',
-      outputFormat: 'GEOJSON',
-      srsName: 'urn:ogc:def:crs:EPSG::4326',
-      filter: circlexml,
-      count: 100,
-      startIndex: 0
-  };
-
-
-    let circleUrl = getUrl(circleParams);
-    let circleResponse = await fetch(circleUrl);
-    let circleJson = await circleResponse.json();
-    let circleWoodlandCount = circleJson.features.length;
-    // featureLength = featureArrayInCircle.length;
-
-    // return circleWoodlandCount;
-    console.log(circleWoodlandCount)
+    if (circleWoodlandCount > 4){
+      riskLevel += "High";
+    }
+    else if(circleWoodlandCount <= 4 && circleWoodlandCount > 2){
+      riskLevel += "Medium";
+    }
+    else {
+      riskLevel += "Low";
+    }
   
-
-  }
-
-  
-
-  new mapboxgl.Marker(element)
-              .setLngLat(centroid)
-              .setPopup(new mapboxgl.Popup({ offset: 25 })
-              .setHTML('<p> OBJECTID: ' + feature.properties.OBJECTID + 
-                        '<p><br><p> Centroid: ' + formattedCentroid +  
-                        '<p><br><p> Number of features: ' + newCircle() ))
-              .addTo(map)
-
-  // element.addEventListener('click', newCircle);
-
-
-  }
+    new mapboxgl.Marker(element)
+                  .setLngLat(centroid)
+                  .setPopup(new mapboxgl.Popup({ offset: 10 })
+                  .setHTML('<p><br><p> Number of large woodland areas: ' + circleWoodlandCount + 
+                            '<p><br><p> Risk Level: ' + riskLevel ))
+                  .addTo(map)  
+}
 
 
  
   function getNewFeatures(loadedFeatureArray, movedFeatureArray){
     let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
     let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
-
     return newFeaturesArray;
   }
 
 
 // Add event which waits for the map to be loaded.
-map.on('load', async function countWoodland() {
+map.on('load', async function() {
 
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
@@ -307,5 +304,3 @@ function getUrl(params) {
 
   return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
 }
-
-
