@@ -143,14 +143,17 @@ async function addTurbineMarkersToMap(feature) {
     let circleWoodlandCount = featuresInCircleJson.features.length;
     let riskLevel = "";
 
-    if (circleWoodlandCount > 4){
+    if (circleWoodlandCount > 7){
       riskLevel += "High";
+      element.style.backgroundImage = "url('windturbineiconred.png')";
     }
-    else if(circleWoodlandCount <= 4 && circleWoodlandCount > 2){
+    else if(circleWoodlandCount <= 7 && circleWoodlandCount > 4){
       riskLevel += "Medium";
+      element.style.backgroundImage = "url('windturbineiconyellow.png')";
     }
     else {
       riskLevel += "Low";
+      element.style.backgroundImage = "url('windturbineicongreen.png')";
     }
   
     new mapboxgl.Marker(element)
@@ -171,6 +174,9 @@ async function addTurbineMarkersToMap(feature) {
 
 // Add event which waits for the map to be loaded.
 map.on('load', async function() {
+
+
+  
 
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
