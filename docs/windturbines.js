@@ -139,32 +139,19 @@ map.on('load', async function() {
   
   let turbineCentroids =[]
   uniqueTurbineArray.forEach(feature => turbineCentroids.push(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates));
-
- 
-
   
-
   
-
-  let radius = 5;
-  let options = {steps: 64, units: 'miles'};
-  let turbineCircles = turbineCentroids.map(x => turf.circle(x, radius, options));
-  let turbineIntersection =[]
-  // let area = 0;
-  
-
-  
-
-  
-
-
-  turbineCentroids.forEach(function(centroid){
+  turbineCentroids.forEach(function addTurbineMarkersToMap(centroid){
     let element = document.createElement('div');
     element.className = 'turbineMarker';
+    
+    let radius = 5;
+    let options = {steps: 64, units: 'miles'};
     let turbineCircle = turf.circle(centroid, radius, options);
-    let area;
+    let area = 0
+    let riskLevel;
 
-    element.addEventListener('click', function area(){
+    element.addEventListener('click', function(){
       let turbinegeojson = {
               "type": "FeatureCollection",
               "features": centroid
@@ -197,39 +184,35 @@ map.on('load', async function() {
       intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
       if(intersection){
         turbineIntersection.push(intersection)
-      }
+        }
     }
-
-    area = turbineIntersection.map(x => turf.area(x)).reduce((x,y) => x+y)
-    console.log(area)
+    for(let i=0; i<turbineIntersection.length; i++){
+      area += (turf.area(turbineIntersection[i])/(1600 ** 2));
+      
+    }
     
+    
+    if(area < 10){
+      riskLevel = "Low";
+      element.style.backgroundImage = "url('windturbineicongreen.png')";
+    }
+    else if(area >=10 && area <30){
+      riskLevel = "Medium";
+      element.style.backgroundImage = "url('windturbineiconyellow.png')";
+    }
+    else{
+      riskLevel = "High";
+      element.style.backgroundImage = "url('windturbineiconred.png')";
+    }
     new mapboxgl.Marker(element)
                   .setLngLat(centroid)
                   .setPopup(new mapboxgl.Popup({ offset: 10 })
-                  .setHTML('<p><br><p> Number of large woodland areas: ' + area 
-                            + '<p><br><p> Risk Level: '))
+                  .setHTML('<p><br><p> Total woodland area: ' + area.toFixed(2) + " miles<sup>2</sup>"
+                            + '<p><br><p> Risk Level: ' + riskLevel))
                   .addTo(map)
-  })
+  });
   
-                  
-                  
-  // let largeTurbine = turbineCircles[268];
-
-
-  // for (let i=0; i<woodlandPolygons.length; i++){
-  //   let intersection = turf.intersect(woodlandPolygons[i], largeTurbine);
-  //   if(intersection){
-
-  //   z.push(turf.union(intersection, intersection))
-  //   area += turf.area(turf.union(intersection));
-  //   }
-  // }
-
- 
-  //  console.log(z)
-  // console.log(area)
-
-
+       
   map.addLayer({
     "id": "woodland",
     "type": "fill",
@@ -258,10 +241,13 @@ map.on('load', async function() {
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
-    // newTurbineFeatures.forEach(addTurbineMarkersToMap);
-    uniqueTurbineArray = uniqueTurbineArray.concat(newTurbineFeatures);
 
+    let newTurbineCentroids = [];
+    newTurbineFeatures.forEach(feature => newTurbineCentroids.push(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates));
     
+
+
+    uniqueTurbineArray = uniqueTurbineArray.concat(newTurbineFeatures);
 
 
     uniqueWoodlandArray = uniqueWoodlandArray.concat(getNewFeatures(uniqueWoodlandArray,bounds2WoodlandArray));
@@ -270,7 +256,83 @@ map.on('load', async function() {
       "features": uniqueWoodlandArray
       }
 
+    
+
     map.getSource('woodland').setData(totalWoodlandFeatures); 
+
+    newTurbineCentroids.forEach(function (centroid){
+      let element = document.createElement('div');
+      element.className = 'turbineMarker';
+      
+      let radius = 5;
+      let options = {steps: 64, units: 'miles'};
+      let turbineCircle = turf.circle(centroid, radius, options);
+      let area = 0
+      let riskLevel;
+  
+      element.addEventListener('click', function(){
+        let turbinegeojson = {
+                "type": "FeatureCollection",
+                "features": centroid
+              };
+          
+                map.addLayer({
+                  "id": "circle",
+                  "type": "fill",
+                  "source": {
+                      "type": "geojson",
+                      "data": turbinegeojson
+                  },
+                  "layout": {},
+                  "paint": {
+                      "fill-color": "#f80",
+                      "fill-opacity": 0.5
+                  }
+              });
+          
+              map.getSource('circle').setData(turbineCircle);
+      });
+      let woodlandPolygons = [];
+      for(let i=0; i<uniqueWoodlandArray.length; i++){
+        woodlandPolygons.push(turf.polygon(uniqueWoodlandArray[i].geometry.coordinates));
+      }
+      
+      let turbineIntersection =[];
+      let intersection;
+      for (let i=0; i<woodlandPolygons.length; i++){
+        intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
+        if(intersection){
+          turbineIntersection.push(intersection)
+          }
+      }
+      for(let i=0; i<turbineIntersection.length; i++){
+        area += (turf.area(turbineIntersection[i])/(1600 ** 2));
+        
+      }
+      
+      
+      if(area < 10){
+        riskLevel = "Low";
+        element.style.backgroundImage = "url('windturbineicongreen.png')";
+      }
+      else if(area >=10 && area <30){
+        riskLevel = "Medium";
+        element.style.backgroundImage = "url('windturbineiconyellow.png')";
+      }
+      else{
+        riskLevel = "High";
+        element.style.backgroundImage = "url('windturbineiconred.png')";
+      }
+      new mapboxgl.Marker(element)
+                    .setLngLat(centroid)
+                    .setPopup(new mapboxgl.Popup({ offset: 10 })
+                    .setHTML('<p><br><p> Total woodland area: ' + area.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Risk Level: ' + riskLevel))
+                    .addTo(map)
+    });
+    
+    
+    
   });
 });
 
