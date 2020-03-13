@@ -65,62 +65,16 @@ map.addControl(new mapboxgl.AttributionControl({
   customAttribution: '&copy; Crown copyright and database rights ' + new Date().getFullYear() + ' Ordnance Survey.'
 }));
 
-
-// async function addTurbineMarkersToMap(feature) {
-//   let element = document.createElement('div');
-//   element.className = 'turbineMarker';
-
-//   let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
-//   let radius = 5;
-//   let options = {steps: 64, units: 'miles'};
-//   let circle = turf.circle(centroid, radius, options);
-
-  
-//   element.addEventListener('click', function(){
-  
-//     let turbinegeojson = {
-//       "type": "FeatureCollection",
-//       "features": centroid
-//     };
-
-//       map.addLayer({
-//         "id": "circle",
-//         "type": "fill",
-//         "source": {
-//             "type": "geojson",
-//             "data": turbinegeojson
-//         },
-//         "layout": {},
-//         "paint": {
-//             "fill-color": "#f80",
-//             "fill-opacity": 0.5
-//         }
-//     });
-
-//     map.getSource('circle').setData(circle);
-//   });
-  
-//     new mapboxgl.Marker(element)
-//                   .setLngLat(centroid)
-//                   .setPopup(new mapboxgl.Popup({ offset: 10 })
-//                   .setHTML('<p><br><p> Number of large woodland areas: ' +  
-//                             '<p><br><p> Risk Level: '))
-//                   .addTo(map)  
-// }
-
  
-  function getNewFeatures(loadedFeatureArray, movedFeatureArray){
-    let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
-    let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
-    return newFeaturesArray;
-  }
+function getNewFeatures(loadedFeatureArray, movedFeatureArray){
+  let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
+  let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
+  return newFeaturesArray;
+}
 
 
 // Add event which waits for the map to be loaded.
 map.on('load', async function() {
-
-
-  
 
   // Get the visible map bounds (BBOX).
   let bounds = map.getBounds();
@@ -129,19 +83,12 @@ map.on('load', async function() {
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
 
-
-
-
   //create markers for turbines and shading woodland features when map loads
-  // uniqueTurbineArray.forEach(addTurbineMarkersToMap);
-
-  
-  
   let turbineCentroids =[]
   uniqueTurbineArray.forEach(feature => turbineCentroids.push(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates));
   
   
-  turbineCentroids.forEach(function addTurbineMarkersToMap(centroid){
+  turbineCentroids.forEach(function (centroid){
     let element = document.createElement('div');
     element.className = 'turbineMarker';
     
@@ -190,7 +137,6 @@ map.on('load', async function() {
       area += (turf.area(turbineIntersection[i])/(1600 ** 2));
       
     }
-    
     
     if(area < 10){
       riskLevel = "Low";
@@ -303,6 +249,7 @@ map.on('load', async function() {
         intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
         if(intersection){
           turbineIntersection.push(intersection)
+
           }
       }
       for(let i=0; i<turbineIntersection.length; i++){
@@ -330,9 +277,6 @@ map.on('load', async function() {
                               + '<p><br><p> Risk Level: ' + riskLevel))
                     .addTo(map)
     });
-    
-    
-    
   });
 });
 
