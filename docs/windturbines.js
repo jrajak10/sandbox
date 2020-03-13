@@ -66,103 +66,47 @@ map.addControl(new mapboxgl.AttributionControl({
 }));
 
 
-async function addTurbineMarkersToMap(feature) {
-  let element = document.createElement('div');
-  element.className = 'turbineMarker';
+// async function addTurbineMarkersToMap(feature) {
+//   let element = document.createElement('div');
+//   element.className = 'turbineMarker';
 
-  let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
-  let radius = 5;
-  let options = {steps: 64, units: 'miles'};
-  let circle = turf.circle(centroid, radius, options);
+//   let centroid = turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates;
+//   let radius = 5;
+//   let options = {steps: 64, units: 'miles'};
+//   let circle = turf.circle(centroid, radius, options);
 
   
-  element.addEventListener('click', function(){
+//   element.addEventListener('click', function(){
   
-    let turbinegeojson = {
-      "type": "FeatureCollection",
-      "features": centroid
-    };
+//     let turbinegeojson = {
+//       "type": "FeatureCollection",
+//       "features": centroid
+//     };
 
-      map.addLayer({
-        "id": "circle",
-        "type": "fill",
-        "source": {
-            "type": "geojson",
-            "data": turbinegeojson
-        },
-        "layout": {},
-        "paint": {
-            "fill-color": "#f80",
-            "fill-opacity": 0.5
-        }
-    });
+//       map.addLayer({
+//         "id": "circle",
+//         "type": "fill",
+//         "source": {
+//             "type": "geojson",
+//             "data": turbinegeojson
+//         },
+//         "layout": {},
+//         "paint": {
+//             "fill-color": "#f80",
+//             "fill-opacity": 0.5
+//         }
+//     });
 
-    map.getSource('circle').setData(circle);
-  });
-
-
-    
-    let circlecoords = circle.geometry.coordinates[0].join(' ')
-
-    let circlexml = '<ogc:Filter>';
-    circlexml += '<ogc:And>';
-    circlexml += '<ogc:Intersects>';
-    circlexml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
-    circlexml += '<gml:Polygon srsName="urn:ogc:def:crs:EPSG::4326">';
-    circlexml += '<gml:outerBoundaryIs>';
-    circlexml += '<gml:LinearRing>';
-    circlexml += '<gml:coordinates>' + circlecoords + '</gml:coordinates>';
-    circlexml += '</gml:LinearRing>';
-    circlexml += '</gml:outerBoundaryIs>';
-    circlexml += '</gml:Polygon>';
-    circlexml += '</ogc:Intersects>';
-    circlexml += '<ogc:PropertyIsGreaterThanOrEqualTo>';
-    circlexml += '<ogc:PropertyName>SHAPE_Area</ogc:PropertyName>';
-    circlexml += '<ogc:Literal>2500000</ogc:Literal>';
-    circlexml += '</ogc:PropertyIsGreaterThanOrEqualTo>';
-    circlexml += '</ogc:And>';
-    circlexml += '</ogc:Filter>';  
-
-    let featuresInCircleParams = {
-          key: apiKey,
-          service: 'WFS',
-          request: 'GetFeature',
-          version: '2.0.0',
-          typeNames: 'Zoomstack_Woodland',
-          outputFormat: 'GEOJSON',
-          srsName: 'urn:ogc:def:crs:EPSG::4326',
-          filter: circlexml,
-          count: 100,
-          startIndex: 0
-      };
-
-
-    let featuresInCircleUrl = getUrl(featuresInCircleParams);
-    let featuresInCircleResponse = await fetch(featuresInCircleUrl);
-    let featuresInCircleJson = await featuresInCircleResponse.json();
-    let circleWoodlandCount = featuresInCircleJson.features.length;
-    let riskLevel = "";
-
-    if (circleWoodlandCount > 7){
-      riskLevel += "High";
-      element.style.backgroundImage = "url('windturbineiconred.png')";
-    }
-    else if(circleWoodlandCount <= 7 && circleWoodlandCount > 4){
-      riskLevel += "Medium";
-      element.style.backgroundImage = "url('windturbineiconyellow.png')";
-    }
-    else {
-      riskLevel += "Low";
-      element.style.backgroundImage = "url('windturbineicongreen.png')";
-    }
+//     map.getSource('circle').setData(circle);
+//   });
   
-    new mapboxgl.Marker(element)
-                  .setLngLat(centroid)
-                  .setPopup(new mapboxgl.Popup({ offset: 10 })
-                  .setHTML('<p><br><p> Number of large woodland areas: ' + circleWoodlandCount + 
-                            '<p><br><p> Risk Level: ' + riskLevel ))
-                  .addTo(map)  
-}
+//     new mapboxgl.Marker(element)
+//                   .setLngLat(centroid)
+//                   .setPopup(new mapboxgl.Popup({ offset: 10 })
+//                   .setHTML('<p><br><p> Number of large woodland areas: ' +  
+//                             '<p><br><p> Risk Level: '))
+//                   .addTo(map)  
+// }
 
  
   function getNewFeatures(loadedFeatureArray, movedFeatureArray){
@@ -189,7 +133,102 @@ map.on('load', async function() {
 
 
   //create markers for turbines and shading woodland features when map loads
-  uniqueTurbineArray.forEach(addTurbineMarkersToMap);
+  // uniqueTurbineArray.forEach(addTurbineMarkersToMap);
+
+  
+  
+  let turbineCentroids =[]
+  uniqueTurbineArray.forEach(feature => turbineCentroids.push(turf.centroid(turf.polygon(feature.geometry.coordinates)).geometry.coordinates));
+
+ 
+
+  
+
+  
+
+  let radius = 5;
+  let options = {steps: 64, units: 'miles'};
+  let turbineCircles = turbineCentroids.map(x => turf.circle(x, radius, options));
+  let turbineIntersection =[]
+  // let area = 0;
+  
+
+  
+
+  
+
+
+  turbineCentroids.forEach(function(centroid){
+    let element = document.createElement('div');
+    element.className = 'turbineMarker';
+    let turbineCircle = turf.circle(centroid, radius, options);
+    let area;
+
+    element.addEventListener('click', function area(){
+      let turbinegeojson = {
+              "type": "FeatureCollection",
+              "features": centroid
+            };
+        
+              map.addLayer({
+                "id": "circle",
+                "type": "fill",
+                "source": {
+                    "type": "geojson",
+                    "data": turbinegeojson
+                },
+                "layout": {},
+                "paint": {
+                    "fill-color": "#f80",
+                    "fill-opacity": 0.5
+                }
+            });
+        
+            map.getSource('circle').setData(turbineCircle);
+    });
+    let woodlandPolygons = [];
+    for(let i=0; i<uniqueWoodlandArray.length; i++){
+      woodlandPolygons.push(turf.polygon(uniqueWoodlandArray[i].geometry.coordinates));
+    }
+    
+    let turbineIntersection =[];
+    let intersection;
+    for (let i=0; i<woodlandPolygons.length; i++){
+      intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
+      if(intersection){
+        turbineIntersection.push(intersection)
+      }
+    }
+
+    area = turbineIntersection.map(x => turf.area(x)).reduce((x,y) => x+y)
+    console.log(area)
+    
+    new mapboxgl.Marker(element)
+                  .setLngLat(centroid)
+                  .setPopup(new mapboxgl.Popup({ offset: 10 })
+                  .setHTML('<p><br><p> Number of large woodland areas: ' + area 
+                            + '<p><br><p> Risk Level: '))
+                  .addTo(map)
+  })
+  
+                  
+                  
+  // let largeTurbine = turbineCircles[268];
+
+
+  // for (let i=0; i<woodlandPolygons.length; i++){
+  //   let intersection = turf.intersect(woodlandPolygons[i], largeTurbine);
+  //   if(intersection){
+
+  //   z.push(turf.union(intersection, intersection))
+  //   area += turf.area(turf.union(intersection));
+  //   }
+  // }
+
+ 
+  //  console.log(z)
+  // console.log(area)
+
 
   map.addLayer({
     "id": "woodland",
@@ -219,8 +258,10 @@ map.on('load', async function() {
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
-    newTurbineFeatures.forEach(addTurbineMarkersToMap);
+    // newTurbineFeatures.forEach(addTurbineMarkersToMap);
     uniqueTurbineArray = uniqueTurbineArray.concat(newTurbineFeatures);
+
+    
 
 
     uniqueWoodlandArray = uniqueWoodlandArray.concat(getNewFeatures(uniqueWoodlandArray,bounds2WoodlandArray));
