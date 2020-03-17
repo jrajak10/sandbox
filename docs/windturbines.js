@@ -82,6 +82,7 @@ map.on('load', async function() {
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '250000', 'Zoomstack_Surfacewater');
 
   //create markers for turbines and shading woodland features when map loads
   let turbineCentroids =[]
@@ -92,7 +93,7 @@ map.on('load', async function() {
 
   
   
-  function addTurbineMarkersToMap(centroids, woodlandArray){
+  function addTurbineMarkersToMap(centroids, woodlandArray, waterArray){
     for(let i=0; i<centroids.length; i++){
       let element = document.createElement('div');
       element.className = 'turbineMarker';
@@ -100,8 +101,10 @@ map.on('load', async function() {
       let radius = 5;
       let options = {steps: 64, units: 'miles'};
       let turbineCircle = turf.circle(centroids[i], radius, options);
-      let area = 0
+      let woodlandArea = 0
       let riskLevel;
+      let waterArea;
+      let waterRisk;
   
       element.addEventListener('click', function(){
         let turbinegeojson = {
@@ -131,25 +134,44 @@ map.on('load', async function() {
       for(let i=0; i<woodlandArray.length; i++){
         woodlandPolygons.push(turf.polygon(woodlandArray[i].geometry.coordinates));
       }
+
+      let waterPolygons = [];
+      for(let i=0; i<waterArray.length; i++){
+        waterPolygons.push(turf.polygon(waterArray[i].geometry.coordinates));
+      }
       
-      let turbineIntersection =[];
-      let intersection;
+      let turbineWoodlandIntersection =[];
+      let woodlandIntersection;
+      let turbineWaterIntersection = []
+      let waterIntersection;
       for (let i=0; i<woodlandPolygons.length; i++){
-        intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
-        if(intersection){
-          turbineIntersection.push(intersection)
+        woodlandIntersection = turf.intersect(woodlandPolygons[i], turbineCircle);
+        if(woodlandIntersection){
+          turbineWoodlandIntersection.push(woodlandIntersection)
           }
       }
-      for(let i=0; i<turbineIntersection.length; i++){
-        area += (turf.area(turbineIntersection[i])/(1600 ** 2));
-        
+
+      for (let i=0; i<waterPolygons.length; i++){
+        waterIntersection = turf.intersect(waterPolygons[i], turbineCircle);
+        if(waterIntersection){
+          turbineWaterIntersection.push(waterIntersection)
+          }
       }
       
-      if(area < 10){
+
+      for(let i=0; i<turbineWoodlandIntersection.length; i++){
+        woodlandArea += (turf.area(turbineWoodlandIntersection[i])/(1600 ** 2));
+      }
+      waterArea = turbineWaterIntersection.map(x => turf.area(x)).reduce((x, y) => x+y, 0)/((1600**2))
+      
+      console.log(waterArea)
+
+      
+      if(woodlandArea < 10){
         riskLevel = "Low";
         element.style.backgroundImage = "url('windturbineicongreen.png')";
       }
-      else if(area >=10 && area <35){
+      else if(woodlandArea >=10 && woodlandArea <35){
         riskLevel = "Medium";
         element.style.backgroundImage = "url('windturbineiconyellow.png')";
       }
@@ -157,16 +179,19 @@ map.on('load', async function() {
         riskLevel = "High";
         element.style.backgroundImage = "url('windturbineiconred.png')";
       }
+
+      
       new mapboxgl.Marker(element)
                     .setLngLat(centroids[i])
                     .setPopup(new mapboxgl.Popup({ offset: 10 })
-                    .setHTML('<p><br><p> Total woodland area: ' + area.toFixed(2) + " miles<sup>2</sup>"
-                              + '<p><br><p> Risk Level: ' + riskLevel))
+                    .setHTML('<p><br><p> Total woodland area: ' + woodlandArea.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Risk Level to woodland: ' + riskLevel
+                              + '<p><br><p> Total surfacewater area: ' + waterArea.toFixed(2)))
                     .addTo(map)
     };
   }
 
-  addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray);
+  addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
        
   map.addLayer({
@@ -185,6 +210,23 @@ map.on('load', async function() {
       "fill-opacity": 0.8
     }
   });
+
+  map.addLayer({
+    "id": "water",
+    "type": "fill",
+    "source": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": uniqueWaterArray
+      }
+    },
+    "layout": {},
+    "paint": {
+      "fill-color": "#00FFFF",
+      "fill-opacity": 0.8
+    }
+  });
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
@@ -195,6 +237,7 @@ map.on('load', async function() {
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '250000', 'Zoomstack_Surfacewater');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
 
@@ -213,8 +256,15 @@ map.on('load', async function() {
       "features": uniqueWoodlandArray
       }
 
+    uniqueWaterArray = uniqueWaterArray.concat(getNewFeatures(uniqueWaterArray, bounds2WaterArray));
+    let totalWaterFeatures = {
+      "type": "FeatureCollection",
+      "features": uniqueWaterArray
+    }
+
     map.getSource('woodland').setData(totalWoodlandFeatures); 
-    addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray);
+    map.getSource('water').setData(totalWaterFeatures); 
+    addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
   });
 });
 
