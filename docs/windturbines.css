@@ -17,6 +17,7 @@
         color: "#FFF"; 
         width: 30px;
         height: 30px;
+        border: solid 2px #000;
         border-radius: 50%;
         cursor: pointer;
 
