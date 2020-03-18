@@ -82,7 +82,7 @@ map.on('load', async function() {
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
-  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '250000', 'Zoomstack_Surfacewater');
+  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '100000', 'Zoomstack_Surfacewater');
 
   //create markers for turbines and shading woodland features when map loads
   let turbineCentroids =[]
@@ -102,9 +102,11 @@ map.on('load', async function() {
       let options = {steps: 64, units: 'miles'};
       let turbineCircle = turf.circle(centroids[i], radius, options);
       let woodlandArea = 0
-      let riskLevel;
+      let woodRisk;
       let waterArea;
       let waterRisk;
+      let riskScore = 0;
+      let overallRisk;
   
       element.addEventListener('click', function(){
         let turbinegeojson = {
@@ -164,29 +166,53 @@ map.on('load', async function() {
       }
       waterArea = turbineWaterIntersection.map(x => turf.area(x)).reduce((x, y) => x+y, 0)/((1600**2))
       
-      console.log(waterArea)
-
-      
       if(woodlandArea < 10){
-        riskLevel = "Low";
-        element.style.backgroundImage = "url('windturbineicongreen.png')";
+        woodRisk = "Low";
+        riskScore += 0;
       }
       else if(woodlandArea >=10 && woodlandArea <35){
-        riskLevel = "Medium";
+        woodRisk = "Medium";
+        riskScore += 1;
+      }
+      else{
+        woodRisk = "High";
+        riskScore += 2;
+      }
+
+      if(waterArea < 0.5){
+        waterRisk = "Low";
+        riskScore += 0;
+      }
+      else if(waterArea >=0.5 && waterArea <1.25){
+        waterRisk = "Medium";
+        riskScore += 1;
+      }
+      else{
+        waterRisk = "High";
+        riskScore += 2;
+      }
+
+      if(riskScore < 2){
+        overallRisk = "Low";
+        element.style.backgroundImage = "url('windturbineicongreen.png')";
+      }
+      else if(riskScore >=2 && riskScore < 3){
+        overallRisk = "Medium";
         element.style.backgroundImage = "url('windturbineiconyellow.png')";
       }
       else{
-        riskLevel = "High";
+        overallRisk = "High";
         element.style.backgroundImage = "url('windturbineiconred.png')";
       }
 
-      
       new mapboxgl.Marker(element)
                     .setLngLat(centroids[i])
                     .setPopup(new mapboxgl.Popup({ offset: 10 })
                     .setHTML('<p><br><p> Total woodland area: ' + woodlandArea.toFixed(2) + " miles<sup>2</sup>"
-                              + '<p><br><p> Risk Level to woodland: ' + riskLevel
-                              + '<p><br><p> Total surfacewater area: ' + waterArea.toFixed(2)))
+                              + '<p><br><p> Risk Level to woodland birds: ' + woodRisk
+                              + '<p><br><p> Total surfacewater area: ' + waterArea.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Risk Level to water birds: ' + waterRisk
+                              + '<p><br><p><b> Overall Risk: '+ overallRisk +"</b>"))
                     .addTo(map)
     };
   }
@@ -237,7 +263,7 @@ map.on('load', async function() {
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
-    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '250000', 'Zoomstack_Surfacewater');
+    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '100000', 'Zoomstack_Surfacewater');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
 
