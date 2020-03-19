@@ -136,7 +136,6 @@ map.on('load', async function() {
       for(let i=0; i<woodlandArray.length; i++){
         woodlandPolygons.push(turf.polygon(woodlandArray[i].geometry.coordinates));
       }
-
       let waterPolygons = [];
       for(let i=0; i<waterArray.length; i++){
         waterPolygons.push(turf.polygon(waterArray[i].geometry.coordinates));
@@ -149,7 +148,7 @@ map.on('load', async function() {
       for (let i=0; i<woodlandPolygons.length; i++){
         woodlandIntersection = turf.intersect(woodlandPolygons[i], turbineCircle);
         if(woodlandIntersection){
-          turbineWoodlandIntersection.push(woodlandIntersection)
+          turbineWoodlandIntersection.push(turf.unkinkPolygon(turf.rewind(woodlandIntersection)));
           }
       }
 
@@ -160,7 +159,7 @@ map.on('load', async function() {
           }
       }
       
-
+      //calculate the total areas where each circle and features intersect
       for(let i=0; i<turbineWoodlandIntersection.length; i++){
         woodlandArea += (turf.area(turbineWoodlandIntersection[i])/(1600 ** 2));
       }
