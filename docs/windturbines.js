@@ -103,12 +103,13 @@ map.on('load', async function() {
       let options = {steps: 64, units: 'miles'};
       let turbineCircle = turf.circle(centroids[i], radius, options);
       let woodlandArea = 0
+      let woodlandAreaMiles2=0;
       let woodRisk;
       let waterArea = 0;
+      let waterAreaMiles2=0;
       let waterRisk;
       let riskScore = 0;
       let overallRisk;
-      const metrestomiles2 = 1/(1600 ** 2);
   
       element.addEventListener('click', function(){
         let turbinegeojson = {
@@ -144,7 +145,8 @@ map.on('load', async function() {
       for (let i=0; i<woodlandPolygons.length; i++){
         woodlandIntersection = turf.intersect(woodlandPolygons[i], turbineCircle);
         if(woodlandIntersection){
-          woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection))) * metrestomiles2;
+          woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection)));
+          woodlandAreaMiles2 = turf.convertArea(woodlandArea, 'metres', 'miles');
           }
       }
       
@@ -152,14 +154,16 @@ map.on('load', async function() {
       for (let i=0; i<waterPolygons.length; i++){
         waterIntersection = turf.intersect(waterPolygons[i], turbineCircle);
         if(waterIntersection){
-          waterArea += turf.area(waterIntersection) * metrestomiles2;
+          waterArea += turf.area(waterIntersection);
+          waterAreaMiles2 = turf.convertArea(waterArea, 'metres', 'miles')
           }
+          
       }
-      if(woodlandArea < 10){
+      if(woodlandAreaMiles2 < 10){
         woodRisk = "Low";
         riskScore += 0;
       }
-      else if(woodlandArea >=10 && woodlandArea <35){
+      else if(woodlandAreaMiles2 >=10 && woodlandAreaMiles2 <35){
         woodRisk = "Medium";
         riskScore += 1;
       }
@@ -168,11 +172,11 @@ map.on('load', async function() {
         riskScore += 2;
       }
 
-      if(waterArea < 0.5){
+      if(waterAreaMiles2 < 0.5){
         waterRisk = "Low";
         riskScore += 0;
       }
-      else if(waterArea >=0.5 && waterArea <1.25){
+      else if(waterAreaMiles2 >=0.5 && waterAreaMiles2 <1.25){
         waterRisk = "Medium";
         riskScore += 1;
       }
@@ -197,9 +201,9 @@ map.on('load', async function() {
       new mapboxgl.Marker(element)
                     .setLngLat(centroids[i])
                     .setPopup(new mapboxgl.Popup({ offset: 10 })
-                    .setHTML('<p><br><p> Total woodland area: ' + woodlandArea.toFixed(2) + " miles<sup>2</sup>"
+                    .setHTML('<p><br><p> Total woodland area: ' + woodlandAreaMiles2.toFixed(2) + " miles<sup>2</sup>"
                               + '<p><br><p> Risk Level to woodland birds: ' + woodRisk
-                              + '<p><br><p> Total surfacewater area: ' + waterArea.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Total surfacewater area: ' + waterAreaMiles2.toFixed(2) + " miles<sup>2</sup>"
                               + '<p><br><p> Risk Level to water birds: ' + waterRisk
                               + '<p><br><p><b> Overall Risk: '+ overallRisk +"</b>"))
                     .addTo(map)
