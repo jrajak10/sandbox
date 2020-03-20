@@ -145,8 +145,7 @@ map.on('load', async function() {
           woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection)))/(1600 ** 2);
           }
       }
-
-      let turbineWaterIntersection = []
+      
       let waterIntersection;
       for (let i=0; i<waterPolygons.length; i++){
         waterIntersection = turf.intersect(waterPolygons[i], turbineCircle);
@@ -154,11 +153,6 @@ map.on('load', async function() {
           waterArea += turf.area(waterIntersection)/(1600 ** 2);
           }
       }
-      
-      //calculate the total areas where each circle and features intersect
-      
-      // waterArea = turbineWaterIntersection.map(x => turf.area(x)).reduce((x, y) => x+y, 0)/((1600**2))
-      
       if(woodlandArea < 10){
         woodRisk = "Low";
         riskScore += 0;
