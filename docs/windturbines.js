@@ -80,6 +80,7 @@ map.on('load', async function() {
   let bounds = map.getBounds();
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
+  //filters out areas less than 2500000m^2 and 100000m^2 for Woodland and Surfacewater features as they nest in larger areas.
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
   let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
   let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '100000', 'Zoomstack_Surfacewater');
@@ -107,6 +108,7 @@ map.on('load', async function() {
       let waterRisk;
       let riskScore = 0;
       let overallRisk;
+      const metrestomiles2 = 1/(1600 ** 2);
   
       element.addEventListener('click', function(){
         let turbinegeojson = {
@@ -142,7 +144,7 @@ map.on('load', async function() {
       for (let i=0; i<woodlandPolygons.length; i++){
         woodlandIntersection = turf.intersect(woodlandPolygons[i], turbineCircle);
         if(woodlandIntersection){
-          woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection)))/(1600 ** 2);
+          woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection))) * metrestomiles2;
           }
       }
       
@@ -150,7 +152,7 @@ map.on('load', async function() {
       for (let i=0; i<waterPolygons.length; i++){
         waterIntersection = turf.intersect(waterPolygons[i], turbineCircle);
         if(waterIntersection){
-          waterArea += turf.area(waterIntersection)/(1600 ** 2);
+          waterArea += turf.area(waterIntersection) * metrestomiles2;
           }
       }
       if(woodlandArea < 10){
