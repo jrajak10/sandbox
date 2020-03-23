@@ -159,11 +159,17 @@ map.on('load', async function() {
           }
           
       }
-      if(woodlandAreaMiles2 < 10){
+
+      
+      //Added a risk score to each risk level.
+      let lowWoodlandAreaBound = 10;
+      let mediumWoodlandAreaBound = 35;
+
+      if(woodlandAreaMiles2 < lowWoodlandAreaBound){
         woodRisk = "Low";
         riskScore += 0;
       }
-      else if(woodlandAreaMiles2 >=10 && woodlandAreaMiles2 <35){
+      else if(woodlandAreaMiles2 >=lowWoodlandAreaBound && woodlandAreaMiles2 < mediumWoodlandAreaBound){
         woodRisk = "Medium";
         riskScore += 1;
       }
@@ -172,11 +178,14 @@ map.on('load', async function() {
         riskScore += 2;
       }
 
-      if(waterAreaMiles2 < 0.5){
+      //Added a risk score to each risk level.
+      let lowWaterAreaBound = 0.5;
+      let mediumWaterAreaBound = 1.25;
+      if(waterAreaMiles2 < lowWaterAreaBound){
         waterRisk = "Low";
         riskScore += 0;
       }
-      else if(waterAreaMiles2 >=0.5 && waterAreaMiles2 <1.25){
+      else if(waterAreaMiles2 >=lowWaterAreaBound && waterAreaMiles2 < mediumWaterAreaBound){
         waterRisk = "Medium";
         riskScore += 1;
       }
@@ -185,6 +194,8 @@ map.on('load', async function() {
         riskScore += 2;
       }
 
+      //Combined the risk scores from the woodland and surfacte water risk scores
+      //to give an overall risk score for the birds. 
       if(riskScore < 2){
         overallRisk = "Low";
         element.style.backgroundImage = "url('windturbineicongreen.png')";
