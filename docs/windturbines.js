@@ -163,7 +163,7 @@ map.on('load', async function() {
           
       }
 
-      
+      //Analysing the data, I created a risk level based on the bounds for the area.
       //Added a risk score to each risk level.
       let lowWoodlandAreaBound = 10;
       let mediumWoodlandAreaBound = 35;
@@ -181,6 +181,7 @@ map.on('load', async function() {
         riskScore += 2;
       }
 
+      //Analysing the data, I created a risk level based on the bounds for the area.
       //Added a risk score to each risk level.
       let lowWaterAreaBound = 0.5;
       let mediumWaterAreaBound = 1.25;
