@@ -81,9 +81,12 @@ map.on('load', async function() {
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
   //filters out areas less than 2500000m^2 and 100000m^2 for Woodland and Surfacewater features as they nest in larger areas.
+  let smallWoodlandAreas = 2500000;
+  let smallWaterAreas = 100000
+
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
-  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '100000', 'Zoomstack_Surfacewater');
+  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', smallWoodlandAreas, 'Zoomstack_Woodland');
+  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', smallWaterAreas, 'Zoomstack_Surfacewater');
 
   //create markers for turbines and shading woodland features when map loads
   let turbineCentroids =[]
@@ -266,8 +269,8 @@ map.on('load', async function() {
     bounds = bounds2;
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
-    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '100000', 'Zoomstack_Surfacewater');
+    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', smallWoodlandAreas, 'Zoomstack_Woodland');
+    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', smallWaterAreas, 'Zoomstack_Surfacewater');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
 
