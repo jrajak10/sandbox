@@ -81,12 +81,12 @@ map.on('load', async function() {
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
   //filters out areas less than 2500000m^2 and 100000m^2 for Woodland and Surfacewater features as they nest in larger areas.
-  const smallWoodlandAreas = 2500000;
-  const smallWaterAreas = 100000
+  const SMALL_WOODLAND_AREAS = 2500000;
+  const SMALL_WATER_AREAS = 100000
 
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', smallWoodlandAreas, 'Zoomstack_Woodland');
-  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', smallWaterAreas, 'Zoomstack_Surfacewater');
+  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
+  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
 
   //create markers for turbines and shading woodland features when map loads
   let turbineCentroids =[]
@@ -165,14 +165,14 @@ map.on('load', async function() {
 
       //Analysing the data, I created a risk level based on the bounds for the area.
       //Added a risk score to each risk level.
-      const lowWoodlandAreaBound = 10;
-      const mediumWoodlandAreaBound = 35;
+      const LOW_WOODLAND_AREA_BOUND = 10;
+      const MEDIUM_WOODLAND_AREA_BOUND = 35;
 
-      if(woodlandAreaMiles2 < lowWoodlandAreaBound){
+      if(woodlandAreaMiles2 < LOW_WOODLAND_AREA_BOUND){
         woodRisk = "Low";
         riskScore += 0;
       }
-      else if(woodlandAreaMiles2 >=lowWoodlandAreaBound && woodlandAreaMiles2 < mediumWoodlandAreaBound){
+      else if(woodlandAreaMiles2 >= LOW_WOODLAND_AREA_BOUND && woodlandAreaMiles2 < MEDIUM_WOODLAND_AREA_BOUND){
         woodRisk = "Medium";
         riskScore += 1;
       }
@@ -183,13 +183,13 @@ map.on('load', async function() {
 
       //Analysing the data, I created a risk level based on the bounds for the area.
       //Added a risk score to each risk level.
-      const lowWaterAreaBound = 0.5;
-      const mediumWaterAreaBound = 1.25;
-      if(waterAreaMiles2 < lowWaterAreaBound){
+      const LOW_WATER_AREA_BOUND = 0.5;
+      const MEDIUM_WATER_AREA_BOUND = 1.25;
+      if(waterAreaMiles2 < LOW_WATER_AREA_BOUND){
         waterRisk = "Low";
         riskScore += 0;
       }
-      else if(waterAreaMiles2 >=lowWaterAreaBound && waterAreaMiles2 < mediumWaterAreaBound){
+      else if(waterAreaMiles2 >=LOW_WATER_AREA_BOUND && waterAreaMiles2 < MEDIUM_WATER_AREA_BOUND){
         waterRisk = "Medium";
         riskScore += 1;
       }
@@ -270,8 +270,8 @@ map.on('load', async function() {
     bounds = bounds2;
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', smallWoodlandAreas, 'Zoomstack_Woodland');
-    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', smallWaterAreas, 'Zoomstack_Surfacewater');
+    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
+    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
 
