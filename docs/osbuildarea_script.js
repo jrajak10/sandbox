@@ -1,10 +1,10 @@
-    const apiKey = 'HRQqp4yN8hLHepJEg2fG4kFS69w1oVap';
+    const API_KEY = 'HRQqp4yN8hLHepJEg2fG4kFS69w1oVap';
 
     let serviceUrl = 'https://osdatahubapi.os.uk/OSVectorTileAPI/vts/v1';
 
     async function fetchStation(stationNumber) {
         let stationParams = {
-            key: apiKey,
+            key: API_KEY,
             service: 'WFS',
             request: 'GetFeature',
             version: '2.0.0',
@@ -39,8 +39,8 @@
         let numbers = randomStations();
         let stationList = [];
         for(let i=0; i<numbers.length; i++){
-            const station = await fetchStation(numbers[i]);
-            stationList.push(station);
+            const STATION = await fetchStation(numbers[i]);
+            stationList.push(STATION);
     }
 
         return stationList;
@@ -50,10 +50,10 @@
     document.body.onload = addElement;
 
     async function addElement() {
-        const stationList = await generatesStations();
-        populatesDropDown(stationList);
-        addDropdownListener(stationList);
-        flyto(stationList[0].geometry.coordinates);
+        const STATION_LIST = await generatesStations();
+        populatesDropDown(STATION_LIST);
+        addDropdownListener(STATION_LIST);
+        flyto(STATION_LIST[0].geometry.coordinates);
     }
 
     function flyto(coords) {
@@ -98,7 +98,7 @@
         center: [-0.104951, 51.520623],
         zoom: 14,
         transformRequest: function (url) {
-            url += '?key=' + apiKey + '&srs=3857';
+            url += '?key=' + API_KEY + '&srs=3857';
             return {
                 url: url
             }
@@ -168,10 +168,10 @@
 
 
 
-        const circle_radius = 0.5
+        const CIRCLE_RADIUS = 0.5
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
-        let circle = turf.circle(center, circle_radius, {
+        let circle = turf.circle(center, CIRCLE_RADIUS, {
             steps: 24,
             units: 'kilometers'
         });
@@ -201,7 +201,7 @@
 
         // Define parameters object.
         let wfsParams = {
-            key: apiKey,
+            key: API_KEY,
             service: 'WFS',
             request: 'GetFeature',
             version: '2.0.0',
@@ -248,13 +248,13 @@
                 // To calculate the area, rounded to 3 decimal places
                 let area = 0;
                 let ratio = 0;
-                const circle_area = Math.PI * circle_radius * circle_radius;
+                const CIRCLE_AREA = Math.PI * CIRCLE_RADIUS ** 2;
                 let feature = geojson.features;
                 for (let i = 0; i < feature.length; i++) {
                     // Area in kilometers square
                     area += (geojson.features[i].properties.SHAPE_Area) / 1000000
                 }
-                ratio = area / circle_area
+                ratio = area / CIRCLE_AREA
                 //format the area
                 if (area < 0.01) {
                     document.getElementById('area').innerHTML = "< 0.01"

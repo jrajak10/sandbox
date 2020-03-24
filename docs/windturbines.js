@@ -80,8 +80,13 @@ map.on('load', async function() {
   let bounds = map.getBounds();
 
   //array for bounds1 features - this will be the arrays with all unique features when the map moves
+  //filters out areas less than 2500000m^2 and 100000m^2 for Woodland and Surfacewater features as they nest in larger areas.
+  const SMALL_WOODLAND_AREAS = 2500000;
+  const SMALL_WATER_AREAS = 100000
+
   let uniqueTurbineArray = await getFeatures(bounds, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+  let uniqueWoodlandArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
+  let uniqueWaterArray = await getFeatures(bounds, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
 
   //create markers for turbines and shading woodland features when map loads
   let turbineCentroids =[]
@@ -92,7 +97,7 @@ map.on('load', async function() {
 
   
   
-  function addTurbineMarkersToMap(centroids, woodlandArray){
+  function addTurbineMarkersToMap(centroids, woodlandArray, waterArray){
     for(let i=0; i<centroids.length; i++){
       let element = document.createElement('div');
       element.className = 'turbineMarker';
@@ -100,8 +105,14 @@ map.on('load', async function() {
       let radius = 5;
       let options = {steps: 64, units: 'miles'};
       let turbineCircle = turf.circle(centroids[i], radius, options);
-      let area = 0
-      let riskLevel;
+      let woodlandArea = 0
+      let woodlandAreaMiles2=0;
+      let woodRisk;
+      let waterArea = 0;
+      let waterAreaMiles2=0;
+      let waterRisk;
+      let riskScore = 0;
+      let overallRisk;
   
       element.addEventListener('click', function(){
         let turbinegeojson = {
@@ -127,46 +138,94 @@ map.on('load', async function() {
       });
 
       //polygonise the woodland array so it can be read by turf.js
-      let woodlandPolygons = [];
-      for(let i=0; i<woodlandArray.length; i++){
-        woodlandPolygons.push(turf.polygon(woodlandArray[i].geometry.coordinates));
-      }
+      let woodlandPolygons = woodlandArray.map(x => x.geometry.coordinates);
+      woodlandPolygons = woodlandPolygons.map(x => turf.polygon(x));
+
+      let waterPolygons = waterArray.map(x => x.geometry.coordinates);
+      waterPolygons = waterPolygons.map(x => turf.polygon(x));
       
-      let turbineIntersection =[];
-      let intersection;
+      let woodlandIntersection;
       for (let i=0; i<woodlandPolygons.length; i++){
-        intersection = turf.intersect(woodlandPolygons[i], turbineCircle);
-        if(intersection){
-          turbineIntersection.push(intersection)
+        woodlandIntersection = turf.intersect(woodlandPolygons[i], turbineCircle);
+        if(woodlandIntersection){
+          woodlandArea += turf.area(turf.unkinkPolygon(turf.rewind(woodlandIntersection)));
+          woodlandAreaMiles2 = turf.convertArea(woodlandArea, 'metres', 'miles');
           }
       }
-      for(let i=0; i<turbineIntersection.length; i++){
-        area += (turf.area(turbineIntersection[i])/(1600 ** 2));
-        
-      }
       
-      if(area < 10){
-        riskLevel = "Low";
+      let waterIntersection;
+      for (let i=0; i<waterPolygons.length; i++){
+        waterIntersection = turf.intersect(waterPolygons[i], turbineCircle);
+        if(waterIntersection){
+          waterArea += turf.area(waterIntersection);
+          waterAreaMiles2 = turf.convertArea(waterArea, 'metres', 'miles')
+          }
+          
+      }
+
+      //Analysing the data, I created a risk level based on the bounds for the area.
+      //Added a risk score to each risk level.
+      const LOW_WOODLAND_AREA_BOUND = 10;
+      const MEDIUM_WOODLAND_AREA_BOUND = 35;
+
+      if(woodlandAreaMiles2 < LOW_WOODLAND_AREA_BOUND){
+        woodRisk = "Low";
+        riskScore += 0;
+      }
+      else if(woodlandAreaMiles2 >= LOW_WOODLAND_AREA_BOUND && woodlandAreaMiles2 < MEDIUM_WOODLAND_AREA_BOUND){
+        woodRisk = "Medium";
+        riskScore += 1;
+      }
+      else{
+        woodRisk = "High";
+        riskScore += 2;
+      }
+
+      //Analysing the data, I created a risk level based on the bounds for the area.
+      //Added a risk score to each risk level.
+      const LOW_WATER_AREA_BOUND = 0.5;
+      const MEDIUM_WATER_AREA_BOUND = 1.25;
+      if(waterAreaMiles2 < LOW_WATER_AREA_BOUND){
+        waterRisk = "Low";
+        riskScore += 0;
+      }
+      else if(waterAreaMiles2 >=LOW_WATER_AREA_BOUND && waterAreaMiles2 < MEDIUM_WATER_AREA_BOUND){
+        waterRisk = "Medium";
+        riskScore += 1;
+      }
+      else{
+        waterRisk = "High";
+        riskScore += 2;
+      }
+
+      //Combined the risk scores from the woodland and surfacte water risk scores
+      //to give an overall risk score for the birds. 
+      if(riskScore < 2){
+        overallRisk = "Low";
         element.style.backgroundImage = "url('windturbineicongreen.png')";
       }
-      else if(area >=10 && area <35){
-        riskLevel = "Medium";
+      else if(riskScore >=2 && riskScore < 3){
+        overallRisk = "Medium";
         element.style.backgroundImage = "url('windturbineiconyellow.png')";
       }
       else{
-        riskLevel = "High";
+        overallRisk = "High";
         element.style.backgroundImage = "url('windturbineiconred.png')";
       }
+
       new mapboxgl.Marker(element)
                     .setLngLat(centroids[i])
                     .setPopup(new mapboxgl.Popup({ offset: 10 })
-                    .setHTML('<p><br><p> Total woodland area: ' + area.toFixed(2) + " miles<sup>2</sup>"
-                              + '<p><br><p> Risk Level: ' + riskLevel))
+                    .setHTML('<p><br><p> Total woodland area: ' + woodlandAreaMiles2.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Risk Level to woodland birds: ' + woodRisk
+                              + '<p><br><p> Total surfacewater area: ' + waterAreaMiles2.toFixed(2) + " miles<sup>2</sup>"
+                              + '<p><br><p> Risk Level to water birds: ' + waterRisk
+                              + '<p><br><p><b> Overall Risk: '+ overallRisk +"</b>"))
                     .addTo(map)
     };
   }
 
-  addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray);
+  addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
        
   map.addLayer({
@@ -185,6 +244,23 @@ map.on('load', async function() {
       "fill-opacity": 0.8
     }
   });
+
+  map.addLayer({
+    "id": "water",
+    "type": "fill",
+    "source": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": uniqueWaterArray
+      }
+    },
+    "layout": {},
+    "paint": {
+      "fill-color": "#00FFFF",
+      "fill-opacity": 0.8
+    }
+  });
   
   // Add event which will be triggered when the map has finshed moving (pan + zoom).
   // Implements a simple strategy to only request data when the map viewport invalidates
@@ -194,7 +270,8 @@ map.on('load', async function() {
     bounds = bounds2;
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
-    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', '2500000', 'Zoomstack_Woodland');
+    let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
+    let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
     
     let newTurbineFeatures = await getNewFeatures(uniqueTurbineArray, bounds2TurbineArray);
 
@@ -213,8 +290,15 @@ map.on('load', async function() {
       "features": uniqueWoodlandArray
       }
 
+    uniqueWaterArray = uniqueWaterArray.concat(getNewFeatures(uniqueWaterArray, bounds2WaterArray));
+    let totalWaterFeatures = {
+      "type": "FeatureCollection",
+      "features": uniqueWaterArray
+    }
+
     map.getSource('woodland').setData(totalWoodlandFeatures); 
-    addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray);
+    map.getSource('water').setData(totalWaterFeatures); 
+    addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
   });
 });
 
