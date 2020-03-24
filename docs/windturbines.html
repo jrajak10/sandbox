@@ -15,6 +15,37 @@
 <body>
 
   <div id='map'></div>
+  <div class ="map-overlay top">
+    <div class ="map-overlay-inner">
+      <h3>Impact of Wind Turbines on Birds</h3>
+      <div class="colorKey">
+          <div class="keyTitle"><b>Turbines Risk Levels</b></div>
+          <div class="flex-container">
+            <div class="square" id="red"></div>
+            <div>High</div>
+          </div>
+          <div class="flex-container">
+            <div class="square" id="yellow"></div>
+            <div>Medium</div>
+          </div>
+          <div class="flex-container">
+            <div class="square" id="green"></div>
+            <div>Low</div>
+          </div>
+          <div class="keyTitle"><b>Features</b></div>
+          <div class="flex-container">
+            <div class="square" id="woodland"></div>
+            <div>Woodland</div>
+          </div>
+          <div class="flex-container">
+            <div class="square" id="surface-water"></div>
+            <div>Surface Water</div>
+          </div>
+        </div>
+
+    </div>
+  </div>
+  
 
   <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
   <script src="windturbines.js"></script>
