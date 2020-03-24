@@ -67,10 +67,10 @@
 
     function addDropdownListener(stationList) {
         //Click on an option in the nav bar, and the map will fly to the location of that station.
-        document.getElementById("stationSelect").addEventListener('change',  function () {
+        document.getElementById("station-select").addEventListener('change',  function () {
             let coords;
             for (let i = 0; i < stationList.length; i++) {
-                if (document.getElementById("stationSelect").value == stationList[i].properties.Name) {
+                if (document.getElementById("station-select").value == stationList[i].properties.Name) {
                     coords = stationList[i].geometry.coordinates;
                     flyto(coords);
                     break;
@@ -85,7 +85,7 @@
             let newOption = document.createElement("option");
             let newContent = document.createTextNode(stationList[i].properties.Name);
             newOption.appendChild(newContent);
-            let selectDiv = document.getElementById("stationSelect");
+            let selectDiv = document.getElementById("station-select");
             selectDiv.appendChild(newOption);
         }
     }
