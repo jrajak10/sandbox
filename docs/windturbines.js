@@ -100,7 +100,7 @@ map.on('load', async function() {
   function addTurbineMarkersToMap(centroids, woodlandArray, waterArray){
     for(let i=0; i<centroids.length; i++){
       let element = document.createElement('div');
-      element.className = 'turbineMarker';
+      element.className = 'turbine-marker';
       
       let radius = 5;
       let options = {steps: 64, units: 'miles'};
