@@ -227,6 +227,8 @@ map.on('load', async function() {
 
   addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
+  let div = document.getElementById('loading-message');
+  div.parentNode.removeChild(div); 
        
   map.addLayer({
     "id": "woodland",
@@ -299,6 +301,8 @@ map.on('load', async function() {
     map.getSource('woodland').setData(totalWoodlandFeatures); 
     map.getSource('water').setData(totalWaterFeatures); 
     addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
+
+   
   });
 });
 
