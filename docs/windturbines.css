@@ -76,6 +76,20 @@
         background-color: #00FFFF;
     }
 
+
+    .homepage-link {
+        color: #4169E1;
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .homepage-link:hover {
+        display: block;
+        color: #e18741;
+    }
+
+
+
     .turbine-marker{
         background-image: url('windturbineicon.png');
         background-size: cover;
