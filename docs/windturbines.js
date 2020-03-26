@@ -98,6 +98,7 @@ map.on('load', async function() {
   
   
   function addTurbineMarkersToMap(centroids, woodlandArray, waterArray){
+    
     for(let i=0; i<centroids.length; i++){
       let element = document.createElement('div');
       element.className = 'turbine-marker';
@@ -227,8 +228,8 @@ map.on('load', async function() {
 
   addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
-  let div = document.getElementById('loading-message');
-  div.parentNode.removeChild(div); 
+  let modal = document.getElementById("load-modal");
+  modal.style.display = "none";
        
   map.addLayer({
     "id": "woodland",
@@ -271,12 +272,7 @@ map.on('load', async function() {
     bounds2 = map.getBounds();
     bounds = bounds2;
 
-    let parentDiv = document.getElementById('map-information');
-    let newElement = document.createElement("div");
-    newElement.setAttribute("id", "loading-message");
-    newElement.innerHTML = "Loading turbines.<br>This may take a few seconds...";
-    parentDiv.appendChild(newElement);
-
+    modal.style.display = "block";
 
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
@@ -309,8 +305,7 @@ map.on('load', async function() {
     map.getSource('water').setData(totalWaterFeatures); 
     addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
-    let div = document.getElementById('loading-message');
-    div.parentNode.removeChild(div);
+    modal.style.display = "none";
   });
 });
 
@@ -374,7 +369,7 @@ async function getFeatures(bounds, comparison, propName, literal, typeName) {
     startIndex += featureLength;     
   }
   
-  while (featureLength >= 100)
+  while (featureLength >= 100);
   return [].concat(...totalFeatures);
 }
 

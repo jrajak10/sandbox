@@ -15,7 +15,14 @@
 <body>
 
   <div id='map'></div>
-  <div class ="map-overlay top">    
+  <div class ="map-overlay top">
+    <div id="load-modal" class="modal">
+      <div id="loading-message" class="modal-content">  
+        <p>Loading turbines.</p>
+        <p>This may take a few seconds...</p>
+        <img src="flyingbird.gif" alt="flying bird">
+      </div>
+    </div>
     <div class ="map-overlay-inner" id="map-information">
       <h3>Impact of Wind Turbines on Birds</h3>
       <div class="colorKey">
@@ -41,11 +48,8 @@
             <div class="square" id="surface-water"></div>
             <div>Surface Water</div>
           </div>
-        </div>
-        <a href="index.html" class="homepage-link">Return to Home Page</a>
-        <div id="loading-message">  
-          Loading turbines.<br>This may take a few seconds...
-        </div>
+      </div>
+      <a href="index.html" class="homepage-link">Return to Home Page</a>
     </div>
   </div>
   
