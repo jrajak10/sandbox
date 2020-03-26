@@ -271,6 +271,13 @@ map.on('load', async function() {
     bounds2 = map.getBounds();
     bounds = bounds2;
 
+    let parentDiv = document.getElementById('map-information');
+    let newElement = document.createElement("div");
+    newElement.setAttribute("id", "loading-message");
+    newElement.innerHTML = "Loading turbines.<br>This may take a few seconds...";
+    parentDiv.appendChild(newElement);
+
+
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
     let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
@@ -302,7 +309,8 @@ map.on('load', async function() {
     map.getSource('water').setData(totalWaterFeatures); 
     addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
-   
+    let div = document.getElementById('loading-message');
+    div.parentNode.removeChild(div);
   });
 });
 

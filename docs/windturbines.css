@@ -1,4 +1,3 @@
-  
     body { 
         margin:0; 
         padding:0; 
@@ -13,44 +12,20 @@
 
     .map-overlay {
         font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        display: flex;
-        flex-direction: row;
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 300px;
         padding: 10px;
     }
 
-    .loading-message {
-        text-align: center;
-        padding: 250px;
-        font-size: 30px;
-        font-weight: bold;
-        position: fixed;
-        margin-left: 250px;
-        color: #000;
-    }
-
-    br {
-        margin-top: 50px;
-        height: 50px;
-    }
-
-
-    .map-overlay-inner {
-        width: 300px;
-        height: 400px;
-    }
-    
     .map-overlay .map-overlay-inner {
         background-color: #fff;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
         border-radius: 4px;
         padding: 10px;
     }
-    
+
     .map-overlay-inner div {
         margin-top: 10px;
     }
@@ -64,12 +39,12 @@
         flex-direction: row;
         font-weight: bold;
     }
-    
+
     .key-title {
         padding-top: 30px;
         margin-bottom: -15px;
     }
-    
+
 
     .square {
         height: 25px;
@@ -110,6 +85,14 @@
     .homepage-link:hover {
         display: block;
         color: #e18741;
+    }
+
+    #loading-message {
+        padding-top: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+
     }
 
 
