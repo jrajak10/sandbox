@@ -16,7 +16,14 @@
 
   <div id='map'></div>
   <div class ="map-overlay top">
-    <div class ="map-overlay-inner">
+    <div id="load-modal" class="modal">
+      <div id="loading-message" class="modal-content">  
+        <p>Loading turbines.</p>
+        <p>This may take a few seconds...</p>
+        <div class="loader"></div>
+      </div>
+    </div>
+    <div class ="map-overlay-inner" id="map-information">
       <h3>Impact of Wind Turbines on Birds</h3>
       <div class="colorKey">
           <div class="keyTitle"><b>Turbines Risk Levels</b></div>
@@ -41,13 +48,13 @@
             <div class="square" id="surface-water"></div>
             <div>Surface Water</div>
           </div>
-        </div>
-        <a href="index.html" class="homepage-link">Return to Home Page</a>
+      </div>
+      <a href="index.html" class="homepage-link">Return to Home Page</a>
     </div>
   </div>
   
 
-  <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
   <script src="windturbines.js"></script>
 
 </body>

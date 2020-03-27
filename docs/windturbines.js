@@ -98,6 +98,7 @@ map.on('load', async function() {
   
   
   function addTurbineMarkersToMap(centroids, woodlandArray, waterArray){
+    
     for(let i=0; i<centroids.length; i++){
       let element = document.createElement('div');
       element.className = 'turbine-marker';
@@ -227,6 +228,8 @@ map.on('load', async function() {
 
   addTurbineMarkersToMap(turbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
 
+  let modal = document.getElementById("load-modal");
+  modal.style.display = "none";
        
   map.addLayer({
     "id": "woodland",
@@ -269,6 +272,8 @@ map.on('load', async function() {
     bounds2 = map.getBounds();
     bounds = bounds2;
 
+    modal.style.display = "block";
+
     let bounds2TurbineArray = await getFeatures(bounds2, 'Equal', 'DescriptiveTerm', 'Wind Turbine', 'Topography_TopographicArea');
     let bounds2WoodlandArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WOODLAND_AREAS, 'Zoomstack_Woodland');
     let bounds2WaterArray = await getFeatures(bounds2, 'GreaterThanOrEqual', 'SHAPE_Area', SMALL_WATER_AREAS, 'Zoomstack_Surfacewater');
@@ -299,6 +304,8 @@ map.on('load', async function() {
     map.getSource('woodland').setData(totalWoodlandFeatures); 
     map.getSource('water').setData(totalWaterFeatures); 
     addTurbineMarkersToMap(newTurbineCentroids, uniqueWoodlandArray, uniqueWaterArray);
+
+    modal.style.display = "none";
   });
 });
 
@@ -362,7 +369,7 @@ async function getFeatures(bounds, comparison, propName, literal, typeName) {
     startIndex += featureLength;     
   }
   
-  while (featureLength >= 100)
+  while (featureLength >= 100);
   return [].concat(...totalFeatures);
 }
 
