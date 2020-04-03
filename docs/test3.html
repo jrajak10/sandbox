@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OS Features API | BBOX Example | Mapbox GL JS</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="https://labs.os.uk/public/os-api-branding/v0.1.0/os-api-branding.css" />
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css" />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://labs.os.uk/public/os-api-branding/v0.1.0/os-api-branding.js"></script>
+<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js"></script>
+<script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+<script>
+
+    var apiKey = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
+
+    var wfsServiceUrl = 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1',
+        tileServiceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
+
+    // Create a map style object using the OS Maps API WMTS service.
+    var params = {
+        key: apiKey,
+        service: 'WMTS',
+        request: 'GetTile',
+        version: '2.0.0',
+        height: 256,
+        width: 256,
+        outputFormat: 'image/png',
+        style: 'default',
+        layer: 'Light_3857',
+        tileMatrixSet: 'EPSG:3857',
+        tileMatrix: '{z}',
+        tileRow: '{y}',
+        tileCol: '{x}'
+    };
+
+    var queryString = Object.keys(params).map(function(key) {
+        return key + '=' + params[key];
+    }).join('&');
+
+    var style = {
+        'version': 8,
+        'sources': {
+            'raster-tiles': {
+                'type': 'raster',
+                'tiles': [ tileServiceUrl + '?' + queryString ],
+                'tileSize': 256,
+                'maxzoom': 20
+            }
+        },
+        'layers': [{
+            'id': 'os-maps-wmts',
+            'type': 'raster',
+            'source': 'raster-tiles'
+        }]
+    };
+
+    // Initialize the map object.
+    var map = new mapboxgl.Map({
+        container: 'map',
+        minZoom: 9,
+        maxZoom: 15,
+        style: style,
+        center: [-0.118092, 51.509865],
+        zoom: 12
+    });
+
+    map.dragRotate.disable(); // Disable map rotation using right click + drag.
+    map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
+
+    // Add navigation control (excluding compass button) to the map.
+    map.addControl(new mapboxgl.NavigationControl({
+        showCompass: false
+    }));
+
+    function getNewFeatures(loadedFeatureArray, movedFeatureArray){
+        let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
+        let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
+        return newFeaturesArray;
+        }
+
+    // Add event whicxh waits for the map to be loaded.
+    map.on('load', async function() {
+        
+        // Get the visible map bounds (BBOX).
+        var bounds = map.getBounds();
+
+        let uniqueRoads = await getFeatures(bounds);
+        for (let i=0; i< uniqueRoads.length; i++){
+            uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
+            }
+            
+        
+        map.addSource('lines', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection', 
+                'features': uniqueRoads
+            }
+        });
+
+        map.addLayer({
+            'id': 'lines',
+            'type': 'line',
+            'source': 'lines',
+            'paint': {
+                'line-width': 5,
+                'line-color': 'red'
+            }
+        })
+        // Add event which will be triggered when the map has finshed moving (pan + zoom).
+        // Implements a simple strategy to only request data when the map viewport invalidates
+        // certain bounds.
+        map.on('moveend', async function() {
+           
+            bounds2 = map.getBounds();
+            bounds = bounds2;
+
+            let roads2Array = await getFeatures(bounds2);
+            for (let i=0; i< roads2Array.length; i++){
+                roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
+                }
+            
+            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, roads2Array))
+            
+
+            let total = {
+                "type": "FeatureCollection",
+                "features": uniqueRoads
+                }
+            map.getSource('lines').setData(total)
+            
+        });
+
+        // When a click event occurs on a feature in the 'airports' layer, open a popup at
+        // the location of the click, with description HTML from its properties.
+        // map.on('click', 'airports', function(e) {
+        //     new mapboxgl.Popup()
+        //         .setLngLat(e.lngLat)
+        //         .setHTML(e.features[0].properties.DistinctiveName1)
+        //         .addTo(map);
+        // });
+
+        // // Change the cursor to a pointer when the mouse is over the 'airports' layer.
+        // map.on('mouseenter', 'airports', function () {
+        //     map.getCanvas().style.cursor = 'pointer';
+        // });
+
+        // Change the cursor back to a pointer when it leaves the 'airports' layer.
+        // map.on('mouseleave', 'airports', function () {
+        //     map.getCanvas().style.cursor = '';
+        // });
+    });
+
+    /**
+     * Get features from the WFS.
+     */
+    async function getFeatures(bounds) {
+        // Convert the bounds to a formatted string.
+        var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
+            ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
+
+        var coords = sw + ' ' + ne;
+
+        // Create an OGC XML filter parameter value which will select the Airport
+        // features (site function) intersecting the BBOX coordinates.
+        var xml = '<ogc:Filter>';
+        xml += '<ogc:And>';
+        xml += '<ogc:BBOX>';
+        xml += '<ogc:PropertyName>SHAPE</ogc:PropertyName>';
+        xml += '<gml:Box srsName="urn:ogc:def:crs:EPSG::4326">';
+        xml += '<gml:coordinates>' + coords + '</gml:coordinates>';
+        xml += '</gml:Box>';
+        xml += '</ogc:BBOX>';
+        xml += '<ogc:PropertyIsEqualTo>';
+        xml += '<ogc:PropertyName>Type</ogc:PropertyName>';
+        xml += '<ogc:Literal>A Road</ogc:Literal>';
+        xml += '</ogc:PropertyIsEqualTo>';
+        xml += '</ogc:And>';
+        xml += '</ogc:Filter>';
+
+        // Define (WFS) parameters object.
+        let startIndex = 0;
+        let featureLength = 0;
+        let totalFeatures = [];
+
+        do {
+        var params = {
+            key: apiKey,
+            service: 'WFS',
+            request: 'GetFeature',
+            version: '2.0.0',
+            typeNames: 'Zoomstack_RoadsRegional',
+            outputFormat: 'GEOJSON',
+            srsName: 'urn:ogc:def:crs:EPSG::4326',
+            filter: xml,
+            startIndex: startIndex.toString(), 
+            count: 100
+        };
+
+        let featureUrl = getUrl(params);
+        let response = await fetch(featureUrl);
+        let json = await response.json();
+        let featureArray = json.features;
+        featureLength = featureArray.length;
+        console.log(featureUrl)
+        
+        totalFeatures.push(featureArray);
+        startIndex += featureLength;
+        }
+        while (featureLength >= 100)
+        return [].concat(...totalFeatures);
+        
+    }
+
+    /**
+     * Return URL with encoded parameters.
+     * @param {object} params - The parameters object to be encoded.
+     */
+    function getUrl(params) {
+        var encodedParameters = Object.keys(params)
+            .map(paramName => paramName + '=' + encodeURI(params[paramName]))
+            .join('&');
+
+        return wfsServiceUrl + '?' + encodedParameters;
+    }
+
+</script>
+
+</body>
+</html>
