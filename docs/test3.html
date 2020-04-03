@@ -93,7 +93,7 @@
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
 
-        let uniqueRoads = await getFeatures(bounds);
+        let uniqueRoads = await getFeatures(bounds, 'Type', 'A Road', 'Zoomstack_RoadsRegional');
         for (let i=0; i< uniqueRoads.length; i++){
             uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
             }
@@ -116,6 +116,27 @@
                 'line-color': 'red'
             }
         })
+
+        let hospitals = await getFeatures(bounds, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
+
+        map.addLayer({
+            "id": "hospitals",
+            "type": "fill",
+            "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": hospitals
+            }
+            },
+            "layout": {},
+            "paint": {
+            "fill-color": "#0c0",
+            "fill-opacity": 0.8
+            }
+        });
+
+        console.log(hospitals)
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
         // Implements a simple strategy to only request data when the map viewport invalidates
         // certain bounds.
@@ -124,7 +145,7 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-            let roads2Array = await getFeatures(bounds2);
+            let roads2Array = await getFeatures(bounds2, 'Type', 'A Road', 'Zoomstack_RoadsRegional');
             for (let i=0; i< roads2Array.length; i++){
                 roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
                 }
@@ -136,34 +157,42 @@
                 "type": "FeatureCollection",
                 "features": uniqueRoads
                 }
-            map.getSource('lines').setData(total)
-            
+            map.getSource('lines').setData(total);
+
+            let hospitals2 = await getFeatures(bounds2, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
+            hospitals = hospitals.concat(getNewFeatures(hospitals, hospitals2));
+
+            let totalHospitals = {
+                "type": "FeatureCollection",
+                "features": hospitals
+                }
+            map.getSource('hospitals').setData(totalHospitals);
         });
 
         // When a click event occurs on a feature in the 'airports' layer, open a popup at
         // the location of the click, with description HTML from its properties.
-        // map.on('click', 'airports', function(e) {
-        //     new mapboxgl.Popup()
-        //         .setLngLat(e.lngLat)
-        //         .setHTML(e.features[0].properties.DistinctiveName1)
-        //         .addTo(map);
-        // });
+        map.on('click', 'hospitals', function(e) {
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.DistinctiveName1)
+                .addTo(map);
+        });
 
-        // // Change the cursor to a pointer when the mouse is over the 'airports' layer.
-        // map.on('mouseenter', 'airports', function () {
-        //     map.getCanvas().style.cursor = 'pointer';
-        // });
+        // Change the cursor to a pointer when the mouse is over the 'airports' layer.
+        map.on('mouseenter', 'hospitals', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
 
         // Change the cursor back to a pointer when it leaves the 'airports' layer.
-        // map.on('mouseleave', 'airports', function () {
-        //     map.getCanvas().style.cursor = '';
-        // });
+        map.on('mouseleave', 'hospitals', function () {
+            map.getCanvas().style.cursor = '';
+        });
     });
 
     /**
      * Get features from the WFS.
      */
-    async function getFeatures(bounds) {
+    async function getFeatures(bounds, propertyName, literal, typeName) {
         // Convert the bounds to a formatted string.
         var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
             ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
@@ -181,8 +210,8 @@
         xml += '</gml:Box>';
         xml += '</ogc:BBOX>';
         xml += '<ogc:PropertyIsEqualTo>';
-        xml += '<ogc:PropertyName>Type</ogc:PropertyName>';
-        xml += '<ogc:Literal>A Road</ogc:Literal>';
+        xml += '<ogc:PropertyName>'+ propertyName +'</ogc:PropertyName>';
+        xml += '<ogc:Literal>'+ literal +'</ogc:Literal>';
         xml += '</ogc:PropertyIsEqualTo>';
         xml += '</ogc:And>';
         xml += '</ogc:Filter>';
@@ -198,7 +227,7 @@
             service: 'WFS',
             request: 'GetFeature',
             version: '2.0.0',
-            typeNames: 'Zoomstack_RoadsRegional',
+            typeNames: typeName,
             outputFormat: 'GEOJSON',
             srsName: 'urn:ogc:def:crs:EPSG::4326',
             filter: xml,
@@ -211,7 +240,6 @@
         let json = await response.json();
         let featureArray = json.features;
         featureLength = featureArray.length;
-        console.log(featureUrl)
         
         totalFeatures.push(featureArray);
         startIndex += featureLength;
