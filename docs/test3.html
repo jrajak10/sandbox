@@ -93,7 +93,7 @@
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
 
-        let uniqueRoads = await getFeatures(bounds, 'Type', 'A Road', 'Zoomstack_RoadsRegional');
+        let uniqueRoads = await getFeatures(bounds, 'AdministrativeArea1', 'SOUTHWARK', 'Highways_Street');
         for (let i=0; i< uniqueRoads.length; i++){
             uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
             }
@@ -136,7 +136,7 @@
             }
         });
 
-        console.log(hospitals)
+        // console.log(hospitals)
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
         // Implements a simple strategy to only request data when the map viewport invalidates
         // certain bounds.
@@ -145,7 +145,7 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-            let roads2Array = await getFeatures(bounds2, 'Type', 'A Road', 'Zoomstack_RoadsRegional');
+            let roads2Array = await getFeatures(bounds2, 'AdministrativeArea1', 'SOUTHWARK', 'Highways_Street');
             for (let i=0; i< roads2Array.length; i++){
                 roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
                 }
@@ -174,7 +174,7 @@
         map.on('click', 'hospitals', function(e) {
             new mapboxgl.Popup()
                 .setLngLat(e.lngLat)
-                .setHTML(e.features[0].properties.DistinctiveName1)
+                .setHTML(e.features[0].properties.DistinctiveName1 + "<br>" + e.features[0].properties.SHAPE_Area)
                 .addTo(map);
         });
 
