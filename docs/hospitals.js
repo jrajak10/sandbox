@@ -1,24 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>OS Features API | BBOX Example | Mapbox GL JS</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <link rel="stylesheet" href="https://labs.os.uk/public/os-api-branding/v0.1.0/os-api-branding.css" />
-    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.css" />
-    <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
-</head>
-<body>
-
-<div id="map"></div>
-
-<script src="https://labs.os.uk/public/os-api-branding/v0.1.0/os-api-branding.js"></script>
-<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js"></script>
-<script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
-<script>
 
     var apiKey = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
 
@@ -69,8 +48,8 @@
         minZoom: 9,
         maxZoom: 15,
         style: style,
-        center: [-0.118092, 51.509865],
-        zoom: 12
+        center: [-1.898575, 52.489471],
+        zoom: 13
     });
 
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -93,10 +72,49 @@
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
 
-        let uniqueRoads = await getFeatures(bounds, 'AdministrativeArea1', 'SOUTHWARK', 'Highways_Street');
+        let responsibleAuthorities = [
+                                    {
+                                        "Name": "Birmingham",
+                                        "center": [-1.898575, 52.489471]
+                                    }, 
+                                    {
+                                        "Name": "Southwark",
+                                        "center": [-0.076555, 51.474490]
+                                    },
+                                    {
+                                        "Name": "Hampshire",
+                                        "center": [-1.309977, 51.062196]
+                                    }
+
+
+                                    ]
+                                 
+        for(let i=0; i<responsibleAuthorities.length; i++){
+            let newOption = document.createElement("option");
+            let newContent = document.createTextNode(responsibleAuthorities[i].Name);
+            newOption.appendChild(newContent);
+            let selectDiv = document.getElementById("area-select");
+            selectDiv.appendChild(newOption)
+        }
+        
+        document.getElementById("area-select").addEventListener('change', function(){
+            for(let i=0; i<responsibleAuthorities.length; i++){
+                if(document.getElementById("area-select").value == responsibleAuthorities[i].Name){
+                    map.flyTo({
+                        center: responsibleAuthorities[i].center,
+                        essential: true
+                    })
+                }
+            }
+        })
+        
+
+        let uniqueRoads = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+        console.log(uniqueRoads)
         for (let i=0; i< uniqueRoads.length; i++){
             uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
             }
+        
             
         
         map.addSource('lines', {
@@ -136,7 +154,7 @@
             }
         });
 
-        // console.log(hospitals)
+        
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
         // Implements a simple strategy to only request data when the map viewport invalidates
         // certain bounds.
@@ -145,7 +163,7 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-            let roads2Array = await getFeatures(bounds2, 'AdministrativeArea1', 'SOUTHWARK', 'Highways_Street');
+            let roads2Array = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
             for (let i=0; i< roads2Array.length; i++){
                 roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
                 }
@@ -260,8 +278,3 @@
 
         return wfsServiceUrl + '?' + encodedParameters;
     }
-
-</script>
-
-</body>
-</html>
