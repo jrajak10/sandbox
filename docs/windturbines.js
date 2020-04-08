@@ -248,7 +248,6 @@ map.on('load', async function() {
     }
   });
 
-  console.log(uniqueWoodlandArray)
 
   map.addLayer({
     "id": "water",
