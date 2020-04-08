@@ -65,6 +65,48 @@
         let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
         return newFeaturesArray;
         }
+        let responsibleAuthorities = [
+            {
+                "Name": "Birmingham",
+                "center": [-1.898575, 52.489471]
+            },
+            {
+                "Name": "Surrey",
+                "center": [-0.5682156,51.2641082]
+            }, 
+            {
+                "Name": "Hampshire",
+                "center": [-1.309977, 51.062196]
+            },
+            {
+                "Name": "Essex",
+                "center": [0.473472, 51.733467]
+            }, 
+            {
+                "Name": "Hertfordshire",
+                "center": [-0.207689, 51.805412]
+            },
+            {
+                "Name": "Kent",
+                "center": [0.522306, 51.271499]
+            },
+            {
+                "Name": "Lancashire",
+                "center": [-2.705225, 53.757385]
+            },
+            {
+                "Name": "Sheffield",
+                "center": [-1.4765833, 53.381783]
+            },
+            {
+                "Name": "Brent",
+                "center": [-0.276161, 51.555659]
+            },
+            {
+                "Name": "Cumbria",
+                "center": [-2.761999, 54.653181]
+            }
+            ]
 
     // Add event whicxh waits for the map to be loaded.
     map.on('load', async function() {
@@ -72,88 +114,29 @@
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
 
-        let responsibleAuthorities = [
-                                    {
-                                        "Name": "Birmingham",
-                                        "center": [-1.898575, 52.489471]
-                                    }, 
-                                    {
-                                        "Name": "Southwark",
-                                        "center": [-0.076555, 51.474490]
-                                    },
-                                    {
-                                        "Name": "Hampshire",
-                                        "center": [-1.309977, 51.062196]
-                                    }
-
-
-                                    ]
+        
                                  
         for(let i=0; i<responsibleAuthorities.length; i++){
             let newOption = document.createElement("option");
-            let newContent = document.createTextNode(responsibleAuthorities[i].Name);
+            let newContent = document.createTextNode([i+ 1] + '. ' + responsibleAuthorities[i].Name);
             newOption.appendChild(newContent);
             let selectDiv = document.getElementById("area-select");
             selectDiv.appendChild(newOption)
         }
-        
-        document.getElementById("area-select").addEventListener('change', function(){
-            for(let i=0; i<responsibleAuthorities.length; i++){
-                if(document.getElementById("area-select").value == responsibleAuthorities[i].Name){
-                    map.flyTo({
-                        center: responsibleAuthorities[i].center,
-                        essential: true
-                    })
+
+
+       
+            document.getElementById("area-select").addEventListener('change', async function(){
+                for(let i=0; i<responsibleAuthorities.length; i++){
+                    if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
+                        map.flyTo({
+                            center: responsibleAuthorities[i].center,
+                            essential: true
+                        });
+                    }
                 }
-            }
-        })
+            });
         
-
-        let uniqueRoads = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
-        console.log(uniqueRoads)
-        for (let i=0; i< uniqueRoads.length; i++){
-            uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
-            }
-        
-            
-        
-        map.addSource('lines', {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection', 
-                'features': uniqueRoads
-            }
-        });
-
-        map.addLayer({
-            'id': 'lines',
-            'type': 'line',
-            'source': 'lines',
-            'paint': {
-                'line-width': 5,
-                'line-color': 'red'
-            }
-        })
-
-        let hospitals = await getFeatures(bounds, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
-
-        map.addLayer({
-            "id": "hospitals",
-            "type": "fill",
-            "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": hospitals
-            }
-            },
-            "layout": {},
-            "paint": {
-            "fill-color": "#0c0",
-            "fill-opacity": 0.8
-            }
-        });
-
         
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
         // Implements a simple strategy to only request data when the map viewport invalidates
@@ -163,48 +146,10 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-            let roads2Array = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
-            for (let i=0; i< roads2Array.length; i++){
-                roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
-                }
             
-            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, roads2Array))
-            
-
-            let total = {
-                "type": "FeatureCollection",
-                "features": uniqueRoads
-                }
-            map.getSource('lines').setData(total);
-
-            let hospitals2 = await getFeatures(bounds2, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
-            hospitals = hospitals.concat(getNewFeatures(hospitals, hospitals2));
-
-            let totalHospitals = {
-                "type": "FeatureCollection",
-                "features": hospitals
-                }
-            map.getSource('hospitals').setData(totalHospitals);
         });
 
-        // When a click event occurs on a feature in the 'airports' layer, open a popup at
-        // the location of the click, with description HTML from its properties.
-        map.on('click', 'hospitals', function(e) {
-            new mapboxgl.Popup()
-                .setLngLat(e.lngLat)
-                .setHTML(e.features[0].properties.DistinctiveName1 + "<br>" + e.features[0].properties.SHAPE_Area)
-                .addTo(map);
-        });
-
-        // Change the cursor to a pointer when the mouse is over the 'airports' layer.
-        map.on('mouseenter', 'hospitals', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change the cursor back to a pointer when it leaves the 'airports' layer.
-        map.on('mouseleave', 'hospitals', function () {
-            map.getCanvas().style.cursor = '';
-        });
+       
     });
 
     /**
@@ -255,6 +200,7 @@
 
         let featureUrl = getUrl(params);
         let response = await fetch(featureUrl);
+        console.log(response)
         let json = await response.json();
         let featureArray = json.features;
         featureLength = featureArray.length;
