@@ -98,6 +98,7 @@
                 "Name": "Sheffield",
                 "center": [-1.4765833, 53.381783]
             },
+            
             {
                 "Name": "Brent",
                 "center": [-0.276161, 51.555659]
@@ -123,19 +124,44 @@
             let selectDiv = document.getElementById("area-select");
             selectDiv.appendChild(newOption)
         }
-
-
        
-            document.getElementById("area-select").addEventListener('change', async function(){
-                for(let i=0; i<responsibleAuthorities.length; i++){
-                    if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
-                        map.flyTo({
-                            center: responsibleAuthorities[i].center,
-                            essential: true
-                        });
-                    }
+        document.getElementById("area-select").addEventListener('change', async function(){
+            for(let i=0; i<responsibleAuthorities.length; i++){
+                if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
+                    map.flyTo({
+                        center: responsibleAuthorities[i].center,
+                        essential: true
+                    });
                 }
-            });
+            }
+        });
+
+        let uniqueRoads = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+        
+        for (let i=0; i< uniqueRoads.length; i++){
+            uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
+            }
+            
+        
+        map.addSource('streets', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection', 
+                'features': uniqueRoads
+            }
+        });
+
+        map.addLayer({
+            'id': 'streets',
+            'type': 'line',
+            'source': 'streets',
+            'paint': {
+                'line-width': 5,
+                'line-color': 'red'
+            }
+        })
+
+        
         
         
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
@@ -145,6 +171,29 @@
            
             bounds2 = map.getBounds();
             bounds = bounds2;
+
+            let roads2Array = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+            for (let i=0; i< roads2Array.length; i++){
+                roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
+                }
+            
+            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, roads2Array))
+
+            
+            let areaValue = document.getElementById("area-select").value.substring(3);
+            let newAreaStreets = await getFeatures(bounds2, 'ResponsibleAuthority', areaValue, 'Highways_Street');
+
+            for (let i=0; i< newAreaStreets.length; i++){
+                newAreaStreets[i].geometry.coordinates = newAreaStreets[i].geometry.coordinates[0];
+                }
+            
+            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, newAreaStreets))
+
+            let total = {
+                "type": "FeatureCollection",
+                "features": uniqueRoads
+                }
+            map.getSource('streets').setData(total);
 
             
         });
@@ -199,8 +248,8 @@
         };
 
         let featureUrl = getUrl(params);
+        console.log(featureUrl)
         let response = await fetch(featureUrl);
-        console.log(response)
         let json = await response.json();
         let featureArray = json.features;
         featureLength = featureArray.length;
