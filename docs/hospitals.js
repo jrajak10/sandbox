@@ -269,7 +269,6 @@
         };
 
         let featureUrl = getUrl(params);
-        console.log(featureUrl)
         let response = await fetch(featureUrl);
         let json = await response.json();
         let featureArray = json.features;
