@@ -136,10 +136,10 @@
             }
         });
 
-        let uniqueRoads = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+        let uniqueStreets = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
         
-        for (let i=0; i< uniqueRoads.length; i++){
-            uniqueRoads[i].geometry.coordinates = uniqueRoads[i].geometry.coordinates[0];
+        for (let i=0; i< uniqueStreets.length; i++){
+            uniqueStreets[i].geometry.coordinates = uniqueStreets[i].geometry.coordinates[0];
             }
             
         
@@ -147,7 +147,7 @@
             'type': 'geojson',
             'data': {
                 'type': 'FeatureCollection', 
-                'features': uniqueRoads
+                'features': uniqueStreets
             }
         });
 
@@ -172,30 +172,51 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-            let roads2Array = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
-            for (let i=0; i< roads2Array.length; i++){
-                roads2Array[i].geometry.coordinates = roads2Array[i].geometry.coordinates[0];
+
+            let mapMovedStreets = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+            for (let i=0; i< mapMovedStreets.length; i++){
+                mapMovedStreets[i].geometry.coordinates = mapMovedStreets[i].geometry.coordinates[0];
                 }
             
-            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, roads2Array))
+            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, mapMovedStreets))
 
-            
-            let areaValue = document.getElementById("area-select").value.substring(3);
+            //adds street features when the map flies to new area
+            //removes the numbering to get the value of the area
+            let areaString = document.getElementById("area-select").value.split('')
+            let areaValue = areaString.slice(areaString.indexOf(" ")+1, areaString.length).join('')
             let newAreaStreets = await getFeatures(bounds2, 'ResponsibleAuthority', areaValue, 'Highways_Street');
 
             for (let i=0; i< newAreaStreets.length; i++){
                 newAreaStreets[i].geometry.coordinates = newAreaStreets[i].geometry.coordinates[0];
                 }
             
-            uniqueRoads = uniqueRoads.concat(getNewFeatures(uniqueRoads, newAreaStreets))
+            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, newAreaStreets))
 
             let total = {
                 "type": "FeatureCollection",
-                "features": uniqueRoads
+                "features": uniqueStreets
                 }
-            map.getSource('streets').setData(total);
+            map.getSource('streets').setData(total);    
+        });
+        
+        // When a click event occurs on a feature in the 'streets' layer, open a popup at
+        // the location of the click, with description HTML from its properties.
+        let popup = new mapboxgl.Popup({className: 'popup', offset: 5});
+        map.on('click', 'streets', function(e) {
+                popup
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.ResponsibleAuthority)
+                .addTo(map);
+        });
 
-            
+        // Change the cursor to a pointer when the mouse is over the 'streets' layer.
+        map.on('mouseenter', 'streets', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change the cursor back to a pointer when it leaves the 'streets' layer.
+        map.on('mouseleave', 'streets', function () {
+            map.getCanvas().style.cursor = '';
         });
 
        
