@@ -28,3 +28,9 @@ body {
 .map-overlay-inner div {
     margin-top: 10px;
 }
+
+
+.mapboxgl-popup-content {
+    font-size: 12px;
+    text-align: center;
+}

@@ -98,6 +98,7 @@
                 "Name": "Sheffield",
                 "center": [-1.4765833, 53.381783]
             },
+            
             {
                 "Name": "Brent",
                 "center": [-0.276161, 51.555659]
@@ -123,19 +124,44 @@
             let selectDiv = document.getElementById("area-select");
             selectDiv.appendChild(newOption)
         }
-
-
        
-            document.getElementById("area-select").addEventListener('change', async function(){
-                for(let i=0; i<responsibleAuthorities.length; i++){
-                    if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
-                        map.flyTo({
-                            center: responsibleAuthorities[i].center,
-                            essential: true
-                        });
-                    }
+        document.getElementById("area-select").addEventListener('change', async function(){
+            for(let i=0; i<responsibleAuthorities.length; i++){
+                if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
+                    map.flyTo({
+                        center: responsibleAuthorities[i].center,
+                        essential: true
+                    });
                 }
-            });
+            }
+        });
+
+        let uniqueStreets = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+        
+        for (let i=0; i< uniqueStreets.length; i++){
+            uniqueStreets[i].geometry.coordinates = uniqueStreets[i].geometry.coordinates[0];
+            }
+            
+        
+        map.addSource('streets', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection', 
+                'features': uniqueStreets
+            }
+        });
+
+        map.addLayer({
+            'id': 'streets',
+            'type': 'line',
+            'source': 'streets',
+            'paint': {
+                'line-width': 5,
+                'line-color': 'red'
+            }
+        })
+
+        
         
         
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
@@ -146,7 +172,51 @@
             bounds2 = map.getBounds();
             bounds = bounds2;
 
+
+            let mapMovedStreets = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
+            for (let i=0; i< mapMovedStreets.length; i++){
+                mapMovedStreets[i].geometry.coordinates = mapMovedStreets[i].geometry.coordinates[0];
+                }
             
+            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, mapMovedStreets))
+
+            //adds street features when the map flies to new area
+            //removes the numbering to get the value of the area
+            let areaString = document.getElementById("area-select").value.split('')
+            let areaValue = areaString.slice(areaString.indexOf(" ")+1, areaString.length).join('')
+            let newAreaStreets = await getFeatures(bounds2, 'ResponsibleAuthority', areaValue, 'Highways_Street');
+
+            for (let i=0; i< newAreaStreets.length; i++){
+                newAreaStreets[i].geometry.coordinates = newAreaStreets[i].geometry.coordinates[0];
+                }
+            
+            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, newAreaStreets))
+
+            let total = {
+                "type": "FeatureCollection",
+                "features": uniqueStreets
+                }
+            map.getSource('streets').setData(total);    
+        });
+        
+        // When a click event occurs on a feature in the 'streets' layer, open a popup at
+        // the location of the click, with description HTML from its properties.
+        let popup = new mapboxgl.Popup({className: 'popup', offset: 5});
+        map.on('click', 'streets', function(e) {
+                popup
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.ResponsibleAuthority)
+                .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the 'streets' layer.
+        map.on('mouseenter', 'streets', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change the cursor back to a pointer when it leaves the 'streets' layer.
+        map.on('mouseleave', 'streets', function () {
+            map.getCanvas().style.cursor = '';
         });
 
        
@@ -200,7 +270,6 @@
 
         let featureUrl = getUrl(params);
         let response = await fetch(featureUrl);
-        console.log(response)
         let json = await response.json();
         let featureArray = json.features;
         featureLength = featureArray.length;
