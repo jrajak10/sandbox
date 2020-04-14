@@ -72,7 +72,7 @@
             },
             {
                 "Name": "Surrey",
-                "center": [-0.5682156,51.2641082]
+                "center": [-0.580217, 51.236944]
             }, 
             {
                 "Name": "Hampshire",
@@ -157,11 +157,48 @@
             'source': 'streets',
             'paint': {
                 'line-width': 5,
-                'line-color': 'red'
+                'line-color': "#FFD700"
             }
         })
 
-        
+        let uniqueHospitals = await getFeatures(bounds, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
+
+        map.addLayer({
+            "id": "hospitals",
+            "type": "fill",
+            "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": uniqueHospitals
+            }
+            },
+            "layout": {},
+            "paint": {
+            "fill-color": "#FF1493",
+            "fill-opacity": 0.8
+            }
+        });
+
+        let uniqueSchools = await getFeatures(bounds, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
+
+        map.addLayer({
+            "id": "schools",
+            "type": "fill",
+            "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": uniqueSchools
+            }
+            },
+            "layout": {},
+            "paint": {
+            "fill-color": "#20B2AA",
+            "fill-opacity": 0.8
+            }
+        });
+
         
         
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
@@ -196,7 +233,25 @@
                 "type": "FeatureCollection",
                 "features": uniqueStreets
                 }
-            map.getSource('streets').setData(total);    
+            map.getSource('streets').setData(total);   
+            
+            let mapMovedHospitals = await getFeatures(bounds2, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
+            uniqueHospitals = uniqueHospitals.concat(getNewFeatures(uniqueHospitals, mapMovedHospitals));
+
+            let totalHospitals = {
+                "type": "FeatureCollection",
+                "features": uniqueHospitals
+                }
+            map.getSource('hospitals').setData(totalHospitals);
+
+            let mapMovedSchools = await getFeatures(bounds2, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
+            uniqueSchools = uniqueSchools.concat(getNewFeatures(uniqueSchools, mapMovedSchools));
+
+            let totalSchools = {
+                "type": "FeatureCollection",
+                "features": uniqueSchools
+                }
+            map.getSource('schools').setData(totalSchools);
         });
         
         // When a click event occurs on a feature in the 'streets' layer, open a popup at
@@ -216,6 +271,44 @@
 
         // Change the cursor back to a pointer when it leaves the 'streets' layer.
         map.on('mouseleave', 'streets', function () {
+            map.getCanvas().style.cursor = '';
+        });
+
+        // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
+        // the location of the click, with description HTML from its properties.
+        map.on('click', 'hospitals', function(e) {
+                popup
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.DistinctiveName1)
+                .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the 'hospitals' layer.
+        map.on('mouseenter', 'hospitals', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
+        map.on('mouseleave', 'hospitals', function () {
+            map.getCanvas().style.cursor = '';
+        });
+
+        // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
+        // the location of the click, with description HTML from its properties.
+        map.on('click', 'schools', function(e) {
+            popup
+            .setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.DistinctiveName1)
+            .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the 'hospitals' layer.
+        map.on('mouseenter', 'schools', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
+        map.on('mouseleave', 'schools', function () {
             map.getCanvas().style.cursor = '';
         });
 
