@@ -252,8 +252,13 @@
                 "features": uniqueSchools
                 }
             map.getSource('schools').setData(totalSchools);
+            
+            
         });
-        
+
+        //Get the source data from school features to use when calculating the nearest school to a hospital
+        let schoolSource = map.getSource('schools')
+
         // When a click event occurs on a feature in the 'streets' layer, open a popup at
         // the location of the click, with description HTML from its properties.
         let popup = new mapboxgl.Popup({className: 'popup', offset: 5});
@@ -277,9 +282,27 @@
         // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
         // the location of the click, with description HTML from its properties.
         map.on('click', 'hospitals', function(e) {
+            let schools = schoolSource._data.features;
+
+            //Distance from most southwestern and most northeastern points of England is approx. 425 miles.
+            //As hospitals as secondary schools do exist in England, this number will be a good starting point,
+            //as the minimum distance between a hospital and school will be less than this.
+            //Distance is measures in miles 
+            let minDistance = 425;
+            let closestSchool = '';
+            for(let i=0; i<schools.length; i++){
+                let distance = turf.distance(e.features[0].geometry.coordinates[0][0], schools[i].geometry.coordinates[0][0], {units: 'miles'})
+                if(distance < minDistance){
+                    minDistance = distance;
+                    closestSchool = schools[i].properties.DistinctiveName1;   
+                }
+            }
+                
                 popup
                 .setLngLat(e.lngLat)
-                .setHTML(e.features[0].properties.DistinctiveName1)
+                .setHTML("<b>"+ e.features[0].properties.DistinctiveName1 + "</b>"
+                     + '<br>Nearest School: ' + closestSchool
+                     + '<br>Distance From Hospital: ' + minDistance.toFixed(2) + " miles")
                 .addTo(map);
         });
 
@@ -311,9 +334,9 @@
         map.on('mouseleave', 'schools', function () {
             map.getCanvas().style.cursor = '';
         });
-
        
     });
+
 
     /**
      * Get features from the WFS.
