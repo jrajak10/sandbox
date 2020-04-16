@@ -181,7 +181,7 @@
         });
 
         let uniqueSchools = await getFeatures(bounds, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
-
+        
         map.addLayer({
             "id": "schools",
             "type": "fill",
@@ -290,13 +290,43 @@
             //Distance is measures in miles 
             let minDistance = 425;
             let closestSchool = '';
+            let closestFeature = ''
             for(let i=0; i<schools.length; i++){
                 let distance = turf.distance(e.features[0].geometry.coordinates[0][0], schools[i].geometry.coordinates[0][0], {units: 'miles'})
                 if(distance < minDistance){
                     minDistance = distance;
-                    closestSchool = schools[i].properties.DistinctiveName1;   
-                }
+                    closestSchool = schools[i].properties.DistinctiveName1;  
+                    closestFeature = [schools[i]]
+                }                
             }
+            if(!map.getLayer('closest-school')){
+                map.addLayer({
+                    "id": "closest-school",
+                    "type": "fill",
+                    "source": {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": closestFeature
+                    }
+                    },
+                    "layout": {},
+                    "paint": {
+                    "fill-color": "#000000",
+                    "fill-opacity": 0.8
+                    }
+                });
+            }
+            else{
+                let closestData = {
+                    "type": "FeatureCollection",
+                    "features": closestFeature
+                }
+                map.getSource('closest-school').setData(closestData)
+            }
+
+            
+            
                 
                 popup
                 .setLngLat(e.lngLat)
@@ -314,6 +344,7 @@
         // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
         map.on('mouseleave', 'hospitals', function () {
             map.getCanvas().style.cursor = '';
+            
         });
 
         // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
