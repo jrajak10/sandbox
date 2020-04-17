@@ -57,6 +57,11 @@ body {
     border: solid 1px #000;
 }
 
+#nearest-school{               
+    background-color: #D2691E;
+    border: solid 1px #000;
+}
+
 .mapboxgl-popup-content {
     font-size: 12px;
     text-align: center;
