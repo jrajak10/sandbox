@@ -181,7 +181,7 @@
         });
 
         let uniqueSchools = await getFeatures(bounds, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
-
+        
         map.addLayer({
             "id": "schools",
             "type": "fill",
@@ -290,12 +290,164 @@
             //Distance is measures in miles 
             let minDistance = 425;
             let closestSchool = '';
+            let closestFeature = ''
+            let closestSchoolPoint;
             for(let i=0; i<schools.length; i++){
                 let distance = turf.distance(e.features[0].geometry.coordinates[0][0], schools[i].geometry.coordinates[0][0], {units: 'miles'})
                 if(distance < minDistance){
                     minDistance = distance;
-                    closestSchool = schools[i].properties.DistinctiveName1;   
+                    closestSchool = schools[i].properties.DistinctiveName1;  
+                    closestFeature = [schools[i]]
+                    closestSchoolPoint = schools[i].geometry.coordinates[0][0]
+                }                
+            }
+            if(!map.getLayer('closest-school')){
+                map.addLayer({
+                    "id": "closest-school",
+                    "type": "fill",
+                    "source": {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": closestFeature
+                    }
+                    },
+                    "layout": {},
+                    "paint": {
+                    "fill-color": "#D2691E",
+                    "fill-opacity": 0.8
+                    }
+                });
+            }
+            else{
+                let closestData = {
+                    "type": "FeatureCollection",
+                    "features": closestFeature
                 }
+                map.getSource('closest-school').setData(closestData)
+            }
+
+            if (!map.getLayer('route')) {
+                map.addSource('route', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                e.features[0].geometry.coordinates[0][0],
+                                closestSchoolPoint
+                            ]
+                        }
+                    }
+                });
+                map.addLayer({
+                    'id': 'route',
+                    'type': 'line',
+                    'source': 'route',
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#888',
+                        'line-width': 3
+                        
+                    }
+                });
+            }
+            else{
+                let routeData = {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': [
+                            e.features[0].geometry.coordinates[0][0],
+                            closestSchoolPoint
+                        ]
+                    }
+                }
+                map.getSource('route').setData(routeData)
+
+                let icon = {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates':  e.features[0].geometry.coordinates[0][0]
+                            }
+                        }
+                    ]
+                };
+                
+                let path = [];
+                // Number of steps to use in the path and animation, more steps means
+                // a smoother path and animation, but too many steps will result in a
+                // low frame rate
+                let steps = 250;
+
+
+                // Draw an path between the `origin` & `destination` of the two points
+                for (let i = 0; i < minDistance; i += minDistance / steps) {
+                    let segment = turf.along(routeData, i, {units: 'miles'});
+                    path.push(segment.geometry.coordinates);
+                    }
+                
+                // Update the route with calculated path coordinates
+                routeData.geometry.coordinates = path;
+                
+                // Used to increment the value of the point measurement against the route.
+                let counter = 0;
+
+                map.loadImage('drone.png', function (error, image) {
+                        if (error) throw error;
+                        if (!map.hasImage('drone')) map.addImage('drone', image);
+                    });
+                
+                if (!map.getLayer('icon')) {
+                   
+                    map.addSource('icon', {
+                        'type': 'geojson',
+                        'data': icon
+                    });
+                    
+                    map.addLayer({
+                        'id': 'icon',
+                        'source': 'icon',
+                        'type': 'symbol',
+                        'layout': {
+                            'icon-image': 'drone',
+                            'icon-size': 0.5,
+                            'icon-rotation-alignment': 'map',
+                            'icon-allow-overlap': true,
+                            'icon-ignore-placement': true
+                        }
+                    });
+                }
+                else{
+                    map.getSource('icon').setData(icon);
+                }
+                function animate() {
+                    icon.features[0].geometry.coordinates =
+                    routeData.geometry.coordinates[counter];
+
+
+                    // Update the source with this new data.
+                    map.getSource('icon').setData(icon);
+
+                    // Request the next frame of animation so long the end has not been reached.
+                    if (counter < steps) {
+                        requestAnimationFrame(animate);
+                    }
+
+                    counter = counter + 1;
+                }
+                animate()
             }
                 
                 popup
@@ -314,6 +466,7 @@
         // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
         map.on('mouseleave', 'hospitals', function () {
             map.getCanvas().style.cursor = '';
+            
         });
 
         // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
