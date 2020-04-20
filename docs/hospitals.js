@@ -65,69 +65,83 @@
         let newFeaturesArray = movedFeatureArray.filter(feature => !totalFeaturesIDs.includes(feature.properties.OBJECTID));
         return newFeaturesArray;
         }
-        let responsibleAuthorities = [
-            {
-                "Name": "Birmingham",
-                "center": [-1.898575, 52.489471]
-            },
-            {
-                "Name": "Surrey",
-                "center": [-0.580217, 51.236944]
-            }, 
-            {
-                "Name": "Hampshire",
-                "center": [-1.309977, 51.062196]
-            },
-            {
-                "Name": "Essex",
-                "center": [0.473472, 51.733467]
-            }, 
-            {
-                "Name": "Hertfordshire",
-                "center": [-0.207689, 51.805412]
-            },
-            {
-                "Name": "Kent",
-                "center": [0.522306, 51.271499]
-            },
-            {
-                "Name": "Lancashire",
-                "center": [-2.705225, 53.757385]
-            },
-            {
-                "Name": "Sheffield",
-                "center": [-1.4765833, 53.381783]
-            },
-            
-            {
-                "Name": "Brent",
-                "center": [-0.276161, 51.555659]
-            },
-            {
-                "Name": "Cumbria",
-                "center": [-2.761999, 54.653181]
+    let responsibleAuthorities = [
+        {
+            "Name": "Birmingham",
+            "center": [-1.898575, 52.489471]
+        },
+        {
+            "Name": "Surrey",
+            "center": [-0.580217, 51.236944]
+        },
+        {
+            "Name": "Hampshire",
+            "center": [-1.309977, 51.062196]
+        },
+        {
+            "Name": "Essex",
+            "center": [0.473472, 51.733467]
+        },
+        {
+            "Name": "Hertfordshire",
+            "center": [-0.207689, 51.805412]
+        },
+        {
+            "Name": "Kent",
+            "center": [0.522306, 51.271499]
+        },
+        {
+            "Name": "Lancashire",
+            "center": [-2.705225, 53.757385]
+        },
+        {
+            "Name": "Sheffield",
+            "center": [-1.4765833, 53.381783]
+        },
+
+        {
+            "Name": "Brent",
+            "center": [-0.276161, 51.555659]
+        },
+        {
+            "Name": "Cumbria",
+            "center": [-2.761999, 54.653181]
+        }
+    ]
+
+    function addPolygonToMap(id, features, fillColor){
+        map.addLayer({
+            "id": id,
+            "type": "fill",
+            "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": features
             }
-            ]
+            },
+            "layout": {},
+            "paint": {
+            "fill-color": fillColor,
+            "fill-opacity": 0.8
+            }
+        });
+    }
 
-    // Add event whicxh waits for the map to be loaded.
-    map.on('load', async function() {
-        
-        // Get the visible map bounds (BBOX).
-        var bounds = map.getBounds();
-
-        
-                                 
-        for(let i=0; i<responsibleAuthorities.length; i++){
+    function createOptions(){
+        for (let i = 0; i < responsibleAuthorities.length; i++) {
             let newOption = document.createElement("option");
-            let newContent = document.createTextNode([i+ 1] + '. ' + responsibleAuthorities[i].Name);
+            let newContent = document.createTextNode([i + 1] + '. ' + responsibleAuthorities[i].Name);
             newOption.appendChild(newContent);
             let selectDiv = document.getElementById("area-select");
             selectDiv.appendChild(newOption)
         }
-       
-        document.getElementById("area-select").addEventListener('change', async function(){
-            for(let i=0; i<responsibleAuthorities.length; i++){
-                if(document.getElementById("area-select").value.replace([i+ 1]+'. ','') == responsibleAuthorities[i].Name){
+    }
+
+    function flyToArea() {
+        document.getElementById("area-select").addEventListener('change', async function () {
+            for (let i = 0; i < responsibleAuthorities.length; i++) {
+                if (document.getElementById("area-select").value.replace([i + 1] + '. ', '') == responsibleAuthorities[i].Name) {
                     map.flyTo({
                         center: responsibleAuthorities[i].center,
                         essential: true
@@ -135,14 +149,49 @@
                 }
             }
         });
+    }
+
+    function updateLayer(features){
+        return {
+            "type": "FeatureCollection",
+             "features": features
+        }
+    }
+
+    function convertLineStringCoords(arr){
+        for(let i=0; i< arr.length; i++){
+            arr[i].geometry.coordinates = arr[i].geometry.coordinates[0];
+        }
+        return arr
+    }
+
+    function addClosestSchool(closestFeature){
+        if(!map.getLayer('closest-school')){
+            addPolygonToMap('closest-school', closestFeature, "#D2691E")
+        }
+        else{
+            let closestData = updateLayer(closestFeature);
+            map.getSource('closest-school').setData(closestData)
+        }
+
+    }
+
+    // Add event whicxh waits for the map to be loaded.
+    map.on('load', async function() {
+        
+        // Get the visible map bounds (BBOX).
+        var bounds = map.getBounds();
+        createOptions() 
+        flyToArea()
+
+        map.loadImage('drone.png', function (error, image) {
+            if (error) throw error;
+            if (!map.hasImage('drone')) map.addImage('drone', image);
+        });
 
         let uniqueStreets = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
-        
-        for (let i=0; i< uniqueStreets.length; i++){
-            uniqueStreets[i].geometry.coordinates = uniqueStreets[i].geometry.coordinates[0];
-            }
+        convertLineStringCoords(uniqueStreets);
             
-        
         map.addSource('streets', {
             'type': 'geojson',
             'data': {
@@ -162,98 +211,44 @@
         })
 
         let uniqueHospitals = await getFeatures(bounds, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
-
-        map.addLayer({
-            "id": "hospitals",
-            "type": "fill",
-            "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": uniqueHospitals
-            }
-            },
-            "layout": {},
-            "paint": {
-            "fill-color": "#FF1493",
-            "fill-opacity": 0.8
-            }
-        });
+        addPolygonToMap("hospitals", uniqueHospitals, "#FF1493")
 
         let uniqueSchools = await getFeatures(bounds, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
-        
-        map.addLayer({
-            "id": "schools",
-            "type": "fill",
-            "source": {
-            "type": "geojson",
-            "data": {
-                "type": "FeatureCollection",
-                "features": uniqueSchools
-            }
-            },
-            "layout": {},
-            "paint": {
-            "fill-color": "#20B2AA",
-            "fill-opacity": 0.8
-            }
-        });
+        addPolygonToMap("schools", uniqueSchools, "#20B2AA")
 
-        
-        
         // Add event which will be triggered when the map has finshed moving (pan + zoom).
         // Implements a simple strategy to only request data when the map viewport invalidates
         // certain bounds.
-        map.on('moveend', async function() {
-           
+        map.on('moveend', async function() {           
             bounds2 = map.getBounds();
             bounds = bounds2;
 
-
             let mapMovedStreets = await getFeatures(bounds2, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
-            for (let i=0; i< mapMovedStreets.length; i++){
-                mapMovedStreets[i].geometry.coordinates = mapMovedStreets[i].geometry.coordinates[0];
-                }
-            
-            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, mapMovedStreets))
+            convertLineStringCoords(mapMovedStreets);
+            uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, mapMovedStreets));
 
             //adds street features when the map flies to new area
             //removes the numbering to get the value of the area
             let areaString = document.getElementById("area-select").value.split('')
             let areaValue = areaString.slice(areaString.indexOf(" ")+1, areaString.length).join('')
             let newAreaStreets = await getFeatures(bounds2, 'ResponsibleAuthority', areaValue, 'Highways_Street');
-
-            for (let i=0; i< newAreaStreets.length; i++){
-                newAreaStreets[i].geometry.coordinates = newAreaStreets[i].geometry.coordinates[0];
-                }
-            
+            convertLineStringCoords(newAreaStreets);
             uniqueStreets = uniqueStreets.concat(getNewFeatures(uniqueStreets, newAreaStreets))
 
-            let total = {
-                "type": "FeatureCollection",
-                "features": uniqueStreets
-                }
-            map.getSource('streets').setData(total);   
-            
+            let totalStreets = updateLayer(uniqueStreets);
+            map.getSource('streets').setData(totalStreets);   
+
             let mapMovedHospitals = await getFeatures(bounds2, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
             uniqueHospitals = uniqueHospitals.concat(getNewFeatures(uniqueHospitals, mapMovedHospitals));
 
-            let totalHospitals = {
-                "type": "FeatureCollection",
-                "features": uniqueHospitals
-                }
+            let totalHospitals = updateLayer(uniqueHospitals);
             map.getSource('hospitals').setData(totalHospitals);
 
             let mapMovedSchools = await getFeatures(bounds2, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
             uniqueSchools = uniqueSchools.concat(getNewFeatures(uniqueSchools, mapMovedSchools));
 
-            let totalSchools = {
-                "type": "FeatureCollection",
-                "features": uniqueSchools
-                }
+            let totalSchools = updateLayer(uniqueSchools);
             map.getSource('schools').setData(totalSchools);
-            
-            
         });
 
         //Get the source data from school features to use when calculating the nearest school to a hospital
@@ -283,50 +278,28 @@
         // the location of the click, with description HTML from its properties.
         map.on('click', 'hospitals', function(e) {
             let schools = schoolSource._data.features;
-
+            let hospitalCenter = turf.centroid(e.features[0]).geometry.coordinates;
             //Distance from most southwestern and most northeastern points of England is approx. 425 miles.
             //As hospitals as secondary schools do exist in England, this number will be a good starting point,
             //as the minimum distance between a hospital and school will be less than this.
             //Distance is measures in miles 
             let minDistance = 425;
             let closestSchool = '';
-            let closestFeature = ''
+            let closestFeature = '';
             let closestSchoolPoint;
             for(let i=0; i<schools.length; i++){
-                let distance = turf.distance(e.features[0].geometry.coordinates[0][0], schools[i].geometry.coordinates[0][0], {units: 'miles'})
+                let schoolCenter = turf.centroid(schools[i]).geometry.coordinates;
+                let distance = turf.distance(hospitalCenter, schoolCenter, {units: 'miles'})
                 if(distance < minDistance){
                     minDistance = distance;
                     closestSchool = schools[i].properties.DistinctiveName1;  
-                    closestFeature = [schools[i]]
-                    closestSchoolPoint = schools[i].geometry.coordinates[0][0]
+                    closestFeature = [schools[i]];
+                    closestSchoolPoint = schoolCenter;
                 }                
             }
-            if(!map.getLayer('closest-school')){
-                map.addLayer({
-                    "id": "closest-school",
-                    "type": "fill",
-                    "source": {
-                    "type": "geojson",
-                    "data": {
-                        "type": "FeatureCollection",
-                        "features": closestFeature
-                    }
-                    },
-                    "layout": {},
-                    "paint": {
-                    "fill-color": "#D2691E",
-                    "fill-opacity": 0.8
-                    }
-                });
-            }
-            else{
-                let closestData = {
-                    "type": "FeatureCollection",
-                    "features": closestFeature
-                }
-                map.getSource('closest-school').setData(closestData)
-            }
 
+            addClosestSchool(closestFeature);
+            
             if (!map.getLayer('route')) {
                 map.addSource('route', {
                     'type': 'geojson',
@@ -336,7 +309,7 @@
                         'geometry': {
                             'type': 'LineString',
                             'coordinates': [
-                                e.features[0].geometry.coordinates[0][0],
+                                hospitalCenter,
                                 closestSchoolPoint
                             ]
                         }
@@ -364,7 +337,7 @@
                     'geometry': {
                         'type': 'LineString',
                         'coordinates': [
-                            e.features[0].geometry.coordinates[0][0],
+                            hospitalCenter,
                             closestSchoolPoint
                         ]
                     }
@@ -379,7 +352,7 @@
                             'properties': {},
                             'geometry': {
                                 'type': 'Point',
-                                'coordinates':  e.features[0].geometry.coordinates[0][0]
+                                'coordinates':  hospitalCenter
                             }
                         }
                     ]
@@ -403,14 +376,9 @@
                 
                 // Used to increment the value of the point measurement against the route.
                 let counter = 0;
-
-                map.loadImage('drone.png', function (error, image) {
-                        if (error) throw error;
-                        if (!map.hasImage('drone')) map.addImage('drone', image);
-                    });
                 
                 if (!map.getLayer('icon')) {
-                   
+                    
                     map.addSource('icon', {
                         'type': 'geojson',
                         'data': icon
@@ -489,7 +457,6 @@
         });
        
     });
-
 
     /**
      * Get features from the WFS.
