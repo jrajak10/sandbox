@@ -128,7 +128,7 @@
         });
     }
 
-    function createOptions(){
+    function createAreaOptions(){
         for (let i = 0; i < responsibleAuthorities.length; i++) {
             let newOption = document.createElement("option");
             let newContent = document.createTextNode([i + 1] + '. ' + responsibleAuthorities[i].Name);
@@ -163,6 +163,26 @@
             arr[i].geometry.coordinates = arr[i].geometry.coordinates[0];
         }
         return arr
+    }
+
+    function addStreetsLayer(features){
+        map.addSource('streets', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection', 
+                'features': features
+            }
+        });
+
+        map.addLayer({
+            'id': 'streets',
+            'type': 'line',
+            'source': 'streets',
+            'paint': {
+                'line-width': 5,
+                'line-color': "#FFD700"
+            }
+        });
     }
 
     function addClosestSchool(closestFeature){
@@ -227,13 +247,51 @@
         }
     }
 
+    function createRouteData(hospitalCenter, closestSchoolPoint){
+        return {
+            'type': 'Feature',
+            'properties': {},
+            'geometry': {
+                'type': 'LineString',
+                'coordinates': [
+                    hospitalCenter,
+                    closestSchoolPoint
+                ]
+            }
+        }
+    }
+
+    function createIcon(hospitalCenter) {
+        return {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': hospitalCenter
+                    }
+                }
+            ]
+        };
+    }
+
+    function drawPath(path, steps, minDistance, routeData) {
+        // Draw an path between the `origin` & `destination` of the two points
+        for (let i = 0; i < minDistance; i += minDistance / steps) {
+            let segment = turf.along(routeData, i, { units: 'miles' });
+            path.push(segment.geometry.coordinates);
+        }
+        return path;
+    }
 
     // Add event whicxh waits for the map to be loaded.
     map.on('load', async function() {
-        
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
-        createOptions() 
+
+        createAreaOptions() 
         flyToArea()
 
         map.loadImage('drone.png', function (error, image) {
@@ -243,24 +301,7 @@
 
         let uniqueStreets = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
         convertLineStringCoords(uniqueStreets);
-            
-        map.addSource('streets', {
-            'type': 'geojson',
-            'data': {
-                'type': 'FeatureCollection', 
-                'features': uniqueStreets
-            }
-        });
-
-        map.addLayer({
-            'id': 'streets',
-            'type': 'line',
-            'source': 'streets',
-            'paint': {
-                'line-width': 5,
-                'line-color': "#FFD700"
-            }
-        })
+        addStreetsLayer(uniqueStreets);
 
         let uniqueHospitals = await getFeatures(bounds, 'SiteFunction', 'Hospital', 'Sites_FunctionalSite');
         addPolygonToMap("hospitals", uniqueHospitals, "#FF1493")
@@ -331,6 +372,7 @@
         map.on('click', 'hospitals', function(e) {
             let schools = schoolSource._data.features;
             let hospitalCenter = turf.centroid(e.features[0]).geometry.coordinates;
+            
             //Distance from most southwestern and most northeastern points of England is approx. 425 miles.
             //As hospitals as secondary schools do exist in England, this number will be a good starting point,
             //as the minimum distance between a hospital and school will be less than this.
@@ -339,30 +381,21 @@
             let closestSchool = '';
             let closestFeature = '';
             let closestSchoolPoint;
-            for(let i=0; i<schools.length; i++){
+            for (let i = 0; i < schools.length; i++) {
                 let schoolCenter = turf.centroid(schools[i]).geometry.coordinates;
-                let distance = turf.distance(hospitalCenter, schoolCenter, {units: 'miles'})
-                if(distance < minDistance){
+                let distance = turf.distance(hospitalCenter, schoolCenter, { units: 'miles' })
+                if (distance < minDistance) {
                     minDistance = distance;
-                    closestSchool = schools[i].properties.DistinctiveName1;  
+                    closestSchool = schools[i].properties.DistinctiveName1;
                     closestFeature = [schools[i]];
                     closestSchoolPoint = schoolCenter;
-                }                
-            }
-
-            addClosestSchool(closestFeature);
-
-            let routeData = {
-                'type': 'Feature',
-                'properties': {},
-                'geometry': {
-                    'type': 'LineString',
-                    'coordinates': [
-                        hospitalCenter,
-                        closestSchoolPoint
-                    ]
                 }
             }
+                
+            //Closest school changes colour onclick
+            addClosestSchool(closestFeature);
+            //Adds the route
+            let routeData = createRouteData(hospitalCenter, closestSchoolPoint);
             addRouteToMap(routeData);
 
             let path = [];
@@ -370,39 +403,19 @@
             // a smoother path and animation, but too many steps will result in a
             // low frame rate
             let steps = 250;
-
-            // Draw an path between the `origin` & `destination` of the two points
-            for (let i = 0; i < minDistance; i += minDistance / steps) {
-                let segment = turf.along(routeData, i, { units: 'miles' });
-                path.push(segment.geometry.coordinates);
-            }
-
+            path = drawPath(path, steps, minDistance, routeData)
+            
             // Update the route with calculated path coordinates
             routeData.geometry.coordinates = path;
 
             // Used to increment the value of the point measurement against the route.
             let counter = 0;
-
-            let icon = {
-                'type': 'FeatureCollection',
-                'features': [
-                    {
-                        'type': 'Feature',
-                        'properties': {},
-                        'geometry': {
-                            'type': 'Point',
-                            'coordinates': hospitalCenter
-                        }
-                    }
-                ]
-            };
-
+            let icon = createIcon(hospitalCenter)
             addIconToMap(icon);
 
             function animate() {
                 icon.features[0].geometry.coordinates =
-                    routeData.geometry.coordinates[counter];
-
+                routeData.geometry.coordinates[counter];
 
                 // Update the source with this new data.
                 map.getSource('icon').setData(icon);
@@ -415,8 +428,6 @@
 
             }
             animate()
-
-
 
             popup
                 .setLngLat(e.lngLat)
@@ -434,7 +445,6 @@
         // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
         map.on('mouseleave', 'hospitals', function () {
             map.getCanvas().style.cursor = '';
-            
         });
 
         // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
