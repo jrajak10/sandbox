@@ -1,12 +1,12 @@
 
-    var apiKey = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
+    const API_KEY = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
 
-    var wfsServiceUrl = 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1',
+    let wfsServiceUrl = 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1',
         tileServiceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
 
     // Create a map style object using the OS Maps API WMTS service.
-    var params = {
-        key: apiKey,
+    let params = {
+        key: API_KEY,
         service: 'WMTS',
         request: 'GetTile',
         version: '2.0.0',
@@ -21,11 +21,11 @@
         tileCol: '{x}'
     };
 
-    var queryString = Object.keys(params).map(function(key) {
+    let queryString = Object.keys(params).map(function(key) {
         return key + '=' + params[key];
     }).join('&');
 
-    var style = {
+    let style = {
         'version': 8,
         'sources': {
             'raster-tiles': {
@@ -43,7 +43,7 @@
     };
 
     // Initialize the map object.
-    var map = new mapboxgl.Map({
+    let map = new mapboxgl.Map({
         container: 'map',
         minZoom: 9,
         maxZoom: 15,
@@ -52,13 +52,44 @@
         zoom: 13
     });
 
-    map.dragRotate.disable(); // Disable map rotation using right click + drag.
-    map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
+    function createMap(map){
+        map.dragRotate.disable(); // Disable map rotation using right click + drag.
+        map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
 
-    // Add navigation control (excluding compass button) to the map.
-    map.addControl(new mapboxgl.NavigationControl({
-        showCompass: false
-    }));
+        // Add navigation control (excluding compass button) to the map.
+        map.addControl(new mapboxgl.NavigationControl({
+            showCompass: false
+        }));
+
+        map.loadImage('drone.png', function (error, image) {
+            if (error) throw error;
+            if (!map.hasImage('drone')) map.addImage('drone', image);
+        });
+
+        //Change cursor when mouse enters or leaves layer
+        function formatCursor(map, event, id){
+            if(event == "mouseenter"){
+                map.on(event, id, function () {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+            }
+            else if(event == 'mouseleave'){
+                map.on(event, id, function () {
+                    map.getCanvas().style.cursor = '';
+                }); 
+            }
+        }
+
+        formatCursor(map, 'mouseenter', 'streets');
+        formatCursor(map, 'mouseleave', 'streets');
+
+        formatCursor(map, 'mouseenter', 'hospitals');
+        formatCursor(map, 'mouseleave', 'hospitals');
+
+        formatCursor(map, 'mouseenter', 'schools');
+        formatCursor(map, 'mouseleave', 'schools');
+   
+    }
 
     function getNewFeatures(loadedFeatureArray, movedFeatureArray){
         let totalFeaturesIDs = loadedFeatureArray.map(x => x.properties.OBJECTID);
@@ -128,7 +159,7 @@
         });
     }
 
-    function createAreaOptions(){
+    function createAreaOptions(responsibleAuthorities){
         for (let i = 0; i < responsibleAuthorities.length; i++) {
             let newOption = document.createElement("option");
             let newContent = document.createTextNode([i + 1] + '. ' + responsibleAuthorities[i].Name);
@@ -138,7 +169,7 @@
         }
     }
 
-    function flyToArea() {
+    function flyToArea(responsibleAuthorities) {
         document.getElementById("area-select").addEventListener('change', async function () {
             for (let i = 0; i < responsibleAuthorities.length; i++) {
                 if (document.getElementById("area-select").value.replace([i + 1] + '. ', '') == responsibleAuthorities[i].Name) {
@@ -220,8 +251,7 @@
             map.getSource('route').setData(routeData)
         }
     }
-
-
+    
     function addIconToMap(icon){
         if (!map.getLayer('icon')) {
             map.addSource('icon', {
@@ -286,18 +316,53 @@
         return path;
     }
 
+    function getClosestSchool(schools, hospitalCenter, minDistance, closestSchool, closestFeature, closestSchoolPoint){
+        for (let i = 0; i < schools.length; i++) {
+            let schoolCenter = turf.centroid(schools[i]).geometry.coordinates;
+            let distance = turf.distance(hospitalCenter, schoolCenter, { units: 'miles' })
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestSchool = schools[i].properties.DistinctiveName1;
+                closestFeature = [schools[i]];
+                closestSchoolPoint = schoolCenter;
+            }
+        }
+        return [minDistance, closestSchool, closestFeature, closestSchoolPoint]
+    }
+
+    function addInformation(e, closestSchool, minDistance){
+        document.getElementById("hospital-name").innerHTML = "<b>" + e.features[0].properties.DistinctiveName1 + "</b>"
+        document.getElementById("closest-school").innerHTML =
+            'Nearest School: ' + closestSchool
+            + '<br>Distance From Hospital: ' + minDistance.toFixed(2) + " miles";
+    }
+
+    function createPopup(map, popup, id){
+        if(id == "streets") {
+            map.on('click', 'streets', function (e) {
+                popup
+                    .setLngLat(e.lngLat)
+                    .setHTML(e.features[0].properties.ResponsibleAuthority)
+                    .addTo(map);
+            });
+        }
+        else if(id == "schools"){
+            map.on('click', 'schools', function(e) {
+                popup
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.DistinctiveName1)
+                .addTo(map);
+            });   
+        }
+    }
+
     // Add event whicxh waits for the map to be loaded.
     map.on('load', async function() {
         // Get the visible map bounds (BBOX).
         var bounds = map.getBounds();
 
-        createAreaOptions() 
-        flyToArea()
-
-        map.loadImage('drone.png', function (error, image) {
-            if (error) throw error;
-            if (!map.hasImage('drone')) map.addImage('drone', image);
-        });
+        createAreaOptions(responsibleAuthorities); 
+        flyToArea(responsibleAuthorities);
 
         let uniqueStreets = await getFeatures(bounds, 'ResponsibleAuthority', 'Birmingham', 'Highways_Street');
         convertLineStringCoords(uniqueStreets);
@@ -347,25 +412,11 @@
         //Get the source data from school features to use when calculating the nearest school to a hospital
         let schoolSource = map.getSource('schools')
 
-        // When a click event occurs on a feature in the 'streets' layer, open a popup at
+        // When a click event occurs on a feature in the layer, open a popup at
         // the location of the click, with description HTML from its properties.
         let popup = new mapboxgl.Popup({className: 'popup', offset: 5});
-        map.on('click', 'streets', function(e) {
-                popup
-                .setLngLat(e.lngLat)
-                .setHTML(e.features[0].properties.ResponsibleAuthority)
-                .addTo(map);
-        });
-
-        // Change the cursor to a pointer when the mouse is over the 'streets' layer.
-        map.on('mouseenter', 'streets', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change the cursor back to a pointer when it leaves the 'streets' layer.
-        map.on('mouseleave', 'streets', function () {
-            map.getCanvas().style.cursor = '';
-        });
+        createPopup(map, popup, 'schools');
+        createPopup(map, popup, 'streets')
 
         // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
         // the location of the click, with description HTML from its properties.
@@ -376,22 +427,14 @@
             //Distance from most southwestern and most northeastern points of England is approx. 425 miles.
             //As hospitals as secondary schools do exist in England, this number will be a good starting point,
             //as the minimum distance between a hospital and school will be less than this.
-            //Distance is measures in miles 
-            let minDistance = 425;
-            let closestSchool = '';
-            let closestFeature = '';
-            let closestSchoolPoint;
-            for (let i = 0; i < schools.length; i++) {
-                let schoolCenter = turf.centroid(schools[i]).geometry.coordinates;
-                let distance = turf.distance(hospitalCenter, schoolCenter, { units: 'miles' })
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestSchool = schools[i].properties.DistinctiveName1;
-                    closestFeature = [schools[i]];
-                    closestSchoolPoint = schoolCenter;
-                }
-            }
+            //Distance is measures in miles
+            let results = getClosestSchool(schools, hospitalCenter, 425, '', '', '');
+            minDistance = results[0];
+            closestSchool = results[1];
+            closestFeature = results[2];
+            closestSchoolPoint = results[3];
                 
+            addInformation(e, closestSchool, minDistance);
             //Closest school changes colour onclick
             addClosestSchool(closestFeature);
             //Adds the route
@@ -423,49 +466,11 @@
                 // Request the next frame of animation so long the end has not been reached.
                 if (counter < steps) {
                     requestAnimationFrame(animate);
-                    counter++;
                 }
-
+                counter++;
             }
-            animate()
-
-            popup
-                .setLngLat(e.lngLat)
-                .setHTML("<b>" + e.features[0].properties.DistinctiveName1 + "</b>"
-                    + '<br>Nearest School: ' + closestSchool
-                    + '<br>Distance From Hospital: ' + minDistance.toFixed(2) + " miles")
-                .addTo(map);
+            animate();       
         });
-
-        // Change the cursor to a pointer when the mouse is over the 'hospitals' layer.
-        map.on('mouseenter', 'hospitals', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
-        map.on('mouseleave', 'hospitals', function () {
-            map.getCanvas().style.cursor = '';
-        });
-
-        // When a click event occurs on a feature in the 'hospitalss' layer, open a popup at
-        // the location of the click, with description HTML from its properties.
-        map.on('click', 'schools', function(e) {
-            popup
-            .setLngLat(e.lngLat)
-            .setHTML(e.features[0].properties.DistinctiveName1)
-            .addTo(map);
-        });
-
-        // Change the cursor to a pointer when the mouse is over the 'hospitals' layer.
-        map.on('mouseenter', 'schools', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change the cursor back to a pointer when it leaves the 'hospitals' layer.
-        map.on('mouseleave', 'schools', function () {
-            map.getCanvas().style.cursor = '';
-        });
-       
     });
 
     /**
@@ -502,7 +507,7 @@
 
         do {
         var params = {
-            key: apiKey,
+            key: API_KEY,
             service: 'WFS',
             request: 'GetFeature',
             version: '2.0.0',
@@ -539,3 +544,5 @@
 
         return wfsServiceUrl + '?' + encodedParameters;
     }
+
+    createMap(map);
