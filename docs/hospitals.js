@@ -106,7 +106,7 @@ let responsibleAuthorities = [
     {
         "Name": "Hampshire",
         "center": [-1.309977, 51.062196]
-    },
+    },  
     {
         "Name": "Essex",
         "center": [0.473472, 51.733467]
