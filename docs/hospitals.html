@@ -16,7 +16,10 @@
 <div id="map"></div>
 <div class='map-overlay top'>
     <div class='map-overlay-inner'>
-        <p>Testing...</p>
+        <div class="onclick-information">
+            <h3 id="hospital-name">Click to select a hospital</h3>
+            <p id="closest-school"></p>
+        </div>
         <select id="area-select">
             <!-- chosen areas will appear here -->
         </select>
@@ -35,7 +38,6 @@
                 <div>Closest Secondary School to Hospital</div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -44,5 +46,6 @@
 <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js"></script>
 <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
 <script src="hospitals.js"></script>
+<script src="hospital_functions.js"></script>
 </body>
 </html>

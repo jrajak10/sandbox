@@ -29,6 +29,12 @@ body {
     margin-top: 10px;
 }
 
+
+#hospital-name{
+    text-align: center; 
+    position: relative; 
+}
+
 .flex-container {
     display: flex;
     flex-direction: row;
