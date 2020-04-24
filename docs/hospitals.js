@@ -357,6 +357,10 @@ function createPopup(map, popup, id) {
 //Create laoding message whilst features load.
 let modal = document.getElementById("load-modal");
 
+function updateModalDisplay(modal, modalDisplay){
+    modal.style.display = modalDisplay;
+}
+
 // Add event whicxh waits for the map to be loaded.
 map.on('load', async function () {
     // Get the visible map bounds (BBOX).
@@ -375,12 +379,12 @@ map.on('load', async function () {
     let uniqueSchools = await getFeatures(bounds, 'SiteFunction', 'Secondary Education', 'Sites_FunctionalSite');
     addPolygonToMap("schools", uniqueSchools, "#20B2AA")
 
-    modal.style.display = "none";
+    updateModalDisplay(modal, 'none');
     // Add event which will be triggered when the map has finshed moving (pan + zoom).
     // Implements a simple strategy to only request data when the map viewport invalidates
     // certain bounds.
     map.on('moveend', async function () {
-        modal.style.display = "block";
+        updateModalDisplay(modal, 'block');
         bounds2 = map.getBounds();
         bounds = bounds2;
 
@@ -410,7 +414,7 @@ map.on('load', async function () {
 
         let totalSchools = updateLayer(uniqueSchools);
         map.getSource('schools').setData(totalSchools);
-        modal.style.display = "none";
+        updateModalDisplay(modal, 'none');
     });
 
     //Get the source data from school features to use when calculating the nearest school to a hospital
