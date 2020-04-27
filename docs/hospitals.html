@@ -15,6 +15,12 @@
 
 <div id="map"></div>
 <div class='map-overlay top'>
+    <div id="load-modal" class="modal">
+        <div id="loading-message" class="modal-content">
+            <p>Loading Features</p>
+            <div class="loader"></div>
+        </div>
+    </div>
     <div class='map-overlay-inner'>
         <div class="onclick-information">
             <h3 id="hospital-name">Click to select a hospital</h3>
@@ -46,6 +52,6 @@
 <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.54.0/mapbox-gl.js"></script>
 <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
 <script src="hospitals.js"></script>
-<script src="hospital_functions.js"></script>
+<script src="hospital_map.js"></script>
 </body>
 </html>
