@@ -64,26 +64,48 @@ img {
 
 @media only screen and (max-width: 780px){
     h1{
-        font-size: 27.5px;
+        font-size: 30px;
         padding-bottom: 5px;
     }
+
+    h2{
+        font-size: 27.5px;
+        margin-left: -20px;
+    }
+    p{
+        font-size: 25px;
+        margin-left: -20px;
+    }
+    li{
+        font-size: 25px;
+        margin-left: -20px;
+    }
+    img{
+        margin-left: -10px;
+    }
+
 }
 
 @media only screen and (max-width: 480px){
-    body{
-        margin: 5% 5%;
-    }
     h1{
         font-size: 20px;
         padding-bottom: 0px;
+        margin-left: auto;
+        margin-right: auto;
     }
     h2{
-        font-size: 17.5px;
+        font-size: 17.5px; 
+        margin-left: -40px;
     }
     p{
         font-size: 15px;
+        margin-left: -40px;
     }
     li{
-        font-size: 12.5px;
+        font-size: 15px;
+        margin-left: -60px;
+    }
+    img{
+        margin-left: -20px;
     }
 }
