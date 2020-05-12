@@ -1,3 +1,4 @@
+
 const API_KEY = 'LMtM3BTwlwljPNGD77f81lrbsjBiKs52';
 
 let serviceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
@@ -42,25 +43,6 @@ let style = {
     }]
 };
 
-// Initialize the map object.
-let map = new mapboxgl.Map({
-    container: 'map',
-    minZoom: 7,
-    maxZoom: 20,
-    style: style,
-    center: [ -2.498094, 52.569447],
-    zoom: 7
-});
-
-map.dragRotate.disable(); // Disable map rotation using right click + drag.
-map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
-
-// Add navigation control (excluding compass button) to the map.
-map.addControl(new mapboxgl.NavigationControl({
-    showCompass: false
-}));
-
-
 let partners;
 let features;
 
@@ -71,18 +53,43 @@ async function fetchPartnerHubs(partners){
     return features
 }
 
-async function createMarkers(features){
-    features = await fetchPartnerHubs(partners);
 
-
-
-    features.forEach(function(marker){
-        new mapboxgl.Marker({color: "#f7a70a", id: 'marker'})
-            .setLngLat(marker.geometry.coordinates)
-            .setPopup(new mapboxgl.Popup({ offset: 10 })
-                .setHTML("Name: " + marker.properties["Company Name"]))
-            .addTo(map);
-
-    });
+function createPartnerHubMarkers(partnerHubs) {
+    map.loadImage(
+        'marker.png',
+        function (error, image) {
+            if (error) throw error;
+            if (!map.getImage) {
+                map.addImage('marker', image);
+            }
+            if (!map.getLayer('markers')) {
+                map.addLayer({
+                    'id': 'markers',
+                    'type': 'symbol',
+                    'source': {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': partnerHubs
+                        }
+                    },
+                    'layout': {
+                        'icon-image': 'marker',
+                        'icon-size': 1
+                    }
+                });
+            }
+        }
+    );
 }
-createMarkers(features)
+
+function togglePartnerHubs(e) {
+    map.setLayoutProperty(
+        'markers',
+        'visibility',
+        e.target.checked ? 'visible' : 'none'
+    );
+}
+
+
+
