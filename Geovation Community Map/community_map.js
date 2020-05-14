@@ -44,52 +44,15 @@ let style = {
 };
 
 let partners;
-let features;
 
 async function fetchPartnerHubs(partners){
     partners = await fetch('partner_hubs.json');
     let json = await partners.json();
-    features = json.features;
+    let features = json.features;
     return features
 }
 
 
-function createPartnerHubMarkers(partnerHubs) {
-    map.loadImage(
-        'marker.png',
-        function (error, image) {
-            if (error) throw error;
-            if (!map.getImage) {
-                map.addImage('marker', image);
-            }
-            if (!map.getLayer('markers')) {
-                map.addLayer({
-                    'id': 'markers',
-                    'type': 'symbol',
-                    'source': {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'FeatureCollection',
-                            'features': partnerHubs
-                        }
-                    },
-                    'layout': {
-                        'icon-image': 'marker',
-                        'icon-size': 1
-                    }
-                });
-            }
-        }
-    );
-}
-
-function togglePartnerHubs(e) {
-    map.setLayoutProperty(
-        'markers',
-        'visibility',
-        e.target.checked ? 'visible' : 'none'
-    );
-}
 
 
 

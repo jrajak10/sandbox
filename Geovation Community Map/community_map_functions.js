@@ -8,6 +8,40 @@ let map = new mapboxgl.Map({
     zoom: 7
 });
 
+function createPartnerHubMarkers(partnerHubs, map) {
+    map.loadImage(
+        'marker.png',
+        function (error, image) {
+            if (error) throw error;
+            if (!map.getImage) {
+                map.addImage('marker', image);
+            }
+            if (!map.getLayer('markers')) {
+                map.addLayer({
+                    'id': 'markers',
+                    'type': 'symbol',
+                    'source': {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'FeatureCollection',
+                            'features': partnerHubs
+                        }
+                    },
+                    'layout': {
+                        'icon-image': 'marker',
+                        'icon-size': 1
+                    }
+                });
+            }
+        }
+    );
+}
+
+function formatCursor(cursor, map){
+    map.getCanvas().style.cursor = cursor; 
+}
+
+let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
 
 function createMap(map){
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
@@ -18,32 +52,31 @@ function createMap(map){
         showCompass: false
     }));
 
+    map.on('load', async function () {
+        let partnerHubs = await fetchPartnerHubs(partners)
+        createPartnerHubMarkers(partnerHubs, map)
+        document.getElementById('markers').addEventListener('change', function (e) {
+            map.setLayoutProperty(
+                'markers',
+                'visibility',
+                e.target.checked ? 'visible' : 'none'
+            );
+        });  
+    });    
+
+    map.on('mouseenter', 'markers', function(e){
+        formatCursor('pointer', map);
+        popup
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML(e.features[0].properties["Company Name"])
+            .addTo(map);   
+    });
+    
+    map.on('mouseleave', 'markers', function(e){
+        formatCursor('', map);
+        popup.remove();   
+    });
 }
 
-map.on('load', async function () {
-    let partnerHubs = await fetchPartnerHubs(partners)
-    createPartnerHubMarkers(partnerHubs)
-    document.getElementById('markers').addEventListener('change', togglePartnerHubs)  
-});
-
-
-function formatCursor(cursor){
-    map.getCanvas().style.cursor = cursor; 
-}
-
-let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
-
-map.on('mouseenter', 'markers', function(e){
-    formatCursor('pointer');
-    popup
-        .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(e.features[0].properties["Company Name"])
-        .addTo(map);   
-})
-
-map.on('mouseleave', 'markers', function(e){
-    formatCursor('');
-    popup.remove();   
-})
 
 createMap(map);
