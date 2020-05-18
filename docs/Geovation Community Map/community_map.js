@@ -56,3 +56,11 @@ let map = new mapboxgl.Map({
 
 fetchPartnerHubs(partners)
 addMapFeatures(map);
+<<<<<<< HEAD:docs/Geovation Community Map/community_map.js
+=======
+
+
+
+
+
+>>>>>>> a0478d7a38ffd0f0e20f2404aa2ecde68fcb4b46:Geovation Community Map/community_map.js
