@@ -1,17 +1,4 @@
 export { partners, fetchPartnerHubs, createPartnerHubMarkers, formatCursor, addMapFeatures }
-<<<<<<< HEAD:docs/Geovation Community Map/community_map_functions.js
-=======
-
-let partners;
-
-//fetches json data for partner hubs
-async function fetchPartnerHubs(partners) {
-    partners = await fetch('partner_hubs.json');
-    let json = await partners.json();
-    let features = json.features;
-    return features
-}
->>>>>>> a0478d7a38ffd0f0e20f2404aa2ecde68fcb4b46:Geovation Community Map/community_map_functions.js
 
 let partners;
 
@@ -53,11 +40,7 @@ function createPartnerHubMarkers(partnerHubs, map) {
     );
 }
 
-<<<<<<< HEAD:docs/Geovation Community Map/community_map_functions.js
 //function that formats the cursor when hovering over a marker
-=======
-//fomat the cursor when hovering over a marker
->>>>>>> a0478d7a38ffd0f0e20f2404aa2ecde68fcb4b46:Geovation Community Map/community_map_functions.js
 function formatCursor(cursor, map) {
     map.getCanvas().style.cursor = cursor;
 }
@@ -83,17 +66,10 @@ function addMapFeatures(map) {
             );
         });
     });
-<<<<<<< HEAD:docs/Geovation Community Map/community_map_functions.js
 
     //create popup which can be removed when toggling the input
     let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
 
-=======
-
-    //create popup which can be removed when toggling the input
-    let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
-
->>>>>>> a0478d7a38ffd0f0e20f2404aa2ecde68fcb4b46:Geovation Community Map/community_map_functions.js
     map.on('mouseenter', 'markers', function (e) {
         formatCursor('pointer', map);
         popup
@@ -106,10 +82,4 @@ function addMapFeatures(map) {
         formatCursor('', map);
         popup.remove();
     });
-<<<<<<< HEAD:docs/Geovation Community Map/community_map_functions.js
 }
-=======
-}
-
-
->>>>>>> a0478d7a38ffd0f0e20f2404aa2ecde68fcb4b46:Geovation Community Map/community_map_functions.js
