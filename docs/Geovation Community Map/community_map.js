@@ -1,3 +1,4 @@
+import { partners, fetchPartnerHubs, addMapFeatures } from "./community_map_functions.js";
 
 const API_KEY = 'LMtM3BTwlwljPNGD77f81lrbsjBiKs52';
 
@@ -21,7 +22,7 @@ let params = {
 };
 
 // Construct query string parameters from object.
-let queryString = Object.keys(params).map(function(key) {
+let queryString = Object.keys(params).map(function (key) {
     return key + '=' + params[key];
 }).join('&');
 
@@ -31,7 +32,7 @@ let style = {
     'sources': {
         'raster-tiles': {
             'type': 'raster',
-            'tiles': [ serviceUrl + '?' + queryString ],
+            'tiles': [serviceUrl + '?' + queryString],
             'tileSize': 256,
             'maxzoom': 20
         }
@@ -43,16 +44,15 @@ let style = {
     }]
 };
 
-let partners;
+// Initialize the map object.
+let map = new mapboxgl.Map({
+        container: 'map',
+        minZoom: 7,
+        maxZoom: 20,
+        style: style,
+        center: [-2.498094, 52.569447],
+        zoom: 7
+    });
 
-async function fetchPartnerHubs(partners){
-    partners = await fetch('partner_hubs.json');
-    let json = await partners.json();
-    let features = json.features;
-    return features
-}
-
-
-
-
-
+fetchPartnerHubs(partners)
+addMapFeatures(map);

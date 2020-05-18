@@ -1,13 +1,16 @@
-// Initialize the map object.
-let map = new mapboxgl.Map({
-    container: 'map',
-    minZoom: 7,
-    maxZoom: 20,
-    style: style,
-    center: [ -2.498094, 52.569447],
-    zoom: 7
-});
+export { partners, fetchPartnerHubs, createPartnerHubMarkers, formatCursor, addMapFeatures }
 
+let partners;
+
+//fetches json data for partner hubs
+async function fetchPartnerHubs(partners) {
+    partners = await fetch('partner_hubs.json');
+    let json = await partners.json();
+    let features = json.features;
+    return features
+}
+
+//Creates Partner Hub Markers, loading them on the map
 function createPartnerHubMarkers(partnerHubs, map) {
     map.loadImage(
         'marker.png',
@@ -37,13 +40,12 @@ function createPartnerHubMarkers(partnerHubs, map) {
     );
 }
 
-function formatCursor(cursor, map){
-    map.getCanvas().style.cursor = cursor; 
+//function that formats the cursor when hovering over a marker
+function formatCursor(cursor, map) {
+    map.getCanvas().style.cursor = cursor;
 }
 
-let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
-
-function createMap(map){
+function addMapFeatures(map) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
 
@@ -55,28 +57,29 @@ function createMap(map){
     map.on('load', async function () {
         let partnerHubs = await fetchPartnerHubs(partners)
         createPartnerHubMarkers(partnerHubs, map)
+        //toggle the checkbox to show/hide markers
         document.getElementById('markers').addEventListener('change', function (e) {
             map.setLayoutProperty(
                 'markers',
                 'visibility',
                 e.target.checked ? 'visible' : 'none'
             );
-        });  
-    });    
+        });
+    });
 
-    map.on('mouseenter', 'markers', function(e){
+    //create popup which can be removed when toggling the input
+    let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
+
+    map.on('mouseenter', 'markers', function (e) {
         formatCursor('pointer', map);
         popup
             .setLngLat(e.features[0].geometry.coordinates)
             .setHTML(e.features[0].properties["Company Name"])
-            .addTo(map);   
+            .addTo(map);
     });
-    
-    map.on('mouseleave', 'markers', function(e){
+
+    map.on('mouseleave', 'markers', function (e) {
         formatCursor('', map);
-        popup.remove();   
+        popup.remove();
     });
 }
-
-
-createMap(map);
