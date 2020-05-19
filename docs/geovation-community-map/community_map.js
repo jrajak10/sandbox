@@ -1,4 +1,4 @@
-import { partners, fetchPartnerHubs, addMapFeatures } from "./community_map_functions.js";
+import { addMapFeatures } from "./community_map_functions.js";
 
 const API_KEY = 'LMtM3BTwlwljPNGD77f81lrbsjBiKs52';
 
@@ -54,5 +54,5 @@ let map = new mapboxgl.Map({
         zoom: 7
     });
 
-fetchPartnerHubs(partners)
+
 addMapFeatures(map);
