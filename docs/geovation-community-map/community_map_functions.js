@@ -1,38 +1,37 @@
-export { partners, fetchPartnerHubs, createPartnerHubMarkers, formatCursor, addMapFeatures }
+export { fetchData, createMarkers, formatCursor, addMapFeatures }
 
-let partners;
-
-//fetches json data for partner hubs
-async function fetchPartnerHubs(partners) {
-    partners = await fetch('partner_hubs.json');
-    let json = await partners.json();
+//fetches json data from json files
+async function fetchData(data) {
+    let fetchedData = await fetch(data);
+    let json = await fetchedData.json();
     let features = json.features;
     return features
 }
 
 //Creates Partner Hub Markers, loading them on the map
-function createPartnerHubMarkers(partnerHubs, map) {
+function createMarkers(fetchedData, map, imageName, id, file) {
     map.loadImage(
-        'marker.png',
+        file,
         function (error, image) {
             if (error) throw error;
             if (!map.getImage) {
-                map.addImage('marker', image);
+                map.addImage(imageName, image);
             }
-            if (!map.getLayer('markers')) {
+            if (!map.getLayer(id)) {
                 map.addLayer({
-                    'id': 'markers',
+                    'id': id,
                     'type': 'symbol',
                     'source': {
                         'type': 'geojson',
                         'data': {
                             'type': 'FeatureCollection',
-                            'features': partnerHubs
+                            'features': fetchedData
                         }
                     },
                     'layout': {
-                        'icon-image': 'marker',
-                        'icon-size': 1
+                        'icon-image': imageName,
+                        'icon-size': 1,
+                        'icon-allow-overlap': true
                     }
                 });
             }
@@ -45,7 +44,37 @@ function formatCursor(cursor, map) {
     map.getCanvas().style.cursor = cursor;
 }
 
-function addMapFeatures(map) {
+// adds popup when mouse hovers over marker
+function addPopup(map, marker, popup){
+    map.on('mouseenter', marker, function (e) {
+        formatCursor('pointer', map);
+        popup
+            .setLngLat(e.features[0].geometry.coordinates)
+            .setHTML(e.features[0].properties["Company Name"])
+            .addTo(map);
+    });
+}
+
+//remvoes popup when mouse leaves marker
+function removePopup(map, marker, popup){
+    map.on('mouseleave', marker, function (e) {
+        formatCursor('', map);
+        popup.remove();
+    });
+}
+    
+//toggle the checkbox to show/hide markers
+function toggleInput(id, map) {
+    document.getElementById(id).addEventListener('change', function (e) {
+        map.setLayoutProperty(
+            id,
+            'visibility',
+            e.target.checked ? 'visible' : 'none'
+        );
+    });
+};
+
+function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
 
@@ -55,31 +84,24 @@ function addMapFeatures(map) {
     }));
 
     map.on('load', async function () {
-        let partnerHubs = await fetchPartnerHubs(partners)
-        createPartnerHubMarkers(partnerHubs, map)
-        //toggle the checkbox to show/hide markers
-        document.getElementById('markers').addEventListener('change', function (e) {
-            map.setLayoutProperty(
-                'markers',
-                'visibility',
-                e.target.checked ? 'visible' : 'none'
-            );
-        });
+        let partnerHubs = await fetchData('partner_hubs.json');
+        let sponsors = await fetchData('sponsors.json');
+        let stakeholders = await fetchData('stakeholders.json');
+       
+        createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
+        createMarkers(sponsors, map, 'sponsor-markers','sponsor-markers', 'sponsors_marker.png')
+        createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholder_marker.png')
+
+        toggleInput('partner-hub-markers', map);
+        toggleInput('sponsor-markers', map)
+        toggleInput('stakeholder-markers', map)     
     });
 
-    //create popup which can be removed when toggling the input
-    let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
+    addPopup(map, 'partner-hub-markers', popup)
+    addPopup(map, 'sponsor-markers', popup)
+    addPopup(map, 'stakeholder-markers', popup)
 
-    map.on('mouseenter', 'markers', function (e) {
-        formatCursor('pointer', map);
-        popup
-            .setLngLat(e.features[0].geometry.coordinates)
-            .setHTML(e.features[0].properties["Company Name"])
-            .addTo(map);
-    });
-
-    map.on('mouseleave', 'markers', function (e) {
-        formatCursor('', map);
-        popup.remove();
-    });
+    removePopup(map, 'partner-hub-markers', popup)
+    removePopup(map, 'sponsor-markers', popup)
+    removePopup(map, 'stakeholder-markers', popup)
 }
