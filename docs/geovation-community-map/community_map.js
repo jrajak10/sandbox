@@ -54,5 +54,9 @@ let map = new mapboxgl.Map({
         zoom: 7
     });
 
+//create popup which can be removed when toggling the input
+let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
 
-addMapFeatures(map);
+
+
+addMapFeatures(map, popup);

@@ -44,9 +44,6 @@ function formatCursor(cursor, map) {
     map.getCanvas().style.cursor = cursor;
 }
 
-//create popup which can be removed when toggling the input
-let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
-
 // adds popup when mouse hovers over marker
 function addPopup(map, marker, popup){
     map.on('mouseenter', marker, function (e) {
@@ -77,7 +74,7 @@ function toggleInput(id, map) {
     });
 };
 
-function addMapFeatures(map) {
+function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
 
