@@ -47,7 +47,7 @@ let style = {
 // Initialize the map object.
 let map = new mapboxgl.Map({
         container: 'map',
-        minZoom: 7,
+        minZoom: 6,
         maxZoom: 20,
         style: style,
         center: [-2.498094, 52.569447],
