@@ -48,10 +48,21 @@ h1 {
 .legend div span{
     display: inline-block;
     margin-right: 10px;
-    margin-top: -50px;
     border: solid 1px #000;
     height: 10px;
     width: 10px;
+}
+
+.high-recipient-values{
+    background-color: #228b22;
+}
+
+.medium-recipient-values{
+    background-color: #d3e8d3;
+}
+
+.low-recipient-values{
+    background-color: #fff;
 }
 
 #onclick-information{

@@ -179,6 +179,7 @@ function addMapFeatures(map, popup) {
         // expression gives the colours for the map based on its value
         let expression = ['match', ['get', 'NAME']];
         expression = fillColor(counties, recipientsCount, expression);
+        console.log(expression)
         addChoroplethLayer(map, 'recipients', expression, counties);
         addCountiesOutline(map, counties);
         addRecipientsInformation(map, recipientsCount);
