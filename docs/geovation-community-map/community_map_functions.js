@@ -74,6 +74,93 @@ function toggleInput(id, map) {
     });
 };
 
+function countUniqueCounties(data){
+    let object = {}
+
+    for(let i=0; i<data.length; i++){
+        if (object[data[i]["County"]] > 0){
+            object[data[i]["County"]]++
+        }
+        else{
+            object[data[i]["County"]] = 1
+        }
+    }
+    return object;
+}
+
+//Calculates colours to the choropleth map for recipients
+function fillColor(counties, recipientsCount, expression) {
+    for (let i = 0; i < counties.length; i++) {
+        //expression creates an array of unique county values with color, else it will return an error
+        if (expression.indexOf(counties[i].properties["NAME"]) === -1) {
+            if (!recipientsCount[counties[i].properties["NAME"]]) {
+                expression.push(counties[i].properties["NAME"], "#FFF")
+            }
+            else if (recipientsCount[counties[i].properties["NAME"]] > 0 &&
+                recipientsCount[counties[i].properties["NAME"]] <= 2) {
+                expression.push(counties[i].properties["NAME"], "#d3e8d3")
+
+            }
+            else {
+                expression.push(counties[i].properties["NAME"], "#228b22")
+            }
+        }
+    }
+    //the default value
+    expression.push('#000')
+    return expression
+}
+
+function addCountiesOutline(map, counties){
+    map.addLayer({
+        'id': 'counties-outline',
+        'type': 'line',
+        'source': {
+            'type': 'geojson',
+            'data': {
+                "type": "FeatureCollection",
+                "features": counties
+            }
+        },
+        'paint': {
+            'line-color': '#000',
+            'line-width': 1
+        }
+    });
+}
+
+function addChoroplethLayer(map, id, expression, counties){
+    map.addLayer({
+        "id": id,
+        "type": "fill",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": counties
+            }
+        },
+        "layout": {},
+        "paint": {
+            "fill-color": expression,
+            "fill-opacity": 0.8
+        }
+    });
+}
+
+//returns information about the county, and number of recipients at the bottom of the information box
+function addRecipientsInformation(map, recipientsCount) {
+    map.on('click', 'recipients', function (e) {
+        let recipientsTotal = recipientsCount[e.features[0].properties["NAME"]]
+        //make recipientsTotal return a value, else it will return 'undefined'
+        if (!recipientsTotal) {
+            recipientsTotal = 0;
+        }
+        document.getElementById('onclick-information').innerHTML = "County: " + e.features[0].properties["NAME"]
+            + "<br> Number of Recipients: " + recipientsTotal;
+    });
+}
+
 function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
@@ -87,14 +174,27 @@ function addMapFeatures(map, popup) {
         let partnerHubs = await fetchData('partner_hubs.json');
         let sponsors = await fetchData('sponsors.json');
         let stakeholders = await fetchData('stakeholders.json');
-       
+        //Fetches the polygons of all the UK counties. 
+        let counties = await fetchData('counties.json');
+        let recipients = await fetchData('geovation_recipients.json');
+
+        let recipientsCount = countUniqueCounties(recipients);
+        
+        // expression gives the colours for the map based on its value
+        let expression = ['match', ['get', 'NAME']];
+        expression = fillColor(counties, recipientsCount, expression);
+        addChoroplethLayer(map, 'recipients', expression, counties);
+        addCountiesOutline(map, counties);
+        addRecipientsInformation(map, recipientsCount);
+
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
-        createMarkers(sponsors, map, 'sponsor-markers','sponsor-markers', 'sponsors_marker.png')
+        createMarkers(sponsors, map, 'sponsor-markers', 'sponsor-markers', 'sponsors_marker.png')
         createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholder_marker.png')
 
         toggleInput('partner-hub-markers', map);
         toggleInput('sponsor-markers', map)
-        toggleInput('stakeholder-markers', map)     
+        toggleInput('stakeholder-markers', map);
+        toggleInput('recipients', map);
     });
 
     addPopup(map, 'partner-hub-markers', popup)
