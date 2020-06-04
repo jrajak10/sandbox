@@ -92,18 +92,13 @@ function countUniqueCounties(data){
 function fillColor(counties, recipientsCount, expression) {
 
     let uniqueCounties = _.map(_.uniqBy(counties, 'properties.NAME'));
-    for (let i = 0; i < uniqueCounties.length; i++) {
-        if (!recipientsCount[uniqueCounties[i].properties["NAME"]]) {
-            expression.push(uniqueCounties[i].properties["NAME"], "#FFF")
-        }
-        else if (recipientsCount[uniqueCounties[i].properties["NAME"]] > 0 &&
-            recipientsCount[uniqueCounties[i].properties["NAME"]] <= 2) {
-            expression.push(uniqueCounties[i].properties["NAME"], "#d3e8d3")
+    for (let i in uniqueCounties) {
+        let county = uniqueCounties[i].properties["NAME"];
+        let recipientCounties = recipientsCount[county];
 
-        }
-        else {
-            expression.push(uniqueCounties[i].properties["NAME"], "#228b22")
-        }
+        !recipientCounties ? expression.push(county, "#FFF") :
+            recipientCounties > 0 && recipientCounties <= 2 ? expression.push(county, "#d3e8d3") :
+                expression.push(county, "#228b22")
     }
     //the default value
     expression.push('#000')
