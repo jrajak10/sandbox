@@ -90,20 +90,19 @@ function countUniqueCounties(data){
 
 //Calculates colours to the choropleth map for recipients
 function fillColor(counties, recipientsCount, expression) {
-    for (let i = 0; i < counties.length; i++) {
-        //expression creates an array of unique county values with color, else it will return an error
-        if (expression.indexOf(counties[i].properties["NAME"]) === -1) {
-            if (!recipientsCount[counties[i].properties["NAME"]]) {
-                expression.push(counties[i].properties["NAME"], "#FFF")
-            }
-            else if (recipientsCount[counties[i].properties["NAME"]] > 0 &&
-                recipientsCount[counties[i].properties["NAME"]] <= 2) {
-                expression.push(counties[i].properties["NAME"], "#d3e8d3")
 
-            }
-            else {
-                expression.push(counties[i].properties["NAME"], "#228b22")
-            }
+    let uniqueCounties = _.map(_.uniqBy(counties, 'properties.NAME'));
+    for (let i = 0; i < uniqueCounties.length; i++) {
+        if (!recipientsCount[uniqueCounties[i].properties["NAME"]]) {
+            expression.push(uniqueCounties[i].properties["NAME"], "#FFF")
+        }
+        else if (recipientsCount[uniqueCounties[i].properties["NAME"]] > 0 &&
+            recipientsCount[uniqueCounties[i].properties["NAME"]] <= 2) {
+            expression.push(uniqueCounties[i].properties["NAME"], "#d3e8d3")
+
+        }
+        else {
+            expression.push(uniqueCounties[i].properties["NAME"], "#228b22")
         }
     }
     //the default value
@@ -177,7 +176,6 @@ function addMapFeatures(map, popup) {
         //Fetches the polygons of all the UK counties. 
         let counties = await fetchData('counties.json');
         let recipients = await fetchData('geovation_recipients.json');
-
         let recipientsCount = countUniqueCounties(recipients);
         
         // expression gives the colours for the map based on its value
