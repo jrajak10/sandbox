@@ -37,3 +37,34 @@ h1 {
 .marker{
     height: 20px;
 }
+
+.legend{
+    padding-top: 40px;
+}
+
+.legend h4 {
+    margin: 0 0 10px;
+}
+.legend div span{
+    display: inline-block;
+    margin-right: 10px;
+    border: solid 1px #000;
+    height: 10px;
+    width: 10px;
+}
+
+.high-recipient-values{
+    background-color: #228b22;
+}
+
+.medium-recipient-values{
+    background-color: #d3e8d3;
+}
+
+.low-recipient-values{
+    background-color: #fff;
+}
+
+#onclick-information{
+    font-weight: bold;
+}
