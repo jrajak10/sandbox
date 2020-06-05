@@ -88,24 +88,33 @@ function countUniqueCounties(data){
     return object;
 }
 
-//Calculates colours to the choropleth map for recipients
-function fillColor(counties, recipientsCount, expression) {
+/**
+ * 
+ * @param {*Object[]} countyPolygons 
+ * @param {*Object} recipientsCount 
+ */
+function calculateCountyColors(countyPolygons, recipientsCount) {
+    let allCounties = _.map(_.uniqBy(countyPolygons, 'properties.NAME'));
+    let countyColors = [];
+    let color = "#FFF";
 
-    let uniqueCounties = _.map(_.uniqBy(counties, 'properties.NAME'));
-    for (let i in uniqueCounties) {
-        let county = uniqueCounties[i].properties["NAME"];
-        let recipientCounties = recipientsCount[county];
-
-        !recipientCounties ? expression.push(county, "#FFF") :
-            recipientCounties > 0 && recipientCounties <= 2 ? expression.push(county, "#d3e8d3") :
-                expression.push(county, "#228b22")
+    for (let county in allCounties) {
+        let countyName = allCounties[county].properties["NAME"];
+        let recipientsInCounty = recipientsCount[countyName];
+        if (!recipientsInCounty) {
+            color = "#FFF";
+        }
+        else {
+            color = recipientsInCounty <= 2 ? "#d3e8d3" : "#228b22";
+        }
+        countyColors.push(countyName, color);
     }
-    //the default value
-    expression.push('#000')
-    return expression
+    //default value
+    countyColors.push("#000");
+    return countyColors;
 }
 
-function addCountiesOutline(map, counties){
+function addCountiesOutline(map, countyPolygons){
     map.addLayer({
         'id': 'counties-outline',
         'type': 'line',
@@ -113,7 +122,7 @@ function addCountiesOutline(map, counties){
             'type': 'geojson',
             'data': {
                 "type": "FeatureCollection",
-                "features": counties
+                "features": countyPolygons
             }
         },
         'paint': {
@@ -123,7 +132,7 @@ function addCountiesOutline(map, counties){
     });
 }
 
-function addChoroplethLayer(map, id, expression, counties){
+function addChoroplethLayer(map, id, expression, countyPolygons){
     map.addLayer({
         "id": id,
         "type": "fill",
@@ -131,7 +140,7 @@ function addChoroplethLayer(map, id, expression, counties){
             "type": "geojson",
             "data": {
                 "type": "FeatureCollection",
-                "features": counties
+                "features": countyPolygons
             }
         },
         "layout": {},
@@ -169,15 +178,17 @@ function addMapFeatures(map, popup) {
         let sponsors = await fetchData('sponsors.json');
         let stakeholders = await fetchData('stakeholders.json');
         //Fetches the polygons of all the UK counties. 
-        let counties = await fetchData('counties.json');
+        let countyPolygons = await fetchData('counties.json');
         let recipients = await fetchData('geovation_recipients.json');
         let recipientsCount = countUniqueCounties(recipients);
         
         // expression gives the colours for the map based on its value
         let expression = ['match', ['get', 'NAME']];
-        expression = fillColor(counties, recipientsCount, expression);
-        addChoroplethLayer(map, 'recipients', expression, counties);
-        addCountiesOutline(map, counties);
+        let countyColors = (calculateCountyColors(countyPolygons, recipientsCount));
+        expression = expression.concat(countyColors)
+
+        addChoroplethLayer(map, 'recipients', expression, countyPolygons);
+        addCountiesOutline(map, countyPolygons);
         addRecipientsInformation(map, recipientsCount);
 
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
