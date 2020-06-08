@@ -88,24 +88,49 @@ function countUniqueCounties(data){
     return object;
 }
 
+//LARGE_VALUE is anything greater than the MEDIUM_VALUE
+let recipientColors = {
+    "SMALL_VALUE": 1,
+    "SMALL_COLOR": "#b2d6b2",
+    "MEDIUM_VALUE": 3,
+    "MEDIUM_COLOR": "#64ae64",
+    "LARGE_COLOR": "#228b22"
+}
+
+let memberColors = {
+    "SMALL_VALUE": 3,
+    "SMALL_COLOR": "#d0a6a6",
+    "MEDIUM_VALUE": 10,
+    "MEDIUM_COLOR": "#ad6464",
+    "LARGE_COLOR": "#8b2222"
+}
+
+
 /**
  * 
  * @param {*Object[]} countyPolygons 
- * @param {*Object} recipientsCount 
+ * @param {*Object} dataCount 
+ * @param {*Object} dataColors 
  */
-function calculateCountyColors(countyPolygons, recipientsCount) {
+function calculateCountyColors(countyPolygons, dataCount, dataColors) {
     let allCounties = _.map(_.uniqBy(countyPolygons, 'properties.NAME'));
     let countyColors = [];
     let color = "#FFF";
 
     for (let county in allCounties) {
         let countyName = allCounties[county].properties["NAME"];
-        let recipientsInCounty = recipientsCount[countyName];
-        if (!recipientsInCounty) {
+        let dataInCounty = dataCount[countyName];
+        if (!dataInCounty) {
             color = "#FFF";
         }
-        else {
-            color = recipientsInCounty <= 2 ? "#d3e8d3" : "#228b22";
+        else if(dataInCounty > 0 && dataInCounty <= dataColors["SMALL_VALUE"]){
+            color = dataColors["SMALL_COLOR"];
+        }
+        else if(dataInCounty > dataColors["SMALL_VALUE"] && dataInCounty <= dataColors["MEDIUM_VALUE"]){
+            color = dataColors["MEDIUM_COLOR"];
+        }
+        else{
+            color = dataColors["LARGE_COLOR"];
         }
         countyColors.push(countyName, color);
     }
@@ -181,13 +206,25 @@ function addMapFeatures(map, popup) {
         let countyPolygons = await fetchData('counties.json');
         let recipients = await fetchData('geovation_recipients.json');
         let recipientsCount = countUniqueCounties(recipients);
-        
+
         // expression gives the colours for the map based on its value
         let expression = ['match', ['get', 'NAME']];
-        let countyColors = (calculateCountyColors(countyPolygons, recipientsCount));
-        expression = expression.concat(countyColors)
+        let recipientsCountyColors = (calculateCountyColors(countyPolygons, recipientsCount, recipientColors));
+        const RECIPIENT_EXPRESSION = expression.concat(recipientsCountyColors);
+        addChoroplethLayer(map, 'recipients', RECIPIENT_EXPRESSION, countyPolygons);
 
-        addChoroplethLayer(map, 'recipients', expression, countyPolygons);
+        let members = await fetchData('members.json');
+        let membersCount = countUniqueCounties(members);
+        let membersCountyColors = (calculateCountyColors(countyPolygons, membersCount, memberColors));
+        const MEMBER_EXPRESSION = expression.concat(membersCountyColors);
+        addChoroplethLayer(map, 'members', MEMBER_EXPRESSION, countyPolygons);
+       
+        
+        
+
+       
+
+        
         addCountiesOutline(map, countyPolygons);
         addRecipientsInformation(map, recipientsCount);
 
