@@ -189,6 +189,16 @@ function addRecipientsInformation(map, recipientsCount) {
     });
 }
 
+function toggleLayers(map, currentLayer, previousLayer){
+    document.getElementById(currentLayer).addEventListener('click', function(){
+        map.setLayoutProperty(previousLayer, 'visibility', 'none');
+        map.setLayoutProperty(currentLayer, 'visibility', 'visible');
+        map.setLayoutProperty('counties-outline', 'visibility', 'visible');
+    });
+
+}
+
+
 function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
@@ -218,15 +228,23 @@ function addMapFeatures(map, popup) {
         let membersCountyColors = (calculateCountyColors(countyPolygons, membersCount, memberColors));
         const MEMBER_EXPRESSION = expression.concat(membersCountyColors);
         addChoroplethLayer(map, 'members', MEMBER_EXPRESSION, countyPolygons);
+        map.setLayoutProperty('members', 'visibility', 'none');
+
+        
+
        
         
         
-
+        toggleLayers(map, 'members', 'recipients');
+        toggleLayers(map, 'recipients', 'members');
        
 
         
         addCountiesOutline(map, countyPolygons);
         addRecipientsInformation(map, recipientsCount);
+
+        
+       
 
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
         createMarkers(sponsors, map, 'sponsor-markers', 'sponsor-markers', 'sponsors_marker.png')
