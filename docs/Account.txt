@@ -1,0 +1,8 @@
+We were asked to experiment with the OS Features from the OS Data Hub. We had to think of a case where we could create a project that demonstrates some of the OS Features. We decided to consider the case of buildings being affected by noise of railways. 
+
+For this project we could combine the features of Zoomstack Railway stations and Buildings features.
+
+First, we copied and pasted the example code posted on the OS Labs, showing the number of Greenspace areas in a 1km radius.
+
+At first glance, the code looks very complicated. Breaking this down into simpler issues has helped me understand the code better.
+

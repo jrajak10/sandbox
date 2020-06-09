@@ -163,7 +163,24 @@
         });
     });
 
+<<<<<<< HEAD:docs/osbuildarea_script.js
     function drawAll(center) {
+=======
+    // Add an event listener to handle when the user clicks the 'Find localBuildings' button.
+    document.getElementById('request').addEventListener('click', function() {
+        // Get the centre point of the map window.
+<<<<<<< HEAD
+        var center = [-0.104759, 51.520698];
+
+
+        
+
+        // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
+        // of the given a radius in kilometers; and steps for precision.
+        var circle = turf.circle(center, 0.1, { steps: 24, units: 'kilometers' });
+=======
+        var center = [-0.104951, 51.520623 ];
+>>>>>>> 3cc45e98c867fdba4401d9a8cc7d11a2a58ece3c:docs/osindex.html
 
 
 
@@ -171,11 +188,16 @@
         const CIRCLE_RADIUS = 0.5
         // {Turf.js} Takes the centre point coordinates and calculates a circular polygon
         // of the given a radius in kilometers; and steps for precision.
+<<<<<<< HEAD:docs/osbuildarea_script.js
         let circle = turf.circle(center, CIRCLE_RADIUS, {
             steps: 24,
             units: 'kilometers'
         });
         
+=======
+        var circle = turf.circle(center, 0.5, { steps: 24, units: 'kilometers' });
+>>>>>>> 70a12c6e8cac0491c2472689f5dde3532b3aa760
+>>>>>>> 3cc45e98c867fdba4401d9a8cc7d11a2a58ece3c:docs/osindex.html
 
         // Set the GeoJSON data for the 'circle' layer and re-render the map.
         map.getSource('circle').setData(circle);
