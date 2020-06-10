@@ -36,15 +36,17 @@ h1 {
 
 .marker{
     height: 20px;
+    vertical-align: bottom;
+}
+
+h4 {
+    margin: 0 0 10px;
 }
 
 .legend{
     padding-top: 40px;
 }
 
-.legend h4 {
-    margin: 0 0 10px;
-}
 .legend div span{
     display: inline-block;
     margin-right: 10px;
