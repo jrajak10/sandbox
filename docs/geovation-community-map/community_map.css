@@ -53,18 +53,61 @@ h1 {
     width: 10px;
 }
 
-.high-recipient-values{
+
+.large-recipient-values{
     background-color: #228b22;
 }
 
 .medium-recipient-values{
-    background-color: #d3e8d3;
+    background-color: #64ae64;
 }
 
-.low-recipient-values{
+.small-recipient-values{
+    background-color: #b2d6b2;
+}
+
+.zero-recipient-values{
     background-color: #fff;
 }
 
 #onclick-information{
     font-weight: bold;
+}
+
+#members-legend{
+    display: none;
+}
+.large-member-values{
+    background-color: #8b2222;
+}
+
+.medium-member-values{
+    background-color: #ad6464;
+}
+
+.small-member-values{
+    background-color: #d0a6a6;
+}
+
+.zero-member-values{
+    background-color: #fff;
+}
+
+#community-connections-legend{
+    display: none;
+}
+.large-community-values{
+    background-color: #22228b;
+}
+
+.medium-community-values{
+    background-color: #6464ad;
+}
+
+.small-community-values{
+    background-color: #a6a6d0;
+}
+
+.zero-community-values{
+    background-color: #fff;
 }
