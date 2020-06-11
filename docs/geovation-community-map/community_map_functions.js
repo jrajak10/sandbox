@@ -152,9 +152,10 @@ function calculateCountyColors(countyPolygons, dataCount, dataColors) {
     return countyColors;
 }
 
-function addCountiesOutline(map, countyPolygons) {
+
+function addCountiesOutline(map, id, countyPolygons, lineWidth) {
     map.addLayer({
-        'id': 'counties-outline',
+        'id': id,
         'type': 'line',
         'source': {
             'type': 'geojson',
@@ -165,7 +166,7 @@ function addCountiesOutline(map, countyPolygons) {
         },
         'paint': {
             'line-color': '#000',
-            'line-width': 1
+            'line-width': lineWidth
         }
     });
 }
@@ -189,6 +190,22 @@ function addChoroplethLayer(map, id, expression, countyPolygons) {
     });
 }
 
+//thickens outline when county is clicked
+function selectCounty(e, map) {
+    let currentCounty = e.features
+
+    if (!map.getLayer('current-county')) {
+        addCountiesOutline(map, 'current-county', currentCounty, 7);
+    }
+    else {
+        let currentCountyData = {
+            "type": "FeatureCollection",
+            "features": currentCounty
+        }
+        map.getSource('current-county').setData(currentCountyData)
+    }  
+}
+
 //returns information about the county, and number of recipients at the bottom of the information box
 function addInformation(map, dataCount, layerId, data) {
     map.on('click', layerId, function (e) {
@@ -199,6 +216,8 @@ function addInformation(map, dataCount, layerId, data) {
         }
         document.getElementById('onclick-information').innerHTML = "County: " + e.features[0].properties["NAME"]
             + "<br> Number of " + data + ": " + dataTotal;
+        
+        selectCounty(e, map)
     });
 }
 
@@ -257,7 +276,7 @@ function addMapFeatures(map, popup) {
         addChoroplethLayer(map, 'community-connections', COMMUNITY_EXPRESSION, countyPolygons);
         map.setLayoutProperty('community-connections', 'visibility', 'none');
 
-        addCountiesOutline(map, countyPolygons);
+        addCountiesOutline(map, 'counties-outline', countyPolygons, 1);
         addInformation(map, recipientsCount, 'recipients', 'Recipients');
         addInformation(map, membersCount, 'members', 'Members');
         addInformation(map, communityConnectionsCount, 'community-connections', 'Community Connections');
