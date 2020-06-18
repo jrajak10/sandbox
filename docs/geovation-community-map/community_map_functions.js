@@ -193,6 +193,7 @@ function addChoroplethLayer(map, id, expression, countyPolygons) {
 //thickens outline when county is clicked
 function selectCounty(e, map) {
     let currentCounty = e.features
+    console.log(e.features)
 
     if (!map.getLayer('current-county')) {
         addCountiesOutline(map, 'current-county', currentCounty, 7);
@@ -206,7 +207,7 @@ function selectCounty(e, map) {
     }  
 }
 
-//returns information about the county, and number of recipients at the bottom of the information box
+//returns information about the county, and number of startups supported at the bottom of the information box
 function addInformation(map, dataCount, layerId, data) {
     map.on('click', layerId, function (e) {
         let dataTotal = dataCount[e.features[0].properties["NAME"]]
@@ -253,57 +254,57 @@ function addMapFeatures(map, popup) {
         let stakeholders = await fetchData('stakeholders.json');
         //Fetches the polygons of all the UK counties. 
         let countyPolygons = await fetchData('counties.json');
-        let recipients = await fetchData('geovation_recipients.json');
+        let startupsSupported = await fetchData('startups_supported.json');
 
         // expression gives the colours for the map based on its value
         let expression = ['match', ['get', 'NAME']];
-        let recipientsCount = countUniqueCounties(recipients);
-        let recipientsCountyColors = (calculateCountyColors(countyPolygons, recipientsCount, RECIPIENT_COLORS));
-        const RECIPIENT_EXPRESSION = expression.concat(recipientsCountyColors);
-        addChoroplethLayer(map, 'recipients', RECIPIENT_EXPRESSION, countyPolygons);
+        let startupsSupportedCount = countUniqueCounties(startupsSupported);
+        let startupsSupportedCountyColors = (calculateCountyColors(countyPolygons, startupsSupportedCount, RECIPIENT_COLORS));
+        const STARTUPS_SUPPORTED_EXPRESSION = expression.concat(startupsSupportedCountyColors);
+        addChoroplethLayer(map, 'startups-supported', STARTUPS_SUPPORTED_EXPRESSION, countyPolygons);
 
-        let members = await fetchData('members.json');
-        let membersCount = countUniqueCounties(members);
-        let membersCountyColors = (calculateCountyColors(countyPolygons, membersCount, MEMBER_COLORS));
-        const MEMBER_EXPRESSION = expression.concat(membersCountyColors);
-        addChoroplethLayer(map, 'members', MEMBER_EXPRESSION, countyPolygons);
-        map.setLayoutProperty('members', 'visibility', 'none');
+        let hubMembers = await fetchData('hub_members.json');
+        let hubMembersCount = countUniqueCounties(hubMembers);
+        let hubMembersCountyColors = (calculateCountyColors(countyPolygons, hubMembersCount, MEMBER_COLORS));
+        const MEMBER_EXPRESSION = expression.concat(hubMembersCountyColors);
+        addChoroplethLayer(map, 'hub-members', MEMBER_EXPRESSION, countyPolygons);
+        map.setLayoutProperty('hub-members', 'visibility', 'none');
 
-        let communityConnections = await fetchData('community_connections.json');
-        let communityConnectionsCount = countUniqueCounties(communityConnections);
-        let communityCountyColors = (calculateCountyColors(countyPolygons, communityConnectionsCount, COMMUNITY_COLORS));
-        const COMMUNITY_EXPRESSION = expression.concat(communityCountyColors);
-        addChoroplethLayer(map, 'community-connections', COMMUNITY_EXPRESSION, countyPolygons);
-        map.setLayoutProperty('community-connections', 'visibility', 'none');
+        let networkConnections = await fetchData('network_connections.json');
+        let networkConnectionsCount = countUniqueCounties(networkConnections);
+        let networkCountyColors = (calculateCountyColors(countyPolygons, networkConnectionsCount, COMMUNITY_COLORS));
+        const NETWORK_EXPRESSION = expression.concat(networkCountyColors);
+        addChoroplethLayer(map, 'network-connections', NETWORK_EXPRESSION, countyPolygons);
+        map.setLayoutProperty('network-connections', 'visibility', 'none');
 
         addCountiesOutline(map, 'counties-outline', countyPolygons, 1);
-        addInformation(map, recipientsCount, 'recipients', 'Recipients');
-        addInformation(map, membersCount, 'members', 'Members');
-        addInformation(map, communityConnectionsCount, 'community-connections', 'Community Connections');
+        addInformation(map, startupsSupportedCount, 'startups-supported', 'Startups Supported');
+        addInformation(map, hubMembersCount, 'hub-members', 'Hub Members');
+        addInformation(map, networkConnectionsCount, 'network-connections', 'Network Connections');
 
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
         createMarkers(sponsors, map, 'sponsor-markers', 'sponsor-markers', 'sponsors_marker.png')
-        createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholder_marker.png')
+        createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholders_marker.png')
 
         toggleInput('partner-hub-markers', map);
         toggleInput('sponsor-markers', map)
         toggleInput('stakeholder-markers', map);
 
-        countiesCursor(map, 'mouseenter', 'recipients', 'pointer');
-        countiesCursor(map, 'mouseleave', 'recipients', '');
+        countiesCursor(map, 'mouseenter', 'startups-supported', 'pointer');
+        countiesCursor(map, 'mouseleave', 'startups-supported', '');
     });
 
-    toggleLayers(map, 'recipients', 'recipients-legend', 'members',
-        'members-legend', 'community-connections', 'community-connections-legend');
-    toggleLayers(map, 'members', 'members-legend', 'recipients', 'recipients-legend',
-        'community-connections', 'community-connections-legend');
-    toggleLayers(map, 'community-connections', 'community-connections-legend',
-        'members', 'members-legend', 'recipients', 'recipients-legend');
+    toggleLayers(map, 'startups-supported', 'startups-supported-legend', 'hub-members',
+        'hub-members-legend', 'network-connections', 'network-connections-legend');
+    toggleLayers(map, 'hub-members', 'hub-members-legend', 'startups-supported', 'startups-supported-legend',
+        'network-connections', 'network-connections-legend');
+    toggleLayers(map, 'network-connections', 'network-connections-legend',
+        'hub-members', 'hub-members-legend', 'startups-supported', 'startups-supported-legend');
 
-    countiesCursor(map, 'mouseenter', 'members', 'pointer');
-    countiesCursor(map, 'mouseleave', 'members', '');
-    countiesCursor(map, 'mouseenter', 'community-connections', 'pointer');
-    countiesCursor(map, 'mouseleave', 'community-connections', '');
+    countiesCursor(map, 'mouseenter', 'hub-members', 'pointer');
+    countiesCursor(map, 'mouseleave', 'hub-members', '');
+    countiesCursor(map, 'mouseenter', 'network-connections', 'pointer');
+    countiesCursor(map, 'mouseleave', 'network-connections', '');
 
     addPopup(map, 'partner-hub-markers', popup)
     addPopup(map, 'sponsor-markers', popup)

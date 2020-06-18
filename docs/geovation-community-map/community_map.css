@@ -56,19 +56,19 @@ h4 {
 }
 
 
-.large-recipient-values{
+.large-startups-supported-values{
     background-color: #228b22;
 }
 
-.medium-recipient-values{
+.medium-startups-supported-values{
     background-color: #64ae64;
 }
 
-.small-recipient-values{
+.small-startups-supported-values{
     background-color: #b2d6b2;
 }
 
-.zero-recipient-values{
+.zero-startups-supported-values{
     background-color: #fff;
 }
 
@@ -76,7 +76,7 @@ h4 {
     font-weight: bold;
 }
 
-#members-legend{
+#hub-members-legend{
     display: none;
 }
 .large-member-values{
@@ -95,21 +95,21 @@ h4 {
     background-color: #fff;
 }
 
-#community-connections-legend{
+#network-connections-legend{
     display: none;
 }
-.large-community-values{
+.large-network-values{
     background-color: #22228b;
 }
 
-.medium-community-values{
+.medium-network-values{
     background-color: #6464ad;
 }
 
-.small-community-values{
+.small-network-values{
     background-color: #a6a6d0;
 }
 
-.zero-community-values{
+.zero-network-values{
     background-color: #fff;
 }
