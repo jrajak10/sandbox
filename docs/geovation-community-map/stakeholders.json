@@ -18,6 +18,20 @@
     "type": "Feature",
     "geometry": {
        "type": "Point",
+       "coordinates":  [-3.1532196, 55.9554259]
+    },
+    "properties": {
+    "Company Name":"Registers of Scotland",
+    "Address 1: Street 1":"Meadowbank House",
+    "Address 1: Street 2":"153 London Road",
+    "Address 1: Street 3":"",
+    "Address 1: ZIP/Postal Code":"EH8 7AU"
+    }
+  },
+  {
+    "type": "Feature",
+    "geometry": {
+       "type": "Point",
        "coordinates":  [-1.0800601, 52.8789864]
     },
     "properties": {
