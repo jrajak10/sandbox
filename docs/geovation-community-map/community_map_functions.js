@@ -127,6 +127,7 @@ const COMMUNITY_COLORS = {
  */
 function calculateCountyColors(countyPolygons, dataCount, dataColors) {
     let allCounties = _.map(_.uniqBy(countyPolygons, 'properties.NAME'));
+    console.log(allCounties.map(x => x.properties["NAME"]))
     let countyColors = [];
     let color = "#FFF";
 
