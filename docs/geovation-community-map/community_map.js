@@ -11,7 +11,7 @@ let style = {
     'sources': {
         'raster-tiles': {
             'type': 'raster',
-            'tiles':  [tileServiceUrl + '/Light_3857/{z}/{x}/{y}.png?key=' + API_KEY],
+            'tiles':  [`${tileServiceUrl}/Light_3857/{z}/{x}/{y}.png?key=${API_KEY}`],
             'tileSize': 256,
             'maxzoom': 20
         }
