@@ -1,30 +1,9 @@
 import { addMapFeatures } from "./community_map_functions.js";
 
-const API_KEY = 'LMtM3BTwlwljPNGD77f81lrbsjBiKs52';
+const API_KEY = '9HtqvDpMDgOd32QLscDMi6AVIt5NZaMJ';
 
-let serviceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
+let tileServiceUrl = 'https://api.os.uk/maps/raster/v1/zxy';
 
-// Define parameters object.
-let params = {
-    key: API_KEY,
-    service: 'WMTS',
-    request: 'GetTile',
-    version: '2.0.0',
-    height: 256,
-    width: 256,
-    outputFormat: 'image/png',
-    style: 'default',
-    layer: 'Light_3857',
-    tileMatrixSet: 'EPSG:3857',
-    tileMatrix: '{z}',
-    tileRow: '{y}',
-    tileCol: '{x}'
-};
-
-// Construct query string parameters from object.
-let queryString = Object.keys(params).map(function (key) {
-    return key + '=' + params[key];
-}).join('&');
 
 // Create a map style object using the WMTS service.
 let style = {
@@ -32,7 +11,7 @@ let style = {
     'sources': {
         'raster-tiles': {
             'type': 'raster',
-            'tiles': [serviceUrl + '?' + queryString],
+            'tiles':  [`${tileServiceUrl}/Light_3857/{z}/{x}/{y}.png?key=${API_KEY}`],
             'tileSize': 256,
             'maxzoom': 20
         }
