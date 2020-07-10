@@ -15,7 +15,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 300px;
+    width: 200px;
     padding: 10px;
 }
 
@@ -28,23 +28,29 @@ body {
 
 .map-overlay-inner div {
     margin-top: 10px;
+    font-size: 12px;
 }
 
 h1 {
-    font-size: 20px !important;
+    font-size: 15px;
 }
 
 .marker{
     height: 20px;
-    vertical-align: bottom;
+    vertical-align: top;
+}
+
+input[type="checkbox"]{
+    vertical-align: middle;
 }
 
 h4 {
     margin: 0 0 10px;
+    font-size: 12.5px;
 }
 
 .legend{
-    padding-top: 40px;
+    padding-top: 5px;
 }
 
 .legend div span{
@@ -112,4 +118,68 @@ h4 {
 
 .zero-network-values{
     background-color: #fff;
+}
+
+@media (min-width: 992px){
+    body { 
+        margin:0; 
+        padding:0; 
+    }
+    
+    #map { 
+        position:absolute; 
+        top:0; 
+        bottom:0; 
+        width:100% !important; 
+    }
+    
+    .map-overlay {
+        font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px !important;
+        padding: 10px;
+        margin: 0px 10px;
+    }
+    
+    .map-overlay .map-overlay-inner {
+        background-color: #fff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+        border-radius: 4px;
+        padding: 25px;
+    }
+    
+    .map-overlay-inner div {
+        margin-top: 10px;
+        font-size: 15px;
+    }
+    
+    h1 {
+        font-size: 20px !important;
+        margin-bottom: 15px;
+    }
+    
+    .marker{
+        height: 20px !important;
+        vertical-align: top;
+    }
+    
+    h4 {
+        margin: 0 0 10px;
+        font-size: 17.5px !important;
+    }
+    
+    .legend{
+        padding-top: 10px;
+    }
+    
+    .legend div span{
+        display: inline-block;
+        margin-right: 10px;
+        border: solid 1px #000;
+        height: 10px !important;
+        width: 10px !important;
+    }
+
 }

@@ -23,18 +23,30 @@ let style = {
     }]
 };
 
+let minZoom = 7;
+function responsiveZoom(minZoom){
+    if(window.matchMedia('(max-width: 767px)').matches === true){
+        minZoom = 6;
+    }
+    return minZoom;
+}
+
+let bounds = [[-7.79042, 49.60878], //southwest coordinates
+            [1.878297, 61.127404]] //northeast coordinates
+
 // Initialize the map object.
 let map = new mapboxgl.Map({
         container: 'map',
-        minZoom: 7,
+        minZoom: responsiveZoom(minZoom),
         maxZoom: 20,
         style: style,
         center: [-2.498094, 52.569447],
-        zoom: 7
+        zoom: 7,
+        maxBounds: bounds
     });
 
 //create popup which can be removed when toggling the input
-let popup = new mapboxgl.Popup({ className: 'popup', offset: 25, closeButton: false });
+let popup = new mapboxgl.Popup({ className: 'popup', offset: 25});
 
 
 

@@ -41,7 +41,9 @@ function createMarkers(fetchedData, map, imageName, id, file) {
 
 //function that formats the cursor when hovering over a marker
 function formatCursor(cursor, map) {
+    event.preventDefault();
     map.getCanvas().style.cursor = cursor;
+    event.stopPropagation();
 }
 
 function countiesCursor(map, event, id, cursor) {
@@ -52,20 +54,14 @@ function countiesCursor(map, event, id, cursor) {
 
 // adds popup when mouse hovers over marker
 function addPopup(map, marker, popup) {
-    map.on('mouseenter', marker, function (e) {
+    map.on('click', marker, function (e) {
+        e.preventDefault();
         formatCursor('pointer', map);
         popup
             .setLngLat(e.features[0].geometry.coordinates)
             .setHTML(e.features[0].properties["Company Name"])
             .addTo(map);
-    });
-}
-
-//remvoes popup when mouse leaves marker
-function removePopup(map, marker, popup) {
-    map.on('mouseleave', marker, function (e) {
-        formatCursor('', map);
-        popup.remove();
+            e.stopPropagation();``
     });
 }
 
@@ -309,8 +305,4 @@ function addMapFeatures(map, popup) {
     addPopup(map, 'partner-hub-markers', popup)
     addPopup(map, 'sponsor-markers', popup)
     addPopup(map, 'stakeholder-markers', popup)
-
-    removePopup(map, 'partner-hub-markers', popup)
-    removePopup(map, 'sponsor-markers', popup)
-    removePopup(map, 'stakeholder-markers', popup)
 }
