@@ -1,4 +1,4 @@
-export { fetchData, createMarkers, formatCursor, addMapFeatures }
+export { fetchData, createMarkers, formatCursor, addMapFeatures, responsiveZoom }
 
 //fetches json data from json files
 async function fetchData(data) {
@@ -61,7 +61,7 @@ function addPopup(map, marker, popup) {
             .setLngLat(e.features[0].geometry.coordinates)
             .setHTML(e.features[0].properties["Company Name"])
             .addTo(map);
-            e.stopPropagation();``
+        e.stopPropagation(); ``
     });
 }
 
@@ -189,7 +189,6 @@ function addChoroplethLayer(map, id, expression, countyPolygons) {
 //thickens outline when county is clicked
 function selectCounty(e, map) {
     let currentCounty = e.features
-    console.log(e.features)
 
     if (!map.getLayer('current-county')) {
         addCountiesOutline(map, 'current-county', currentCounty, 7);
@@ -200,7 +199,7 @@ function selectCounty(e, map) {
             "features": currentCounty
         }
         map.getSource('current-county').setData(currentCountyData)
-    }  
+    }
 }
 
 //returns information about the county, and number of startups supported at the bottom of the information box
@@ -213,7 +212,7 @@ function addInformation(map, dataCount, layerId, data) {
         }
         document.getElementById('onclick-information').innerHTML = "County: " + e.features[0].properties["NAME"]
             + "<br> Number of " + data + ": " + dataTotal;
-        
+
         selectCounty(e, map)
     });
 }
@@ -235,6 +234,33 @@ function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactive
     });
 }
 
+function toggleOptions(options, show, hide){
+    document.getElementById('toggle').addEventListener('click', function () {
+        let list = document.getElementById(options)
+        let showButton = document.getElementById(show)
+        let hideButton = document.getElementById(hide)
+
+        if(list.style.display === 'block'){
+            list.style.display = 'none'
+            showButton.style.display = 'block'
+            hideButton.style.display = 'none'
+        } 
+        else {
+            list.style.display = "block";
+            showButton.style.display = 'none'
+            hideButton.style.display = 'block'
+        }
+    });
+}
+
+function responsiveZoom(minZoom){
+    if(window.matchMedia('(max-width: 767px)').matches === true){
+        minZoom = 6;
+    }
+    return minZoom;
+}
+
+
 function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
@@ -243,6 +269,8 @@ function addMapFeatures(map, popup) {
     map.addControl(new mapboxgl.NavigationControl({
         showCompass: false
     }));
+
+
 
     map.on('load', async function () {
         let partnerHubs = await fetchData('partner_hubs.json');
@@ -288,6 +316,9 @@ function addMapFeatures(map, popup) {
 
         countiesCursor(map, 'mouseenter', 'startups-supported', 'pointer');
         countiesCursor(map, 'mouseleave', 'startups-supported', '');
+        
+        toggleOptions('options', 'show', 'hide')
+        
     });
 
     toggleLayers(map, 'startups-supported', 'startups-supported-legend', 'hub-members',
