@@ -41,7 +41,9 @@ function createMarkers(fetchedData, map, imageName, id, file) {
 
 //function that formats the cursor when hovering over a marker
 function formatCursor(cursor, map) {
+    event.preventDefault();
     map.getCanvas().style.cursor = cursor;
+    event.stopPropagation();
 }
 
 function countiesCursor(map, event, id, cursor) {
@@ -52,20 +54,14 @@ function countiesCursor(map, event, id, cursor) {
 
 // adds popup when mouse hovers over marker
 function addPopup(map, marker, popup) {
-    map.on('mouseenter', marker, function (e) {
+    map.on('click', marker, function (e) {
+        e.preventDefault();
         formatCursor('pointer', map);
         popup
             .setLngLat(e.features[0].geometry.coordinates)
             .setHTML(e.features[0].properties["Company Name"])
             .addTo(map);
-    });
-}
-
-//remvoes popup when mouse leaves marker
-function removePopup(map, marker, popup) {
-    map.on('mouseleave', marker, function (e) {
-        formatCursor('', map);
-        popup.remove();
+        e.stopPropagation(); ``
     });
 }
 
@@ -193,7 +189,6 @@ function addChoroplethLayer(map, id, expression, countyPolygons) {
 //thickens outline when county is clicked
 function selectCounty(e, map) {
     let currentCounty = e.features
-    console.log(e.features)
 
     if (!map.getLayer('current-county')) {
         addCountiesOutline(map, 'current-county', currentCounty, 7);
@@ -204,7 +199,7 @@ function selectCounty(e, map) {
             "features": currentCounty
         }
         map.getSource('current-county').setData(currentCountyData)
-    }  
+    }
 }
 
 //returns information about the county, and number of startups supported at the bottom of the information box
@@ -215,9 +210,9 @@ function addInformation(map, dataCount, layerId, data) {
         if (!dataTotal) {
             dataTotal = 0;
         }
-        document.getElementById('onclick-information').innerHTML = "County: " + e.features[0].properties["NAME"]
-            + "<br> Number of " + data + ": " + dataTotal;
-        
+        document.getElementById('onclick-information').innerHTML = "<div>County: " + e.features[0].properties["NAME"]
+            + "</div><div>" + data + ": " + dataTotal + "</div>";
+
         selectCounty(e, map)
     });
 }
@@ -239,6 +234,26 @@ function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactive
     });
 }
 
+function toggleOptions(options, show, hide){
+    document.getElementById('toggle').addEventListener('click', function () {
+        let list = document.getElementById(options)
+        let showButton = document.getElementById(show)
+        let hideButton = document.getElementById(hide)
+
+        if(list.style.display === 'block'){
+            list.style.display = 'none'
+            showButton.style.display = 'block'
+            hideButton.style.display = 'none'
+        } 
+        else {
+            list.style.display = "block";
+            showButton.style.display = 'none'
+            hideButton.style.display = 'block'
+        }
+    });
+}
+
+
 function addMapFeatures(map, popup) {
     map.dragRotate.disable(); // Disable map rotation using right click + drag.
     map.touchZoomRotate.disableRotation(); // Disable map rotation using touch rotation gesture.
@@ -247,6 +262,8 @@ function addMapFeatures(map, popup) {
     map.addControl(new mapboxgl.NavigationControl({
         showCompass: false
     }));
+
+
 
     map.on('load', async function () {
         let partnerHubs = await fetchData('partner_hubs.json');
@@ -292,6 +309,9 @@ function addMapFeatures(map, popup) {
 
         countiesCursor(map, 'mouseenter', 'startups-supported', 'pointer');
         countiesCursor(map, 'mouseleave', 'startups-supported', '');
+        
+        toggleOptions('options', 'show', 'hide')
+        
     });
 
     toggleLayers(map, 'startups-supported', 'startups-supported-legend', 'hub-members',
@@ -309,8 +329,4 @@ function addMapFeatures(map, popup) {
     addPopup(map, 'partner-hub-markers', popup)
     addPopup(map, 'sponsor-markers', popup)
     addPopup(map, 'stakeholder-markers', popup)
-
-    removePopup(map, 'partner-hub-markers', popup)
-    removePopup(map, 'sponsor-markers', popup)
-    removePopup(map, 'stakeholder-markers', popup)
 }

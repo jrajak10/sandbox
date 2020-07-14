@@ -23,18 +23,23 @@ let style = {
     }]
 };
 
+
+let bounds = [[-7.79042, 49.60878], //southwest coordinates of basemap range
+            [1.878297, 61.127404]] //northeast coordinates of basemap range
+
 // Initialize the map object.
 let map = new mapboxgl.Map({
         container: 'map',
-        minZoom: 7,
-        maxZoom: 20,
+        minZoom: 6,
+        maxZoom: 10,
         style: style,
         center: [-2.498094, 52.569447],
-        zoom: 7
+        zoom: 6,
+        maxBounds: bounds
     });
 
 //create popup which can be removed when toggling the input
-let popup = new mapboxgl.Popup({ className: 'popup', offset: 25 });
+let popup = new mapboxgl.Popup({ className: 'popup', offset: 25});
 
 
 
