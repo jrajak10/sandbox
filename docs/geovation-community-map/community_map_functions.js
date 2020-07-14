@@ -1,4 +1,4 @@
-export { fetchData, createMarkers, formatCursor, addMapFeatures, responsiveZoom }
+export { fetchData, createMarkers, formatCursor, addMapFeatures }
 
 //fetches json data from json files
 async function fetchData(data) {
@@ -210,8 +210,8 @@ function addInformation(map, dataCount, layerId, data) {
         if (!dataTotal) {
             dataTotal = 0;
         }
-        document.getElementById('onclick-information').innerHTML = "County: " + e.features[0].properties["NAME"]
-            + "<br> Number of " + data + ": " + dataTotal;
+        document.getElementById('onclick-information').innerHTML = "<div>County: " + e.features[0].properties["NAME"]
+            + "</div><div>" + data + ": " + dataTotal + "</div>";
 
         selectCounty(e, map)
     });
@@ -251,13 +251,6 @@ function toggleOptions(options, show, hide){
             hideButton.style.display = 'block'
         }
     });
-}
-
-function responsiveZoom(minZoom){
-    if(window.matchMedia('(max-width: 767px)').matches === true){
-        minZoom = 6;
-    }
-    return minZoom;
 }
 
 

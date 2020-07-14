@@ -1,4 +1,4 @@
-import { addMapFeatures, responsiveZoom } from "./community_map_functions.js";
+import { addMapFeatures } from "./community_map_functions.js";
 
 const API_KEY = '9HtqvDpMDgOd32QLscDMi6AVIt5NZaMJ';
 
@@ -23,7 +23,6 @@ let style = {
     }]
 };
 
-let minZoom = 7;
 
 let bounds = [[-7.79042, 49.60878], //southwest coordinates of basemap range
             [1.878297, 61.127404]] //northeast coordinates of basemap range
@@ -31,11 +30,11 @@ let bounds = [[-7.79042, 49.60878], //southwest coordinates of basemap range
 // Initialize the map object.
 let map = new mapboxgl.Map({
         container: 'map',
-        minZoom: responsiveZoom(minZoom),
+        minZoom: 6,
         maxZoom: 10,
         style: style,
         center: [-2.498094, 52.569447],
-        zoom: 7,
+        zoom: 6,
         maxBounds: bounds
     });
 
