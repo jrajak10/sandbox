@@ -1,6 +1,6 @@
 import { addMapFeatures } from "./community_map_functions.js";
 
-const API_KEY = '9HtqvDpMDgOd32QLscDMi6AVIt5NZaMJ';
+const API_KEY = '8ethzVGN9T27lVBclrwYIobHbl2Xe1SL';
 
 let tileServiceUrl = 'https://api.os.uk/maps/raster/v1/zxy';
 
