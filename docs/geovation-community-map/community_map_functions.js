@@ -76,16 +76,11 @@ function toggleInput(id, map) {
     });
 };
 
-function countUniqueCounties(data) {
+function countUniqueCounties(data, value) {
     let object = {}
 
     for (let i = 0; i < data.length; i++) {
-        if (object[data[i]["County"]] > 0) {
-            object[data[i]["County"]]++
-        }
-        else {
-            object[data[i]["County"]] = 1
-        }
+        object[data[i]["County"]] = data[i][value]
     }
     return object;
 }
@@ -271,24 +266,24 @@ function addMapFeatures(map, popup) {
         let stakeholders = await fetchData('stakeholders.json');
         //Fetches the polygons of all the UK counties. 
         let countyPolygons = await fetchData('counties.json');
-        let startupsSupported = await fetchData('startups_supported.json');
+        let startupsSupported = await fetchData('startups_supported_counties.json');
 
         // expression gives the colours for the map based on its value
         let expression = ['match', ['get', 'NAME']];
-        let startupsSupportedCount = countUniqueCounties(startupsSupported);
+        let startupsSupportedCount = countUniqueCounties(startupsSupported, "Startups");
         let startupsSupportedCountyColors = (calculateCountyColors(countyPolygons, startupsSupportedCount, RECIPIENT_COLORS));
         const STARTUPS_SUPPORTED_EXPRESSION = expression.concat(startupsSupportedCountyColors);
         addChoroplethLayer(map, 'startups-supported', STARTUPS_SUPPORTED_EXPRESSION, countyPolygons);
 
-        let hubMembers = await fetchData('hub_members.json');
-        let hubMembersCount = countUniqueCounties(hubMembers);
+        let hubMembers = await fetchData('members_counties.json');
+        let hubMembersCount = countUniqueCounties(hubMembers, "Members");
         let hubMembersCountyColors = (calculateCountyColors(countyPolygons, hubMembersCount, MEMBER_COLORS));
         const MEMBER_EXPRESSION = expression.concat(hubMembersCountyColors);
         addChoroplethLayer(map, 'hub-members', MEMBER_EXPRESSION, countyPolygons);
         map.setLayoutProperty('hub-members', 'visibility', 'none');
 
-        let networkConnections = await fetchData('network_connections.json');
-        let networkConnectionsCount = countUniqueCounties(networkConnections);
+        let networkConnections = await fetchData('network_connections_counties.json');
+        let networkConnectionsCount = countUniqueCounties(networkConnections, "Connections");
         let networkCountyColors = (calculateCountyColors(countyPolygons, networkConnectionsCount, COMMUNITY_COLORS));
         const NETWORK_EXPRESSION = expression.concat(networkCountyColors);
         addChoroplethLayer(map, 'network-connections', NETWORK_EXPRESSION, countyPolygons);

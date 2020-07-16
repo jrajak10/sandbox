@@ -1,0 +1,365 @@
+{
+   "type": "FeatureCollection",
+  "features": [
+      {
+         "County": "Bedfordshire",
+         "Startups": 0
+      },
+      {
+         "County": "Berkshire",
+         "Startups": 0
+      },
+      {
+         "County": "Bristol",
+         "Startups": 2
+      },
+      {
+         "County": "Cheshire",
+         "Startups": 1
+      },
+      {
+         "County": "Cumbria",
+         "Startups": 0
+      },
+      {
+         "County": "Derbyshire",
+         "Startups": 0
+      },
+      {
+         "County": "Durham",
+         "Startups": 0
+      },
+      {
+         "County": "East Riding of Yorkshire",
+         "Startups": 0
+      },
+      {
+         "County": "East Sussex",
+         "Startups": 0
+      },
+      {
+         "County": "Essex",
+         "Startups": 1
+      },
+      {
+         "County": "Gloucestershire",
+         "Startups": 1
+      },
+      {
+         "County": "Greater London",
+         "Startups": 35
+      },
+      {
+         "County": "Greater Manchester",
+         "Startups": 1
+      },
+      {
+         "County": "Herefordshire",
+         "Startups": 0
+      },
+      {
+         "County": "Hertfordshire",
+         "Startups": 2
+      },
+      {
+         "County": "Kent",
+         "Startups": 1
+      },
+      {
+         "County": "Lancashire",
+         "Startups": 1
+      },
+      {
+         "County": "Leicestershire",
+         "Startups": 1
+      },
+      {
+         "County": "Lincolnshire",
+         "Startups": 0
+      },
+      {
+         "County": "Merseyside",
+         "Startups": 0
+      },
+      {
+         "County": "Norfolk",
+         "Startups": 1
+      },
+      {
+         "County": "North Yorkshire",
+         "Startups": 0
+      },
+      {
+         "County": "Northamptonshire",
+         "Startups": 0
+      },
+      {
+         "County": "Northumberland",
+         "Startups": 0
+      },
+      {
+         "County": "Nottinghamshire",
+         "Startups": 1
+      },
+      {
+         "County": "Oxfordshire",
+         "Startups": 1
+      },
+      {
+         "County": "Rutland",
+         "Startups": 0
+      },
+      {
+         "County": "Shropshire",
+         "Startups": 0
+      },
+      {
+         "County": "South Yorkshire",
+         "Startups": 1
+      },
+      {
+         "County": "Staffordshire",
+         "Startups": 0
+      },
+      {
+         "County": "Suffolk",
+         "Startups": 0
+      },
+      {
+         "County": "Surrey",
+         "Startups": 0
+      },
+      {
+         "County": "Tyne & Wear",
+         "Startups": 0
+      },
+      {
+         "County": "Warwickshire",
+         "Startups": 0
+      },
+      {
+         "County": "West Midlands",
+         "Startups": 0
+      },
+      {
+         "County": "West Sussex",
+         "Startups": 0
+      },
+      {
+         "County": "West Yorkshire",
+         "Startups": 0
+      },
+      {
+         "County": "Wiltshire",
+         "Startups": 1
+      },
+      {
+         "County": "Worcestershire",
+         "Startups": 0
+      },
+      {
+         "County": "Buckinghamshire",
+         "Startups": 0
+      },
+      {
+         "County": "Cambridgeshire",
+         "Startups": 0
+      },
+      {
+         "County": "Cornwall",
+         "Startups": 0
+      },
+      {
+         "County": "Devon",
+         "Startups": 0
+      },
+      {
+         "County": "Dorset",
+         "Startups": 0
+      },
+      {
+         "County": "Hampshire",
+         "Startups": 1
+      },
+      {
+         "County": "Isle of Wight",
+         "Startups": 0
+      },
+      {
+         "County": "Somerset",
+         "Startups": 0
+      },
+      {
+         "County": "Aberdeenshire",
+         "Startups": 0
+      },
+      {
+         "County": "Angus",
+         "Startups": 0
+      },
+      {
+         "County": "Argyll and Bute",
+         "Startups": 0
+      },
+      {
+         "County": "Ayrshire and Arran",
+         "Startups": 0
+      },
+      {
+         "County": "Banffshire",
+         "Startups": 0
+      },
+      {
+         "County": "Berwickshire",
+         "Startups": 0
+      },
+      {
+         "County": "Caithness",
+         "Startups": 0
+      },
+      {
+         "County": "City of Aberdeen",
+         "Startups": 1
+      },
+      {
+         "County": "City of Dundee",
+         "Startups": 0
+      },
+      {
+         "County": "City of Edinburgh",
+         "Startups": 3
+      },
+      {
+         "County": "City of Glasgow",
+         "Startups": 0
+      },
+      {
+         "County": "Clackmannan",
+         "Startups": 0
+      },
+      {
+         "County": "Dumfries",
+         "Startups": 0
+      },
+      {
+         "County": "Dunbartonshire",
+         "Startups": 0
+      },
+      {
+         "County": "East Lothian",
+         "Startups": 0
+      },
+      {
+         "County": "Fife",
+         "Startups": 0
+      },
+      {
+         "County": "Inverness",
+         "Startups": 0
+      },
+      {
+         "County": "Kincardineshire",
+         "Startups": 0
+      },
+      {
+         "County": "Lanarkshire",
+         "Startups": 0
+      },
+      {
+         "County": "Midlothian",
+         "Startups": 0
+      },
+      {
+         "County": "Moray",
+         "Startups": 0
+      },
+      {
+         "County": "Nairn",
+         "Startups": 0
+      },
+      {
+         "County": "Orkney",
+         "Startups": 0
+      },
+      {
+         "County": "Perth and Kinross",
+         "Startups": 0
+      },
+      {
+         "County": "Renfrewshire",
+         "Startups": 0
+      },
+      {
+         "County": "Ross and Cromarty",
+         "Startups": 0
+      },
+      {
+         "County": "Roxburgh, Ettrick and Lauderdale",
+         "Startups": 0
+      },
+      {
+         "County": "Shetland",
+         "Startups": 0
+      },
+      {
+         "County": "Stirling and Falkirk",
+         "Startups": 0
+      },
+      {
+         "County": "Sutherland",
+         "Startups": 0
+      },
+      {
+         "County": "The Stewartry of Kirkcudbright",
+         "Startups": 0
+      },
+      {
+         "County": "Tweeddale",
+         "Startups": 0
+      },
+      {
+         "County": "West Lothian",
+         "Startups": 0
+      },
+      {
+         "County": "Western Isles",
+         "Startups": 0
+      },
+      {
+         "County": "Wigtown",
+         "Startups": 0
+      },
+      {
+         "County": "Clwyd",
+         "Startups": 0
+      },
+      {
+         "County": "Dyfed",
+         "Startups": 0
+      },
+      {
+         "County": "Gwent",
+         "Startups": 0
+      },
+      {
+         "County": "Gwynedd",
+         "Startups": 0
+      },
+      {
+         "County": "Mid Glamorgan",
+         "Startups": 0
+      },
+      {
+         "County": "Powys",
+         "Startups": 0
+      },
+      {
+         "County": "South Glamorgan",
+         "Startups": 1
+      },
+      {
+         "County": "West Glamorgan",
+         "Startups": 0
+      }
+   ]
+}

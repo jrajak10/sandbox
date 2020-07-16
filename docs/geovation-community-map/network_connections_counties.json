@@ -1,0 +1,365 @@
+{
+   "type": "FeatureCollection",
+  "features": [
+      {
+         "County": "Bedfordshire",
+         "Connections": 2
+      },
+      {
+         "County": "Berkshire",
+         "Connections": 10
+      },
+      {
+         "County": "Bristol",
+         "Connections": 11
+      },
+      {
+         "County": "Cheshire",
+         "Connections": 4
+      },
+      {
+         "County": "Cumbria",
+         "Connections": 0
+      },
+      {
+         "County": "Derbyshire",
+         "Connections": 4
+      },
+      {
+         "County": "Durham",
+         "Connections": 0
+      },
+      {
+         "County": "East Riding of Yorkshire",
+         "Connections": 2
+      },
+      {
+         "County": "East Sussex",
+         "Connections": 3
+      },
+      {
+         "County": "Essex",
+         "Connections": 1
+      },
+      {
+         "County": "Gloucestershire",
+         "Connections": 1
+      },
+      {
+         "County": "Greater London",
+         "Connections": 176
+      },
+      {
+         "County": "Greater Manchester",
+         "Connections": 22
+      },
+      {
+         "County": "Herefordshire",
+         "Connections": 1
+      },
+      {
+         "County": "Hertfordshire",
+         "Connections": 8
+      },
+      {
+         "County": "Kent",
+         "Connections": 6
+      },
+      {
+         "County": "Lancashire",
+         "Connections": 2
+      },
+      {
+         "County": "Leicestershire",
+         "Connections": 2
+      },
+      {
+         "County": "Lincolnshire",
+         "Connections": 1
+      },
+      {
+         "County": "Merseyside",
+         "Connections": 2
+      },
+      {
+         "County": "Norfolk",
+         "Connections": 1
+      },
+      {
+         "County": "North Yorkshire",
+         "Connections": 0
+      },
+      {
+         "County": "Northamptonshire",
+         "Connections": 1
+      },
+      {
+         "County": "Northumberland",
+         "Connections": 0
+      },
+      {
+         "County": "Nottinghamshire",
+         "Connections": 4
+      },
+      {
+         "County": "Oxfordshire",
+         "Connections": 11
+      },
+      {
+         "County": "Rutland",
+         "Connections": 0
+      },
+      {
+         "County": "Shropshire",
+         "Connections": 0
+      },
+      {
+         "County": "South Yorkshire",
+         "Connections": 5
+      },
+      {
+         "County": "Staffordshire",
+         "Connections": 2
+      },
+      {
+         "County": "Suffolk",
+         "Connections": 2
+      },
+      {
+         "County": "Surrey",
+         "Connections": 16
+      },
+      {
+         "County": "Tyne & Wear",
+         "Connections": 0
+      },
+      {
+         "County": "Warwickshire",
+         "Connections": 2
+      },
+      {
+         "County": "West Midlands",
+         "Connections": 11
+      },
+      {
+         "County": "West Sussex",
+         "Connections": 7
+      },
+      {
+         "County": "West Yorkshire",
+         "Connections": 1
+      },
+      {
+         "County": "Wiltshire",
+         "Connections": 10
+      },
+      {
+         "County": "Worcestershire",
+         "Connections": 1
+      },
+      {
+         "County": "Buckinghamshire",
+         "Connections": 11
+      },
+      {
+         "County": "Cambridgeshire",
+         "Connections": 8
+      },
+      {
+         "County": "Cornwall",
+         "Connections": 1
+      },
+      {
+         "County": "Devon",
+         "Connections": 11
+      },
+      {
+         "County": "Dorset",
+         "Connections": 4
+      },
+      {
+         "County": "Hampshire",
+         "Connections": 14
+      },
+      {
+         "County": "Isle of Wight",
+         "Connections": 1
+      },
+      {
+         "County": "Somerset",
+         "Connections": 5
+      },
+      {
+         "County": "Aberdeenshire",
+         "Connections": 0
+      },
+      {
+         "County": "Angus",
+         "Connections": 0
+      },
+      {
+         "County": "Argyll and Bute",
+         "Connections": 0
+      },
+      {
+         "County": "Ayrshire and Arran",
+         "Connections": 0
+      },
+      {
+         "County": "Banffshire",
+         "Connections": 0
+      },
+      {
+         "County": "Berwickshire",
+         "Connections": 0
+      },
+      {
+         "County": "Caithness",
+         "Connections": 0
+      },
+      {
+         "County": "City of Aberdeen",
+         "Connections": 1
+      },
+      {
+         "County": "City of Dundee",
+         "Connections": 1
+      },
+      {
+         "County": "City of Edinburgh",
+         "Connections": 17
+      },
+      {
+         "County": "City of Glasgow",
+         "Connections": 9
+      },
+      {
+         "County": "Clackmannan",
+         "Connections": 0
+      },
+      {
+         "County": "Dumfries",
+         "Connections": 0
+      },
+      {
+         "County": "Dunbartonshire",
+         "Connections": 0
+      },
+      {
+         "County": "East Lothian",
+         "Connections": 1
+      },
+      {
+         "County": "Fife",
+         "Connections": 0
+      },
+      {
+         "County": "Inverness",
+         "Connections": 0
+      },
+      {
+         "County": "Kincardineshire",
+         "Connections": 0
+      },
+      {
+         "County": "Lanarkshire",
+         "Connections": 1
+      },
+      {
+         "County": "Midlothian",
+         "Connections": 0
+      },
+      {
+         "County": "Moray",
+         "Connections": 0
+      },
+      {
+         "County": "Nairn",
+         "Connections": 0
+      },
+      {
+         "County": "Orkney",
+         "Connections": 0
+      },
+      {
+         "County": "Perth and Kinross",
+         "Connections": 0
+      },
+      {
+         "County": "Renfrewshire",
+         "Connections": 0
+      },
+      {
+         "County": "Ross and Cromarty",
+         "Connections": 0
+      },
+      {
+         "County": "Roxburgh, Ettrick and Lauderdale",
+         "Connections": 0
+      },
+      {
+         "County": "Shetland",
+         "Connections": 0
+      },
+      {
+         "County": "Stirling and Falkirk",
+         "Connections": 3
+      },
+      {
+         "County": "Sutherland",
+         "Connections": 0
+      },
+      {
+         "County": "The Stewartry of Kirkcudbright",
+         "Connections": 0
+      },
+      {
+         "County": "Tweeddale",
+         "Connections": 0
+      },
+      {
+         "County": "West Lothian",
+         "Connections": 2
+      },
+      {
+         "County": "Western Isles",
+         "Connections": 0
+      },
+      {
+         "County": "Wigtown",
+         "Connections": 0
+      },
+      {
+         "County": "Clwyd",
+         "Connections": 1
+      },
+      {
+         "County": "Dyfed",
+         "Connections": 2
+      },
+      {
+         "County": "Gwent",
+         "Connections": 0
+      },
+      {
+         "County": "Gwynedd",
+         "Connections": 0
+      },
+      {
+         "County": "Mid Glamorgan",
+         "Connections": 2
+      },
+      {
+         "County": "Powys",
+         "Connections": 0
+      },
+      {
+         "County": "South Glamorgan",
+         "Connections": 9
+      },
+      {
+         "County": "West Glamorgan",
+         "Connections": 1
+      }
+   ]
+}

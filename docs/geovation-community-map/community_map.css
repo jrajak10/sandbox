@@ -201,6 +201,7 @@ hr{
         position: absolute;
         top: 0;
         left: 0;
+        height: 200px;
         width: 300px !important;
         padding: 20px;
         margin: 0px 10px;
@@ -217,8 +218,7 @@ hr{
         background-color: #FFF;
         opacity: 0.9;
         border-radius: 4px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-        
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);   
     }
 
     .selection{
