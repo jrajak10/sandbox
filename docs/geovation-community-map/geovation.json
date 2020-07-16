@@ -1,0 +1,19 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+   {
+     "type": "Feature",
+     "geometry": {
+        "type": "Point",
+        "coordinates":  [-0.0998887, 51.5243897]
+     },
+     "properties": {
+     "Company Name":"Geovation Hub",
+     "Address 1: Street 1":"Goswell Road",
+     "Address 1: Street 2":"London",
+     "Address 1: Street 3":"",
+     "Address 1: ZIP/Postal Code":"EC1V 7EN"
+     }
+   }
+ ]
+ }

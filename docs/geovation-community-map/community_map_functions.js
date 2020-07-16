@@ -61,7 +61,7 @@ function addPopup(map, marker, popup) {
             .setLngLat(e.features[0].geometry.coordinates)
             .setHTML(e.features[0].properties["Company Name"])
             .addTo(map);
-        e.stopPropagation(); ``
+        e.stopPropagation();
     });
 }
 
@@ -264,6 +264,7 @@ function addMapFeatures(map, popup) {
         let partnerHubs = await fetchData('partner_hubs.json');
         let sponsors = await fetchData('sponsors.json');
         let stakeholders = await fetchData('stakeholders.json');
+        let geovation = await fetchData('geovation.json');
         //Fetches the polygons of all the UK counties. 
         let countyPolygons = await fetchData('counties.json');
         let startupsSupported = await fetchData('startups_supported_counties.json');
@@ -294,9 +295,12 @@ function addMapFeatures(map, popup) {
         addInformation(map, hubMembersCount, 'hub-members', 'Hub Members');
         addInformation(map, networkConnectionsCount, 'network-connections', 'Network Connections');
 
+        
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
         createMarkers(sponsors, map, 'sponsor-markers', 'sponsor-markers', 'sponsors_marker.png')
         createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholders_marker.png')
+        createMarkers(geovation, map, 'geovation-marker', 'geovation-marker', 'geovation_marker.png')
+        
 
         toggleInput('partner-hub-markers', map);
         toggleInput('sponsor-markers', map)
@@ -306,7 +310,6 @@ function addMapFeatures(map, popup) {
         countiesCursor(map, 'mouseleave', 'startups-supported', '');
         
         toggleOptions('options', 'show', 'hide')
-        
     });
 
     toggleLayers(map, 'startups-supported', 'startups-supported-legend', 'hub-members',
@@ -324,4 +327,5 @@ function addMapFeatures(map, popup) {
     addPopup(map, 'partner-hub-markers', popup)
     addPopup(map, 'sponsor-markers', popup)
     addPopup(map, 'stakeholder-markers', popup)
+    addPopup(map, 'geovation-marker', popup)
 }
