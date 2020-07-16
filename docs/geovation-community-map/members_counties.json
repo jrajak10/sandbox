@@ -1,0 +1,365 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+ {
+   "County": "Aberdeenshire",
+   "Members": 0
+ },
+ {
+   "County": "Angus",
+   "Members": 0
+ },
+ {
+   "County": "Argyll and Bute",
+   "Members": 0
+ },
+ {
+   "County": "Ayrshire and Arran",
+   "Members": 0
+ },
+ {
+   "County": "Banffshire",
+   "Members": 0
+ },
+ {
+   "County": "Bedfordshire",
+   "Members": 3
+ },
+ {
+   "County": "Berkshire",
+   "Members": 4
+ },
+ {
+   "County": "Berwickshire",
+   "Members": 0
+ },
+ {
+   "County": "Bristol",
+   "Members": 5
+ },
+ {
+   "County": "Buckinghamshire",
+   "Members": 2
+ },
+ {
+   "County": "Caithness",
+   "Members": 0
+ },
+ {
+   "County": "Cambridgeshire",
+   "Members": 5
+ },
+ {
+   "County": "Cheshire",
+   "Members": 1
+ },
+ {
+   "County": "City of Aberdeen",
+   "Members": 0
+ },
+ {
+   "County": "City of Dundee",
+   "Members": 0
+ },
+ {
+   "County": "City of Edinburgh",
+   "Members": 3
+ },
+ {
+   "County": "City of Glasgow",
+   "Members": 1
+ },
+ {
+   "County": "Clackmannan",
+   "Members": 0
+ },
+ {
+   "County": "Clwyd",
+   "Members": 0
+ },
+ {
+   "County": "Cornwall",
+   "Members": 0
+ },
+ {
+   "County": "Cumbria",
+   "Members": 1
+ },
+ {
+   "County": "Derbyshire",
+   "Members": 3
+ },
+ {
+   "County": "Devon",
+   "Members": 4
+ },
+ {
+   "County": "Dorset",
+   "Members": 2
+ },
+ {
+   "County": "Dumfries",
+   "Members": 0
+ },
+ {
+   "County": "Dunbartonshire",
+   "Members": 0
+ },
+ {
+   "County": "Durham",
+   "Members": 1
+ },
+ {
+   "County": "Dyfed",
+   "Members": 0
+ },
+ {
+   "County": "East Lothian",
+   "Members": 0
+ },
+ {
+   "County": "East Riding of Yorkshire",
+   "Members": 1
+ },
+ {
+   "County": "East Sussex",
+   "Members": 6
+ },
+ {
+   "County": "Essex",
+   "Members": 3
+ },
+ {
+   "County": "Fife",
+   "Members": 0
+ },
+ {
+   "County": "Gloucestershire",
+   "Members": 2
+ },
+ {
+   "County": "Greater London",
+   "Members": 299
+ },
+ {
+   "County": "Greater Manchester",
+   "Members": 3
+ },
+ {
+   "County": "Gwent",
+   "Members": 0
+ },
+ {
+   "County": "Gwynedd",
+   "Members": 0
+ },
+ {
+   "County": "Hampshire",
+   "Members": 12
+ },
+ {
+   "County": "Herefordshire",
+   "Members": 0
+ },
+ {
+   "County": "Hertfordshire",
+   "Members": 13
+ },
+ {
+   "County": "Inverness",
+   "Members": 0
+ },
+ {
+   "County": "Isle of Wight",
+   "Members": 0
+ },
+ {
+   "County": "Kent",
+   "Members": 6
+ },
+ {
+   "County": "Kincardineshire",
+   "Members": 0
+ },
+ {
+   "County": "Lanarkshire",
+   "Members": 0
+ },
+ {
+   "County": "Lancashire",
+   "Members": 1
+ },
+ {
+   "County": "Leicestershire",
+   "Members": 4
+ },
+ {
+   "County": "Lincolnshire",
+   "Members": 1
+ },
+ {
+   "County": "Merseyside",
+   "Members": 0
+ },
+ {
+   "County": "Mid Glamorgan",
+   "Members": 0
+ },
+ {
+   "County": "Midlothian",
+   "Members": 0
+ },
+ {
+   "County": "Moray",
+   "Members": 0
+ },
+ {
+   "County": "Nairn",
+   "Members": 0
+ },
+ {
+   "County": "Norfolk",
+   "Members": 2
+ },
+ {
+   "County": "North Yorkshire",
+   "Members": 0
+ },
+ {
+   "County": "Northamptonshire",
+   "Members": 1
+ },
+ {
+   "County": "Northumberland",
+   "Members": 0
+ },
+ {
+   "County": "Nottinghamshire",
+   "Members": 2
+ },
+ {
+   "County": "Orkney",
+   "Members": 0
+ },
+ {
+   "County": "Oxfordshire",
+   "Members": 4
+ },
+ {
+   "County": "Perth and Kinross",
+   "Members": 0
+ },
+ {
+   "County": "Powys",
+   "Members": 0
+ },
+ {
+   "County": "Renfrewshire",
+   "Members": 1
+ },
+ {
+   "County": "Ross and Cromarty",
+   "Members": 0
+ },
+ {
+   "County": "Roxburgh, Ettrick and Lauderdale",
+   "Members": 0
+ },
+ {
+   "County": "Rutland",
+   "Members": 0
+ },
+ {
+   "County": "Shetland",
+   "Members": 0
+ },
+ {
+   "County": "Shropshire",
+   "Members": 0
+ },
+ {
+   "County": "Somerset",
+   "Members": 1
+ },
+ {
+   "County": "South Glamorgan",
+   "Members": 0
+ },
+ {
+   "County": "South Yorkshire",
+   "Members": 1
+ },
+ {
+   "County": "Staffordshire",
+   "Members": 2
+ },
+ {
+   "County": "Stirling and Falkirk",
+   "Members": 0
+ },
+ {
+   "County": "Suffolk",
+   "Members": 1
+ },
+ {
+   "County": "Surrey",
+   "Members": 14
+ },
+ {
+   "County": "Sutherland",
+   "Members": 0
+ },
+ {
+   "County": "The Stewartry of Kirkcudbright",
+   "Members": 0
+ },
+ {
+   "County": "Tweeddale",
+   "Members": 0
+ },
+ {
+   "County": "Tyne & Wear",
+   "Members": 1
+ },
+ {
+   "County": "Warwickshire",
+   "Members": 0
+ },
+ {
+   "County": "West Glamorgan",
+   "Members": 0
+ },
+ {
+   "County": "West Lothian",
+   "Members": 0
+ },
+ {
+   "County": "West Midlands",
+   "Members": 2
+ },
+ {
+   "County": "West Sussex",
+   "Members": 7
+ },
+ {
+   "County": "West Yorkshire",
+   "Members": 1
+ },
+ {
+   "County": "Western Isles",
+   "Members": 0
+ },
+ {
+   "County": "Wigtown",
+   "Members": 0
+ },
+ {
+   "County": "Wiltshire",
+   "Members": 3
+ },
+ {
+   "County": "Worcestershire",
+   "Members": 1
+ }
+]
+}
