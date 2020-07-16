@@ -71,6 +71,7 @@ h1 {
     vertical-align: top;
 }
 
+
 input[type="radio"]{
     margin-top: 10px;
 }
@@ -271,7 +272,7 @@ hr{
         height: 20px !important;
         vertical-align: top;
     }
-    
+
     h4 {
         margin: 5px 10px 10px 15px;
         font-size: 16px !important;

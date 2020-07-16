@@ -31,7 +31,7 @@ let bounds = [[-7.79042, 49.60878], //southwest coordinates of basemap range
 let map = new mapboxgl.Map({
         container: 'map',
         minZoom: 6,
-        maxZoom: 10,
+        maxZoom: 12,
         style: style,
         center: [-2.498094, 52.569447],
         zoom: 6,
@@ -40,7 +40,5 @@ let map = new mapboxgl.Map({
 
 //create popup which can be removed when toggling the input
 let popup = new mapboxgl.Popup({ className: 'popup', offset: 25});
-
-
 
 addMapFeatures(map, popup);
