@@ -176,7 +176,7 @@ function addChoroplethLayer(map, id, expression, countyPolygons) {
         "layout": {},
         "paint": {
             "fill-color": expression,
-            "fill-opacity": 0.8
+            "fill-opacity": 0.6
         }
     });
 }
