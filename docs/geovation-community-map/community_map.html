@@ -15,12 +15,12 @@
 
 <body>
     <div id="map"></div>
-    <div class='map-overlay top'>
+    <div class='map-overlay top' id="map-overlay">
         <div class='map-overlay-inner' id='map-information'>
             <div id="onclick-information">
                 <!-- information goes here -->
             </div>
-            <hr>
+            <div id="line"></div>
             <div id="startups-supported-legend" class="legend">
                 <h4>Startups Supported</h4>
                 <div class='values'>
@@ -73,6 +73,10 @@
                     <br>
                     <input type="radio" id="network-connections" name="group-type" value="network-connections">
                     <label for="network-connections">Network <br id="mobile-break">Connections</label>
+                    <br>
+                    <input type="radio" id="hide-layers" name="group-type" value="hide-layers">
+                    <label for="hide-layers">Show <br id="mobile-break">Basemap</label>
+                    
                 </div>
                 <div class="patrons">
                     <h4>Patrons</h4>

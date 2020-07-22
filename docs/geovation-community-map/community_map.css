@@ -132,8 +132,11 @@ h4 {
     padding-top: 10px;
 }
 
-hr{
-    border-color: #000;
+#line{
+    background-color: #000;
+    height: 1px;
+    margin-top: 10px;
+    width: 100%;
 }
 
 #hub-members-legend{
