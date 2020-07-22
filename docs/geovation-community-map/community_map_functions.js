@@ -241,10 +241,9 @@ function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactive
 
 
 function hideLayer(map, hideLayer, inactiveLayer1, inactiveLayer2, inactiveLayer3) {
+    let inactiveLayers = [inactiveLayer1, inactiveLayer2, inactiveLayer3]
     document.getElementById(hideLayer).addEventListener('click', function () {
-        map.setLayoutProperty(inactiveLayer1, 'visibility', 'none');
-        map.setLayoutProperty(inactiveLayer2, 'visibility', 'none');
-        map.setLayoutProperty(inactiveLayer3, 'visibility', 'none');
+        inactiveLayers.map(x => map.setLayoutProperty(x, 'visibility', 'none'));
         map.setLayoutProperty('counties-outline', 'visibility', 'none');
         map.setLayoutProperty('current-county', 'visibility', 'none');
         document.getElementById("map-information").style.display = 'none';
