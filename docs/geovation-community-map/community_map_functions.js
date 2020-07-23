@@ -218,28 +218,46 @@ function toggleLegend(currentLegend, inactiveLegend1, inactiveLegend2) {
     document.getElementById(inactiveLegend2).style.display = 'none';
 }
 
-function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactiveLegend1, inactiveLayer2, inactiveLegend2) {
-    document.getElementById(currentLayer).addEventListener('click', function () {
-        map.setLayoutProperty(currentLayer, 'visibility', 'visible');
-        map.setLayoutProperty(inactiveLayer1, 'visibility', 'none');
-        map.setLayoutProperty(inactiveLayer2, 'visibility', 'none');
-        map.setLayoutProperty('counties-outline', 'visibility', 'visible');
+function responsiveDisplay(information) {
+    document.getElementById(information).style.display = 'flex';
+    let smallScreen = window.matchMedia('(max-width: 767px)')
+    if (smallScreen.matches) {
+        document.getElementById(information).style.flexDirection = "column";
+    }
+}
 
+function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactiveLegend1, inactiveLayer2, inactiveLegend2) {
+    const INACTIVE_LAYERS = [inactiveLayer1, inactiveLayer2];
+    const ACTIVE_LAYERS = [currentLayer, 'counties-outline', 'current-county']
+    document.getElementById(currentLayer).addEventListener('click', function () {
+        INACTIVE_LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'none'));
+        ACTIVE_LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'visible'));
         toggleLegend(currentLegend, inactiveLegend1, inactiveLegend2);
+        responsiveDisplay('map-information');
     });
 }
 
-function toggleOptions(options, show, hide){
+
+
+function hideLayer(map, hideLayer, inactiveLayer1, inactiveLayer2, inactiveLayer3) {
+    const LAYERS = [inactiveLayer1, inactiveLayer2, inactiveLayer3, 'counties-outline', 'current-county'];
+    document.getElementById(hideLayer).addEventListener('click', function () {
+        LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'none'));
+        document.getElementById("map-information").style.display = 'none';
+    });
+}
+
+function toggleOptions(options, show, hide) {
     document.getElementById('toggle').addEventListener('click', function () {
         let list = document.getElementById(options)
         let showButton = document.getElementById(show)
         let hideButton = document.getElementById(hide)
 
-        if(list.style.display === 'block'){
+        if (list.style.display === 'block') {
             list.style.display = 'none'
             showButton.style.display = 'block'
             hideButton.style.display = 'none'
-        } 
+        }
         else {
             list.style.display = "block";
             showButton.style.display = 'none'
@@ -295,12 +313,12 @@ function addMapFeatures(map, popup) {
         addInformation(map, hubMembersCount, 'hub-members', 'Hub Members');
         addInformation(map, networkConnectionsCount, 'network-connections', 'Network Connections');
 
-        
+
         createMarkers(partnerHubs, map, 'partner-hub-markers', 'partner-hub-markers', 'partner_hubs_marker.png')
         createMarkers(sponsors, map, 'sponsor-markers', 'sponsor-markers', 'sponsors_marker.png')
         createMarkers(stakeholders, map, 'stakeholder-markers', 'stakeholder-markers', 'stakeholders_marker.png')
         createMarkers(geovation, map, 'geovation-marker', 'geovation-marker', 'geovation_marker.png')
-        
+
 
         toggleInput('partner-hub-markers', map);
         toggleInput('sponsor-markers', map)
@@ -308,7 +326,7 @@ function addMapFeatures(map, popup) {
 
         countiesCursor(map, 'mouseenter', 'startups-supported', 'pointer');
         countiesCursor(map, 'mouseleave', 'startups-supported', '');
-        
+
         toggleOptions('options', 'show', 'hide')
     });
 
@@ -318,6 +336,7 @@ function addMapFeatures(map, popup) {
         'network-connections', 'network-connections-legend');
     toggleLayers(map, 'network-connections', 'network-connections-legend',
         'hub-members', 'hub-members-legend', 'startups-supported', 'startups-supported-legend');
+    hideLayer(map, 'hide-layers', 'startups-supported', 'network-connections', 'hub-members')
 
     countiesCursor(map, 'mouseenter', 'hub-members', 'pointer');
     countiesCursor(map, 'mouseleave', 'hub-members', '');
