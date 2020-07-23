@@ -227,12 +227,11 @@ function responsiveDisplay(information) {
 }
 
 function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactiveLegend1, inactiveLayer2, inactiveLegend2) {
+    const INACTIVE_LAYERS = [inactiveLayer1, inactiveLayer2];
+    const ACTIVE_LAYERS = [currentLayer, 'counties-outline', 'current-county']
     document.getElementById(currentLayer).addEventListener('click', function () {
-        map.setLayoutProperty(currentLayer, 'visibility', 'visible');
-        map.setLayoutProperty(inactiveLayer1, 'visibility', 'none');
-        map.setLayoutProperty(inactiveLayer2, 'visibility', 'none');
-        map.setLayoutProperty('counties-outline', 'visibility', 'visible');
-        map.setLayoutProperty('current-county', 'visibility', 'visible');
+        INACTIVE_LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'none'));
+        ACTIVE_LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'visible'));
         toggleLegend(currentLegend, inactiveLegend1, inactiveLegend2);
         responsiveDisplay('map-information');
     });
@@ -241,11 +240,9 @@ function toggleLayers(map, currentLayer, currentLegend, inactiveLayer1, inactive
 
 
 function hideLayer(map, hideLayer, inactiveLayer1, inactiveLayer2, inactiveLayer3) {
-    let inactiveLayers = [inactiveLayer1, inactiveLayer2, inactiveLayer3]
+    const LAYERS = [inactiveLayer1, inactiveLayer2, inactiveLayer3, 'counties-outline', 'current-county'];
     document.getElementById(hideLayer).addEventListener('click', function () {
-        inactiveLayers.map(x => map.setLayoutProperty(x, 'visibility', 'none'));
-        map.setLayoutProperty('counties-outline', 'visibility', 'none');
-        map.setLayoutProperty('current-county', 'visibility', 'none');
+        LAYERS.map(layer => map.setLayoutProperty(layer, 'visibility', 'none'));
         document.getElementById("map-information").style.display = 'none';
     });
 }
