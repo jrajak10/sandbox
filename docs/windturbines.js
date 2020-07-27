@@ -1,36 +1,15 @@
-var apiKey = '5IYearA3dYe1guQqqmZC9HNcAOqfpEdn';
+const API_KEY = '6Z6d52telvVFGcgjIrOCHpGNakA7e326';
 
-var serviceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
+const SERVICE_URL = 'https://api.os.uk/maps/raster/v1/zxy';
 
-// Define (WMTS) parameters object.
-var wmtsParams = {
-  key: apiKey,
-  service: 'WMTS',
-  request: 'GetTile',
-  version: '2.0.0',
-  height: 256,
-  width: 256,
-  outputFormat: 'image/png',
-  style: 'default',
-  layer: 'Light_3857',
-  tileMatrixSet: 'EPSG:3857',
-  tileMatrix: '{z}',
-  tileRow: '{y}',
-  tileCol: '{x}'
-};
-
-// Construct query string parameters from object.
-var queryString = Object.keys(wmtsParams).map(function(key) {
-  return key + '=' + wmtsParams[key];
-}).join('&');
 
 // Create a map style object using the OS Maps API WMTS.
-var style = {
+let style = {
   'version': 8,
   'sources': {
     'raster-tiles': {
       'type': 'raster',
-      'tiles': [serviceUrl + '?' + queryString],
+      'tiles': [`${SERVICE_URL}/Light_3857/{z}/{x}/{y}.png?key=${API_KEY}`],
       'tileSize': 256,
       'maxzoom': 20
     }
@@ -43,7 +22,7 @@ var style = {
 }
 
 // Initialize the map object.
-var map = new mapboxgl.Map({
+let map = new mapboxgl.Map({
   container: 'map',
   minZoom: 7,
   maxZoom: 20,
@@ -320,8 +299,8 @@ map.on('load', async function() {
   */
 async function getFeatures(bounds, comparison, propName, literal, typeName) {
   // Convert the bounds to a formatted string.
-  var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
-    ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
+  var sw = bounds.getSouthWest().lat + ',' + bounds.getSouthWest().lng,
+    ne = bounds.getNorthEast().lat + ',' + bounds.getNorthEast().lng;
 
   var coords = sw + ' ' + ne;
   // Create an OGC XML filter parameter value which will select the
@@ -347,7 +326,7 @@ async function getFeatures(bounds, comparison, propName, literal, typeName) {
   let totalFeatures = [];
   do {
     let params = {
-      key: apiKey,
+      key: API_KEY,
       service: 'WFS',
       request: 'GetFeature',
       version: '2.0.0',
@@ -384,5 +363,5 @@ function getUrl(params) {
     .map(paramName => paramName + '=' + encodeURI(params[paramName]))
     .join('&');
 
-  return 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1?' + encodedParameters;
+  return 'https://api.os.uk/features/v1/wfs' + '?' + encodedParameters;
 }
