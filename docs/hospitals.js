@@ -1,35 +1,14 @@
-const API_KEY = '3zXkAvqscgURkDBx93akJeowLMnJiBrh';
+const API_KEY = 'KQfKvPtUyXlBf0GpLXEkWiGBae4rEzVE';
 
-let wfsServiceUrl = 'https://osdatahubapi.os.uk/OSFeaturesAPI/wfs/v1',
-    tileServiceUrl = 'https://osdatahubapi.os.uk/OSMapsAPI/wmts/v1';
-
-// Create a map style object using the OS Maps API WMTS service.
-let params = {
-    key: API_KEY,
-    service: 'WMTS',
-    request: 'GetTile',
-    version: '2.0.0',
-    height: 256,
-    width: 256,
-    outputFormat: 'image/png',
-    style: 'default',
-    layer: 'Light_3857',
-    tileMatrixSet: 'EPSG:3857',
-    tileMatrix: '{z}',
-    tileRow: '{y}',
-    tileCol: '{x}'
-};
-
-let queryString = Object.keys(params).map(function (key) {
-    return key + '=' + params[key];
-}).join('&');
+let wfsServiceUrl = 'https://api.os.uk/features/v1/wfs',
+    tileServiceUrl = 'https://api.os.uk/maps/raster/v1/zxy';
 
 let style = {
     'version': 8,
     'sources': {
         'raster-tiles': {
             'type': 'raster',
-            'tiles': [tileServiceUrl + '?' + queryString],
+            'tiles': [`${tileServiceUrl}/Light_3857/{z}/{x}/{y}.png?key=${API_KEY}`],
             'tileSize': 256,
             'maxzoom': 20
         }
@@ -321,8 +300,8 @@ function updateModalDisplay(modal, modalDisplay){
  */
 async function getFeatures(bounds, propertyName, literal, typeName) {
     // Convert the bounds to a formatted string.
-    var sw = bounds.getSouthWest().lng + ',' + bounds.getSouthWest().lat,
-        ne = bounds.getNorthEast().lng + ',' + bounds.getNorthEast().lat;
+    var sw = bounds.getSouthWest().lat + ',' + bounds.getSouthWest().lng,
+        ne = bounds.getNorthEast().lat + ',' + bounds.getNorthEast().lng;
 
     var coords = sw + ' ' + ne;
 
