@@ -1,4 +1,4 @@
-    const API_KEY = 'bQCDYqF6VUg0uqFeakUA2bXZ3Mtrmwbk';
+    const API_KEY = 'RkeaARasu3BBgjlu9FPPk2nJAXywf4KM';
 
     let serviceUrl = 'https://api.os.uk/maps/raster/v1/zxy';
 
