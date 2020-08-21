@@ -14,7 +14,7 @@ let map = new mapboxgl.Map({
         minZoom: 5,
         maxZoom: 12,
         style: vectorUrl + '/resources/styles?key=' + API_KEY,
-        center: [-3.3557395, 54.8353492],
+        center: [-0.1224489, 51.6104341],
         zoom: 5,
         maxBounds: bounds,
         transformRequest: url => {
