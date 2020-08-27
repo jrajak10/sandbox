@@ -3,6 +3,7 @@ import { RESIDENTIAL_ROAD_ISSUES, TRAFFIC_ROAD_ISSUES, ONE_WAY_ROAD_ISSUES, BROW
 import { SCHOOL_PUPIL_NUMBERS } from "./school_pupil_numbers.js"
 import { EAST_ROADS, WEST_ROADS, QUEENS_ROAD, NO_RIGHT_TURN } from "./direction_signs.js"
 import { ENFIELD_LABELS, HARINGEY_LABELS, BARNET_LABELS } from "./borough_labels.js"
+import { ROADS, SCHOOLS } from "./roads_and_schools.js"
 
 const API_KEY = '2RqLGYUE6yOw3yfoF2vw8dFQb3gkrD7R';
 const WFS_SERVICE_URL = 'https://api.os.uk/features/v1/wfs';
@@ -19,22 +20,14 @@ function addMapFeatures(map) {
     // Add event which waits for the map to be loaded.
     map.on('load', async function () {
 
-        const RESIDENTIAL_ROADS_ARRAY = ['Westbury Road', 'Elvendon Road', "Goring Road", "Beech Road",
-            "Hardwicke Road", "Russell Road", "Whittington Road", "Palmerston Road", "Eleanor Road", "Richmond Road",
-            "Herbert Road", "Fletton Road", "Queens Road", "Natal Road", "York Road", "Warwick Road", "Bosworth Road", "Lancaster Road", "Wakefield Road",
-            "Union Road", "Highworth Road", "Stanley Road", "Ollerton Road", "Evesham Road", "Shrewsbury Road", 
-            "Maidstone Road", "Tewkesbury Terrace", "Clarence Road", "Truro Road", "Nightingale Road"]
-
-        const BROWNLOW_ARRAY = ["Brownlow Road"];
-
-        const TRAFFIC_ROADS_ARRAY = ['Bounds Green Road', 'Bowes Road', "Green Lanes", "High Road", "Telford Road",
-            "Durnsford Road", "Albert Road", "Powys Lane", "Wilmer Way", "Pinkham Way", "North Circular Road"];
+        const RESIDENTIAL_ROADS_ARRAY = ROADS["Residential"];
+        const BROWNLOW_ARRAY = ROADS["Brownlow"]; 
+        const TRAFFIC_ROADS_ARRAY = ROADS["Traffic"];
+        const ONE_WAY_ROADS_ARRAY = ROADS["One Way"];
 
         // Creating a separate array of OBJECTIDS on Albert Road but not on the main road 
         // to filter out.
         const ALBERT_IDS_TO_FILTER = [2741116, 2836222, 2735510, 2811727, 3667766, 4172927, 2643822, 2865212]
-
-        const ONE_WAY_ROADS_ARRAY = ['Sidney Avenue', "Melbourne Avenue", "Kelvin Avenue", "Belsize Avenue", "Spencer Avenue"];
 
         //unable to put all the arrays into one big array, due to the request string being too long.
         const NON_TRAFFIC_ROADS = [].concat(RESIDENTIAL_ROADS_ARRAY, BROWNLOW_ARRAY, ONE_WAY_ROADS_ARRAY);
@@ -54,11 +47,7 @@ function addMapFeatures(map) {
         let roadGates = await fetchData('road_gates.json');
 
         //add schools features
-        const SCHOOLS_ARRAY = ["St Thomas More Roman Catholic School", "Alexandra Park School", "Bowes Primary School",
-            "Our Lady of Lourdes Roman Catholic Primary School", "Earlham Primary School", "Bounds Green Junior and Infants Schools",
-            "Rhodes Avenue Primary School", "Broomfield School", "St Anne's Roman Catholic High School for Girls",
-            "St Michael's Church of England Primary School", "Trinity Primary Academy School"];
-
+        const SCHOOLS_ARRAY = SCHOOLS["Schools"];
         const SCHOOLS_FILTER = ['Primary Education', 'Secondary Education'];
         let totalSchoolFeatures = await getFeatures('Sites_FunctionalSite', SCHOOLS_FILTER, 'SiteFunction');
         let affectedSchools = totalSchoolFeatures
@@ -82,13 +71,14 @@ function addMapFeatures(map) {
         addSchoolsLayer(map, affectedSchools);
         addBoroughBoundaries(map, boroughPolygons, 'borough-boundaries', '#000', 2);
 
-        const IDS = ['residential-roads', 'traffic-roads', 'one-way-roads', 'brownlow-road', 'road-gates', 'schools'];
+        
         clickRoad(map, 'residential-roads', RESIDENTIAL_ROAD_ISSUES);
         clickRoad(map, 'traffic-roads', TRAFFIC_ROAD_ISSUES);
         clickRoad(map, 'one-way-roads', ONE_WAY_ROAD_ISSUES);
         clickRoad(map, 'brownlow-road', BROWNLOW_ROAD_ISSUES);
         clickRoad(map, 'road-gates', '');
-        clickSchool(map, 'schools')
+        clickSchool(map, 'schools');
+        const IDS = ['residential-roads', 'traffic-roads', 'one-way-roads', 'brownlow-road', 'road-gates', 'schools'];
         IDS.map(ID => mouseEnter(map, ID));
         IDS.map(ID => mouseLeave(map, ID));
 
