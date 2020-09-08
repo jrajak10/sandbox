@@ -5,7 +5,7 @@ import { EAST_ROADS, WEST_ROADS, QUEENS_ROAD, NO_RIGHT_TURN } from "./direction_
 import { ENFIELD_LABELS, HARINGEY_LABELS, BARNET_LABELS } from "./borough_labels.js"
 import { ROADS, SCHOOLS } from "./roads_and_schools.js"
 
-const API_KEY = '2RqLGYUE6yOw3yfoF2vw8dFQb3gkrD7R';
+const API_KEY = 'Ae6wi8HZzLBBiZE3xLoRvqYhqoV83ije';
 const WFS_SERVICE_URL = 'https://api.os.uk/features/v1/wfs';
 
 function addMapFeatures(map) {
