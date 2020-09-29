@@ -85,6 +85,13 @@ span {
     font-size: 12px !important;
     margin: 5px 17.5px;
 }
+
+#disclaimer{
+    font-size: 12px !important;
+    margin: 5px 17.5px;
+    font-style: italic;
+}
+
 #traffic-road{
     background-color: #F00;
     border: solid 1px #000;
